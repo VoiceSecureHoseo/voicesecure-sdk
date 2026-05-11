@@ -21,3 +21,10 @@ pre-commit install
 - [SRS](docs/SRS.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Implementation Plan](docs/IMPLEMENTATION_PLAN.md)
+
+## 팀
+
+- 김예나 (조장) — modulation, safety
+- 한승규 — RL
+- 이도현 — evaluators
+- 송준섭 — reward, utils
