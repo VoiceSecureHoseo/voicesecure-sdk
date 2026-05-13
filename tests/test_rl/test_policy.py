@@ -131,7 +131,7 @@ if __name__ == "__main__":
     print()
 
     # 타일링 확인
-    print(f"[타일링 확인]")
+    print("[타일링 확인]")
     print(f"  첫 프레임 == 마지막 프레임? {torch.allclose(action[:, 0], action[:, -1])}")
     print()
 

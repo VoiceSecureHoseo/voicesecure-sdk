@@ -20,7 +20,7 @@ import torch.optim as optim
 
 from voicesecure.rl.policy import PolicyNetwork
 from voicesecure.rl.state import StateExtractor
-from voicesecure.types import Action, AudioArray, Reward, State, Transition
+from voicesecure.types import Action, AudioArray, Transition
 
 logger = logging.getLogger(__name__)
 
