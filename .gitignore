@@ -218,6 +218,10 @@ __marimo__/
 .streamlit/secrets.toml
 
 # === VoiceSecure 추가 ===
+# 데이터셋 — LibriSpeech 원본 (용량 크고 라이선스 별도)
+Original/
+data/
+datasets/
 .venv/
 venv/
 .env
