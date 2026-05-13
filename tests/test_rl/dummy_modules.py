@@ -24,7 +24,7 @@
 import numpy as np
 import torch
 
-from voicesecure.types import ACTION_N_FREQ, ACTION_N_TIME, AudioArray, Reward
+from voicesecure.types import AudioArray, Reward
 
 
 class DummyMasker:

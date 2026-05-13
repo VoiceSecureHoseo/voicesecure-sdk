@@ -9,6 +9,7 @@
 import os
 
 import librosa
+import pytest
 import torch
 
 from voicesecure.rl.policy import PolicyNetwork
@@ -21,6 +22,7 @@ _ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", ".."))
 TEST_FILE = os.path.join(_ROOT, "Original", "100", "121669", "100-121669-0000.wav")
 
 
+@pytest.mark.slow
 def test_pipeline_shape():
     """음성 → state → action 전체 흐름에서 shape 확인."""
     audio, sr = librosa.load(TEST_FILE, sr=SAMPLE_RATE, mono=True)
@@ -35,6 +37,7 @@ def test_pipeline_shape():
     assert action.shape == (ACTION_N_FREQ, ACTION_N_TIME)
 
 
+@pytest.mark.slow
 def test_pipeline_no_nan():
     """파이프라인 전체에서 NaN/Inf 없는지 확인."""
     audio, sr = librosa.load(TEST_FILE, sr=SAMPLE_RATE, mono=True)
@@ -50,6 +53,7 @@ def test_pipeline_no_nan():
     assert not torch.isnan(value).any()
 
 
+@pytest.mark.slow
 def test_different_audio_different_action():
     """다른 음성이면 다른 state → 다른 action이 나오는지 확인."""
     file1 = os.path.join(_ROOT, "Original", "100", "121669", "100-121669-0000.wav")
@@ -85,7 +89,7 @@ if __name__ == "__main__":
 
     # 오디오 로드
     audio, sr = librosa.load(TEST_FILE, sr=SAMPLE_RATE, mono=True)
-    print(f"\n[입력 음성]")
+    print("\n[입력 음성]")
     print(f"  파일    : {TEST_FILE.split(chr(92))[-1]}")
     print(f"  길이    : {len(audio)/sr:.2f}초")
 
@@ -94,13 +98,13 @@ if __name__ == "__main__":
 
     # Step 1: 음성 → state
     state = extractor.extract(audio)
-    print(f"\n[Step 1] StateExtractor")
+    print("\n[Step 1] StateExtractor")
     print(f"  state shape : {state.shape}")
     print(f"  state 값    : {[f'{v:.3f}' for v in state.tolist()]}")
 
     # Step 2: state → action
     action, log_prob, value = policy(state, deterministic=True)
-    print(f"\n[Step 2] PolicyNetwork (deterministic)")
+    print("\n[Step 2] PolicyNetwork (deterministic)")
     print(f"  action shape   : {action.shape}")
     print(f"  action min/max : {action.min():.4f} / {action.max():.4f}")
     print(f"  log_prob       : {log_prob.item():.4f}")
@@ -112,7 +116,7 @@ if __name__ == "__main__":
     state2 = extractor.extract(audio2)
     action2, _, _ = policy(state2, deterministic=True)
 
-    print(f"\n[비교] 다른 음성 파일")
+    print("\n[비교] 다른 음성 파일")
     print(f"  파일    : {file2.split(chr(92))[-1]}")
     print(f"  state 값: {[f'{v:.3f}' for v in state2.tolist()]}")
     print(f"  action min/max : {action2.min():.4f} / {action2.max():.4f}")

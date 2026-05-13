@@ -1,7 +1,8 @@
 """공통 타입 정의. 모든 모듈은 여기 정의된 타입만 입출력으로 사용한다."""
 
 from dataclasses import dataclass
-from typing import TypedDict, Any
+from typing import Any, TypedDict
+
 import numpy as np
 import numpy.typing as npt
 import torch

@@ -6,14 +6,16 @@ dummy_modules.py의 더미를 실제로 교체하면 된다.
 실행: python tests/test_rl/test_agent.py
 """
 
+import os
+import sys
+
 import librosa
 import numpy as np
+import pytest
 import torch
 
 from voicesecure.rl.agent import RLAgent
 from voicesecure.types import ACTION_N_FREQ, ACTION_N_TIME, SAMPLE_RATE, Transition
-import sys
-import os
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
 from dummy_modules import DummyMasker, DummyMixer, DummyReward
@@ -29,6 +31,7 @@ def _load_audio():
     return audio
 
 
+@pytest.mark.slow
 def test_act_output_shape():
     """act() 출력 shape 확인."""
     audio = _load_audio()
@@ -44,6 +47,7 @@ def test_act_output_shape():
     assert value.shape == ()
 
 
+@pytest.mark.slow
 def test_act_no_nan():
     """act() 출력에 NaN/Inf 없는지 확인."""
     audio = _load_audio()
@@ -62,6 +66,7 @@ def test_act_no_nan():
     assert not torch.isnan(value)
 
 
+@pytest.mark.slow
 def test_full_pipeline_one_step():
     """음성 → act → 더미 Masker/Mixer → 더미 reward → 전체 1스텝 동작 확인."""
     audio = _load_audio()
@@ -99,6 +104,7 @@ def test_full_pipeline_one_step():
     assert isinstance(reward, float), "reward가 float이 아님"
 
 
+@pytest.mark.slow
 def test_ppo_update_one_step():
     """더미 Transition으로 PPO 업데이트 1회 동작 확인."""
     audio = _load_audio()
@@ -159,6 +165,7 @@ def test_ppo_update_one_step():
     assert not np.isnan(metrics["value_loss"])
 
 
+@pytest.mark.slow
 def test_save_and_load(tmp_path):
     """save → load 후 동일한 결과 확인."""
     audio = _load_audio()

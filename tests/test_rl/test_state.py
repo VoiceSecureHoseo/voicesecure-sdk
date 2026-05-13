@@ -7,8 +7,9 @@ pytest -v -s 로 실행하면 특징값까지 출력됨.
 
 import os
 
-import numpy as np
 import librosa
+import numpy as np
+import pytest
 import torch
 
 from voicesecure.rl.state import StateExtractor
@@ -24,6 +25,7 @@ TEST_FILE = os.path.normpath(
 LABELS = [f"MFCC_{i+1:02d}" for i in range(13)] + ["F0_mean", "duration", "rms"]
 
 
+@pytest.mark.slow
 def test_output_shape():
     """state shape이 (16,) 인지 확인."""
     audio, sr = librosa.load(TEST_FILE, sr=SAMPLE_RATE, mono=True)
@@ -34,6 +36,7 @@ def test_output_shape():
     assert state.shape == (STATE_DIM,), f"shape 오류: {state.shape}"
 
 
+@pytest.mark.slow
 def test_output_dtype():
     """state dtype이 float32 인지 확인."""
     audio, sr = librosa.load(TEST_FILE, sr=SAMPLE_RATE, mono=True)
@@ -44,6 +47,7 @@ def test_output_dtype():
     assert state.dtype == torch.float32, f"dtype 오류: {state.dtype}"
 
 
+@pytest.mark.slow
 def test_no_nan_or_inf():
     """state에 NaN/Inf 없는지 확인."""
     audio, sr = librosa.load(TEST_FILE, sr=SAMPLE_RATE, mono=True)
@@ -56,6 +60,7 @@ def test_no_nan_or_inf():
     assert not torch.isinf(state).any(), "Inf 검출"
 
 
+@pytest.mark.slow
 def test_feature_values():
     """각 특징값 출력 — 실제 추출된 값 확인."""
     audio, sr = librosa.load(TEST_FILE, sr=SAMPLE_RATE, mono=True)
@@ -65,7 +70,7 @@ def test_feature_values():
     print(f"\n  파일: {TEST_FILE.split(chr(92))[-1]}  ({len(audio)/sr:.2f}초)")
     print(f"  {'특징':<12} {'값':>12}")
     print(f"  {'-'*25}")
-    for label, val in zip(LABELS, state.tolist()):
+    for label, val in zip(LABELS, state.tolist(), strict=True):
         print(f"  {label:<12} {val:>12.6f}")
 
     # MFCC는 음수도 정상, F0/duration/rms는 0 이상이어야 함
@@ -110,7 +115,7 @@ if __name__ == "__main__":
     print()
     print(f"{'특징':<12} {'값':>12}")
     print(f"{'-'*25}")
-    for label, val in zip(LABELS, state.tolist()):
+    for label, val in zip(LABELS, state.tolist(), strict=True):
         print(f"{label:<12} {val:>12.6f}")
 
     sys.exit(0)
