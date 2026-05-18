@@ -55,20 +55,30 @@
 
 #### 입력
 - 오디오 데이터: PCM, 16kHz, 16bit, mono
-- 길이: 100ms ~ 30초
+- 길이: 정확히 1초 청크 (16000 샘플)
+  - 짧은 청크 (100ms ~ 1초): 무음 zero-padding으로 1초 채움
+  - 긴 음성 (> 1초): 호출자가 1초 청크로 분할 후 순차 호출
+
+#### v1.0 설계 결정 (긴 음성 처리)
+실시간 음성 보호는 청크 단위 스트리밍 처리가 표준이므로, SDK는 1초 청크만 처리.
+긴 음성은 호출자가 분할해서 호출 (예시는 README 참조).
+types.py의 `ACTION_N_TIME = 100`과 정합.
 
 #### 동작
-1. 입력 검증: sample rate, dtype, 길이 범위 확인
+1. 입력 검증: sample rate, dtype, 청크 크기 확인
 2. 정규화: int16 → float32 [-1, 1]
 3. resampling: 16kHz가 아니면 16kHz로 변환
-4. 모듈 간 표준 타입 (`AudioArray`)으로 변환
+4. 길이 보정:
+   - `len(audio) < 16000`: zero-padding으로 16000 샘플 채움
+   - `len(audio) > 16000`: `ChunkSizeError` 발생 (호출자가 청크 분할 책임)
+5. 모듈 간 표준 타입 (`AudioArray`)으로 변환
 
 #### 출력
 - `AudioArray`: shape `(num_samples,)`, float32, [-1, 1]
 
 #### 예외
-- 입력 길이 < 100ms: `InsufficientAudioError`
-- 입력 길이 > 30초: 30초 청크로 분할 처리 (실시간성 위해)
+- 입력 길이 < 100ms (1600 샘플): `InsufficientAudioError`
+- 입력 길이 > 16000 샘플: `ChunkSizeError` — 호출자가 분할해서 다시 호출 필요
 - 무음 구간 (RMS < 0.001): pass-through (변형 안 함)
 
 ---
@@ -120,7 +130,7 @@
 #### 출력
 - `Action` (raw noise): shape `(n_freq_bins, n_time_frames)`, float32
   - `n_freq_bins = 257` (n_fft=512 / 2 + 1)
-  - `n_time_frames` = audio 길이에 따라 가변
+  - `n_time_frames = 100` (1초 청크 기준 고정, `types.py:ACTION_N_TIME`)
 
 #### 성능 요구
 - 추론 시간 ≤ 5ms (1초 입력, Raspberry Pi 4B, ONNX)
@@ -581,6 +591,7 @@ python scripts/infer.py --model checkpoints/v1.0.onnx --input input.wav --output
 | 버전 | 날짜 | 변경 사항 | 작성자 |
 |---|---|---|---|
 | v1.0 | 2025-03-31 | 초안 확정 | dPsk |
+| v1.1 | 2025-05-18 | FR-1, FR-3을 types.py (ACTION_N_TIME=100)와 정합화 | dPsk |
 
 ---
 
