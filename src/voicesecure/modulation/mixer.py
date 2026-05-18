@@ -12,18 +12,16 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-import numpy as np
-import numpy.typing as npt
 import torch
 
-AudioArray = npt.NDArray[np.float32]
+from voicesecure.types import SAMPLE_RATE, AudioArray
 
 
 @dataclass
 class MixerConfig:
     """Mixer hyperparameters."""
 
-    sample_rate: int = 16000
+    sample_rate: int = SAMPLE_RATE
     n_fft: int = 512
     hop_length: int = 160
     win_length: int = 400

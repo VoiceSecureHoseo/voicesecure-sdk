@@ -15,9 +15,8 @@ import logging
 from dataclasses import dataclass
 
 import numpy as np
-import numpy.typing as npt
 
-AudioArray = npt.NDArray[np.float32]
+from voicesecure.types import AudioArray
 
 logger = logging.getLogger(__name__)
 

@@ -25,14 +25,12 @@ import numpy as np
 import numpy.typing as npt
 import torch
 
-AudioArray = npt.NDArray[np.float32]
-
+from voicesecure.types import SAMPLE_RATE, AudioArray
 
 # STFT parameters (ARCHITECTURE.md section 4)
 N_FFT: int = 512
 HOP_LENGTH: int = 160
 WIN_LENGTH: int = 400
-SAMPLE_RATE: int = 16000
 
 
 @dataclass
