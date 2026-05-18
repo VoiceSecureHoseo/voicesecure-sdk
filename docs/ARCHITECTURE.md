@@ -291,24 +291,68 @@ class PolicyNetwork(torch.nn.Module):
 
 ```python
 class RLAgent:
-    """학습/추론 통합 인터페이스. scripts/train.py가 호출."""
+    """학습/추론 통합 인터페이스. scripts/train.py가 호출.
 
-    def __init__(self, config: dict) -> None:
+    내부에 StateExtractor와 PolicyNetwork를 보유하고,
+    audio 입력을 받아 state 추출부터 action 생성까지 일괄 처리한다.
+    """
+
+    def __init__(self, config: dict | None = None) -> None:
+        """
+        Args:
+            config: 하이퍼파라미터 dict. 없으면 기본값 사용.
+                예: {"lr": 3e-4, "ppo_epsilon": 0.2, "gamma": 0.99}
+        """
         ...
 
-    def act(self, state: State, deterministic: bool = False) -> Action:
-        """추론용. raw noise 생성."""
+    def act(
+        self,
+        audio: AudioArray,
+        deterministic: bool = False,
+    ) -> tuple[Action, torch.Tensor, torch.Tensor]:
+        """음성 입력을 받아 노이즈(action)를 생성.
+
+        내부적으로 StateExtractor로 state 추출 후 PolicyNetwork forward 호출.
+        추론 시 deterministic=True (평균 action),
+        학습 시 deterministic=False (분포에서 샘플링).
+
+        Args:
+            audio: 원본 음성, shape (num_samples,), float32
+            deterministic: True면 평균 action, False면 sampling
+
+        Returns:
+            action:   노이즈 spectrogram, shape (n_freq, n_time) = (257, 100)
+            log_prob: 이 action의 로그확률 (PPO 학습용; 추론 시 무시 가능)
+            value:    Critic의 V(s) (PPO 학습용; 추론 시 무시 가능)
+        """
+        ...
 
     def update(self, transitions: list[Transition]) -> dict:
-        """
-        PPO 업데이트 1회. 학습 시 호출.
+        """PPO 업데이트 1회. 학습 시 호출.
+
         Returns:
             metrics: {"policy_loss": float, "value_loss": float, "entropy": float}
         """
+        ...
 
-    def save(self, path: str) -> None: ...
-    def load(self, path: str) -> None: ...
+    def save(self, path: str) -> None:
+        """학습된 PolicyNetwork + optimizer 상태 체크포인트로 저장."""
+        ...
+
+    def load(self, path: str) -> None:
+        """저장된 체크포인트 불러오기."""
+        ...
 ```
+
+**v1.0 설계 결정 (act 시그니처)**
+
+`act`는 `State`가 아닌 `AudioArray`를 입력으로 받는다. 이유:
+- 호출자가 매번 `StateExtractor.extract()`를 외부에서 호출하는 부담을 없앰
+- audio → state → action 파이프라인이 RLAgent 내부에 캡슐화
+
+`act`는 `(action, log_prob, value)` tuple을 반환한다. 이유:
+- 학습 루프에서 Transition을 만들 때 log_prob, value가 필요
+- 추론 시에는 `action, _, _ = agent.act(audio)` 형태로 무시 가능
 
 ### 3.3 `evaluators/` (담당: 이도현)
 
@@ -559,7 +603,7 @@ def test_masker_output_shape(masker, audio):
 이 항목들에 의존하는 코드는 **외부에서 직접 접근하지 말고** 모듈 인터페이스를 거쳐서 사용.
 
 ---
-
+| v1.1 | 2025-05-18 | RLAgent.act 시그니처를 코드(agent.py)와 정합화 | dPsk |
 **v1.0 확정일**: 2025-03-31
 **다음 리뷰 예정**: v1 모듈 통합 직후 (5월 중순 예상)
 **문서 책임자**: dPsk (조장)
