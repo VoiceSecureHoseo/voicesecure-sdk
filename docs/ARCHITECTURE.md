@@ -402,11 +402,32 @@ class TTSEvaluator(Evaluator):
 
 
 class ASREvaluator(Evaluator):
-    """wav2vec2-xlsr-korean으로 CER 측정."""
+    """wav2vec2-xlsr-korean으로 CER 측정.
+
+    ASR은 base Evaluator와 달리 evaluate에 `original_text` 인자를 추가로 받는다.
+    SRS FR-9에 명시된 입력 사양 반영.
+
+    Note: precompute는 audio feature 캐싱이 불필요 (text label 비교만 함).
+    빈 dict 반환하며 audio validation만 수행.
+    """
+
+    def evaluate(
+        self,
+        original: AudioArray,
+        modified: AudioArray,
+        original_text: str,
+    ) -> EvaluatorOutput:
+        """
+        Args:
+            original: 원본 음성
+            modified: 최종 변형 음성
+            original_text: 원본 정답 텍스트 (학습 데이터에서 제공)
+        Returns:
+            EvaluatorOutput
+        """
 
     # score = max(0, 1 - cer)  # 명료성 점수 [0,1]
     # raw_metric = cer
-```
 
 ### 3.4 `reward/` (담당: 송준섭)
 
@@ -604,6 +625,7 @@ def test_masker_output_shape(masker, audio):
 
 ---
 | v1.1 | 2025-05-18 | RLAgent.act 시그니처를 코드(agent.py)와 정합화 | dPsk |
+| v1.2 | 2025-05-18 | ASREvaluator 시그니처 명시 (original_text 추가), precompute no-op 명시 | dPsk |
 **v1.0 확정일**: 2025-03-31
 **다음 리뷰 예정**: v1 모듈 통합 직후 (5월 중순 예상)
 **문서 책임자**: dPsk (조장)
