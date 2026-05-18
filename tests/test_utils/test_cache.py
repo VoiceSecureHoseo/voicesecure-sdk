@@ -1,5 +1,7 @@
 """FeatureCache unit tests."""
 
+import pytest
+
 from voicesecure.utils.cache import FeatureCache
 
 
@@ -117,4 +119,72 @@ def test_cache_separates_different_evaluators():
     assert result_a["feature"] == 123
     assert result_b["feature"] == 999
     assert evaluator_a.call_count == 1
+    assert evaluator_b.call_count == 1
+
+
+def test_cache_invalid_max_size_raises_value_error():
+    """max_size가 0 이하이면 ValueError가 발생해야 한다."""
+    with pytest.raises(ValueError):
+        FeatureCache(max_size=0)
+
+
+def test_cache_evicts_oldest_entry_when_max_size_exceeded():
+    """max_size 초과 시 가장 오래된 cache entry가 제거되어야 한다."""
+    cache = FeatureCache(max_size=1)
+
+    evaluator = DummyEvaluator()
+
+    cache.get_or_compute(
+        audio_id="audio_1",
+        evaluator=evaluator,
+        audio=None,
+    )
+
+    cache.get_or_compute(
+        audio_id="audio_2",
+        evaluator=evaluator,
+        audio=None,
+    )
+
+    cache.get_or_compute(
+        audio_id="audio_1",
+        evaluator=evaluator,
+        audio=None,
+    )
+
+    assert evaluator.call_count == 3
+
+
+def test_cache_clear_specific_evaluator_only():
+    """evaluator를 지정하면 해당 evaluator의 cache만 삭제되어야 한다."""
+    cache = FeatureCache()
+
+    evaluator_a = DummyEvaluator()
+    evaluator_b = AnotherDummyEvaluator()
+
+    cache.get_or_compute(
+        audio_id="audio_1",
+        evaluator=evaluator_a,
+        audio=None,
+    )
+    cache.get_or_compute(
+        audio_id="audio_1",
+        evaluator=evaluator_b,
+        audio=None,
+    )
+
+    cache.clear(evaluator=evaluator_a)
+
+    cache.get_or_compute(
+        audio_id="audio_1",
+        evaluator=evaluator_a,
+        audio=None,
+    )
+    cache.get_or_compute(
+        audio_id="audio_1",
+        evaluator=evaluator_b,
+        audio=None,
+    )
+
+    assert evaluator_a.call_count == 2
     assert evaluator_b.call_count == 1

@@ -4,11 +4,15 @@
 오디오는 mono float32, [-1, 1], 16kHz 기준을 따른다.
 """
 
+import logging
+
 import librosa
 import numpy as np
 import soundfile as sf
 
 from voicesecure.types import SAMPLE_RATE, AudioArray
+
+logger = logging.getLogger(__name__)
 
 
 def load_audio(path: str, target_sr: int = SAMPLE_RATE) -> AudioArray:
@@ -68,6 +72,17 @@ def _to_audio_array(audio: AudioArray) -> AudioArray:
 
     if not np.isfinite(array).all():
         raise ValueError("audio must not contain NaN or Inf")
+
+    out_of_range = int(np.sum(np.abs(array) > 1.0))
+
+    if out_of_range > 0:
+        fraction = out_of_range / len(array)
+
+        if fraction > 0.001:
+            logger.warning(
+                "audio: %.2f%% samples out of [-1, 1] -> clipped",
+                fraction * 100,
+            )
 
     return np.clip(array, -1.0, 1.0).astype(np.float32)
 
