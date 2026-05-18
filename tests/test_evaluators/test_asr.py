@@ -35,4 +35,3 @@ def test_asr_evaluator_requires_reference_text():
 
     with pytest.raises(ValueError):
         evaluator.evaluate(audio, audio)
-

@@ -14,4 +14,3 @@ __all__ = [
     "TTSEvaluator",
     "character_error_rate",
 ]
-

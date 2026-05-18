@@ -32,4 +32,3 @@ def test_speaker_evaluator_requires_model_adapters():
 
     with pytest.raises(ModelNotConfiguredError):
         evaluator.evaluate(audio, audio)
-

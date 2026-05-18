@@ -89,7 +89,9 @@ class Evaluator(abc.ABC):
         elif callable(model):
             result = model(reference_audio)
         else:
-            raise TypeError(f"{model_name} must be callable or expose clone(audio)/synthesize(audio).")
+            raise TypeError(
+                f"{model_name} must be callable or expose clone(audio)/synthesize(audio)."
+            )
 
         return Evaluator.validate_audio(result, name=f"{model_name} clone")
 
@@ -107,7 +109,9 @@ class Evaluator(abc.ABC):
         elif callable(model):
             result = model(audio)
         else:
-            raise TypeError(f"{model_name} must be callable or expose transcribe(audio)/predict(audio).")
+            raise TypeError(
+                f"{model_name} must be callable or expose transcribe(audio)/predict(audio)."
+            )
 
         if not isinstance(result, str):
             raise TypeError(f"{model_name} transcription must be str, got {type(result).__name__}.")
@@ -137,4 +141,3 @@ def clip_unit_interval(value: float) -> float:
 
 
 Normalizer = Callable[[float], float]
-

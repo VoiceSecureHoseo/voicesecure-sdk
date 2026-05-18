@@ -51,4 +51,3 @@ class SpeakerEvaluator(Evaluator):
             raw_metric=raw_metric,
             metadata={"wavlm_dist": wavlm_dist, "cam_dist": cam_dist},
         )
-

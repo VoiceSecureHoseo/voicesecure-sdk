@@ -77,4 +77,3 @@ class ASREvaluator(Evaluator):
             raw_metric=cer,
             metadata={"transcription": transcription, "reference_text": reference_text},
         )
-
