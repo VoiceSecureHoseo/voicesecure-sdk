@@ -171,9 +171,17 @@ class Transition:
 
 ```python
 class PsychoacousticMasker:
-    """RL이 만든 raw noise를 사람 청각 임계치 이내로 clamp한다."""
+    """RL이 만든 raw noise를 사람 청각 임계치 이내로 clamp한다.
 
-    def __init__(self, sample_rate: int = SAMPLE_RATE) -> None:
+    v1.0 설계: MaskerConfig dataclass로 모든 파라미터(sample_rate, n_fft,
+    hop_length, win_length, n_bark_bands, spreading_slope 등) 일괄 관리.
+    """
+
+    def __init__(self, config: MaskerConfig | None = None) -> None:
+        """
+        Args:
+            config: Masker 하이퍼파라미터. None이면 기본값(sample_rate=16000 등).
+        """
         ...
 
     def compute_threshold(self, audio: AudioArray) -> AudioArray:
@@ -204,9 +212,17 @@ class PsychoacousticMasker:
 
 ```python
 class Mixer:
-    """원본 음성과 안전 노이즈를 합성해 변형 음성을 만든다."""
+    """원본 음성과 안전 노이즈를 합성해 변형 음성을 만든다.
 
-    def __init__(self, sample_rate: int = SAMPLE_RATE) -> None:
+    v1.0 설계: MixerConfig dataclass로 STFT 파라미터(sample_rate, n_fft,
+    hop_length, win_length) 일괄 관리.
+    """
+
+    def __init__(self, config: MixerConfig | None = None) -> None:
+        """
+        Args:
+            config: Mixer 하이퍼파라미터. None이면 기본값.
+        """
         ...
 
     def mix(self, audio: AudioArray, safe_noise: Action) -> AudioArray:
@@ -223,9 +239,19 @@ class Mixer:
 
 ```python
 class SafetyChecker:
-    """변형 음성에 대한 코드 레벨 안전장치."""
+    """변형 음성에 대한 코드 레벨 안전장치.
 
-    def __init__(self, sample_rate: int = SAMPLE_RATE) -> None:
+    v1.0 설계: SafetyConfig dataclass로 임계치(RMS 비율 범위, clipping 비율,
+    fallback blend alpha 등) 일괄 관리.
+    """
+
+    def __init__(self, config: SafetyConfig | None = None) -> None:
+        """
+        Args:
+            config: Safety 임계치 설정. None이면 기본값
+                (rms_ratio: [0.5, 2.0], clipping_fraction_max: 0.01,
+                 fallback_blend_alpha: 0.7).
+        """
         ...
 
     def check(self, original: AudioArray, modified: AudioArray) -> AudioArray:
