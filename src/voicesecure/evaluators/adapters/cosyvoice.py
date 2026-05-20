@@ -69,6 +69,7 @@ class CosyVoiceAdapter:
         if device is None:
             try:
                 import torch
+
                 device = "cuda" if torch.cuda.is_available() else "cpu"
             except ImportError:
                 device = "cpu"

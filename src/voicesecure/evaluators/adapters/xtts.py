@@ -28,9 +28,7 @@ def _ensure_ffmpeg_path() -> None:
     if sys.platform != "win32":
         return
 
-    winget_pkgs = os.path.expandvars(
-        r"%LOCALAPPDATA%\Microsoft\WinGet\Packages"
-    )
+    winget_pkgs = os.path.expandvars(r"%LOCALAPPDATA%\Microsoft\WinGet\Packages")
     if not os.path.isdir(winget_pkgs):
         return
 
@@ -42,6 +40,8 @@ def _ensure_ffmpeg_path() -> None:
                     os.environ["PATH"] = bin_path + os.pathsep + os.environ["PATH"]
                     logger.debug("Added FFmpeg shared bin to PATH: %s", bin_path)
                     return
+
+
 _CLONE_TEXT = "안녕하세요"
 _LANGUAGE = "ko"
 
