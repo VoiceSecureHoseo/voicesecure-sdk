@@ -5,8 +5,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from voicesecure.types import SAMPLE_RATE
-from voicesecure.utils.audio import load_audio, resample, save_audio
+from voicesecure.types import SAMPLE_RATE, ChunkSizeError, InsufficientAudioError
+from voicesecure.utils.audio import load_audio, prepare_chunk, resample, save_audio
 
 
 def test_resample_same_sample_rate():
@@ -140,3 +140,66 @@ def test_audio_with_nan_or_inf_raises_value_error():
             src_sr=SAMPLE_RATE,
             dst_sr=SAMPLE_RATE,
         )
+
+
+# ── FR-1: prepare_chunk ──────────────────────────────────────────────────────
+
+
+def test_prepare_chunk_exact_length():
+    """정확히 1초(16000 샘플)이면 그대로 반환."""
+    audio = np.random.uniform(-0.5, 0.5, SAMPLE_RATE).astype(np.float32)
+    chunk, is_silent = prepare_chunk(audio)
+    assert chunk.shape == (SAMPLE_RATE,)
+    assert chunk.dtype == np.float32
+    assert not is_silent
+
+
+def test_prepare_chunk_short_audio_is_padded():
+    """100ms~1초 미만 입력은 16000 샘플로 zero-padding."""
+    audio = np.random.uniform(-0.5, 0.5, 8000).astype(np.float32)  # 0.5초
+    chunk, _ = prepare_chunk(audio)
+    assert chunk.shape == (SAMPLE_RATE,)
+    assert np.all(chunk[8000:] == 0.0)  # 뒷부분이 0으로 채워졌는지
+
+
+def test_prepare_chunk_too_short_raises():
+    """100ms(1600 샘플) 미만은 InsufficientAudioError."""
+    audio = np.zeros(1599, dtype=np.float32)
+    with pytest.raises(InsufficientAudioError):
+        prepare_chunk(audio)
+
+
+def test_prepare_chunk_minimum_length_passes():
+    """정확히 1600 샘플(100ms)은 통과."""
+    audio = np.random.uniform(-0.5, 0.5, 1600).astype(np.float32)
+    chunk, _ = prepare_chunk(audio)
+    assert chunk.shape == (SAMPLE_RATE,)
+
+
+def test_prepare_chunk_too_long_raises():
+    """1초(16000 샘플) 초과는 ChunkSizeError."""
+    audio = np.zeros(16001, dtype=np.float32)
+    with pytest.raises(ChunkSizeError):
+        prepare_chunk(audio)
+
+
+def test_prepare_chunk_silent_audio_detected():
+    """RMS < 0.001인 무음은 is_silent=True."""
+    audio = np.zeros(SAMPLE_RATE, dtype=np.float32)
+    _, is_silent = prepare_chunk(audio)
+    assert is_silent
+
+
+def test_prepare_chunk_non_silent_audio():
+    """충분한 에너지가 있는 음성은 is_silent=False."""
+    audio = np.random.uniform(-0.5, 0.5, SAMPLE_RATE).astype(np.float32)
+    _, is_silent = prepare_chunk(audio)
+    assert not is_silent
+
+
+def test_prepare_chunk_output_range():
+    """출력이 [-1, 1] 범위 내에 있어야 한다."""
+    audio = np.random.uniform(-0.9, 0.9, SAMPLE_RATE).astype(np.float32)
+    chunk, _ = prepare_chunk(audio)
+    assert chunk.min() >= -1.0
+    assert chunk.max() <= 1.0

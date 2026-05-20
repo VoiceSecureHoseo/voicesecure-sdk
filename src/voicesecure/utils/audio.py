@@ -10,7 +10,12 @@ import librosa
 import numpy as np
 import soundfile as sf
 
-from voicesecure.types import SAMPLE_RATE, AudioArray
+from voicesecure.types import SAMPLE_RATE, AudioArray, ChunkSizeError, InsufficientAudioError
+
+# FR-1 상수
+_CHUNK_SAMPLES = SAMPLE_RATE  # 16000 — 정확히 1초
+_MIN_SAMPLES = int(SAMPLE_RATE * 0.1)  # 1600 — 100ms
+_SILENCE_RMS_THRESHOLD = 0.001
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +63,58 @@ def resample(
     )
 
     return _to_audio_array(resampled)
+
+
+def prepare_chunk(audio: AudioArray) -> tuple[AudioArray, bool]:
+    """FR-1: 1초 청크 단위 입력을 검증하고 표준 형식으로 준비한다.
+
+    동작 순서:
+        1. 기본 검증 (_to_audio_array)
+        2. 길이 검증 — 너무 짧으면 InsufficientAudioError, 너무 길면 ChunkSizeError
+        3. zero-padding — 1600~15999 샘플이면 16000 샘플로 채움
+        4. 무음 감지 — RMS < 0.001이면 is_silent=True 반환 (호출자가 pass-through 처리)
+
+    Args:
+        audio: 원본 음성 청크, shape (num_samples,), float32
+
+    Returns:
+        chunk:     shape (16000,), float32, [-1, 1] — 패딩 완료된 청크
+        is_silent: True이면 무음 구간 → 호출자가 변형 없이 원본 반환 권장
+
+    Raises:
+        InsufficientAudioError: 입력이 100ms(1600 샘플) 미만
+        ChunkSizeError:         입력이 1초(16000 샘플) 초과
+    """
+    array = _to_audio_array(audio)
+
+    if len(array) < _MIN_SAMPLES:
+        raise InsufficientAudioError(
+            f"audio too short: {len(array)} samples "
+            f"(minimum {_MIN_SAMPLES} = 100ms at {SAMPLE_RATE}Hz)"
+        )
+
+    if len(array) > _CHUNK_SAMPLES:
+        raise ChunkSizeError(
+            f"audio too long: {len(array)} samples "
+            f"(maximum {_CHUNK_SAMPLES} = 1s at {SAMPLE_RATE}Hz). "
+            "Split into 1-second chunks before calling."
+        )
+
+    # zero-padding: 1초보다 짧으면 뒤를 0으로 채움
+    if len(array) < _CHUNK_SAMPLES:
+        pad_width = _CHUNK_SAMPLES - len(array)
+        array = np.pad(array, (0, pad_width), mode="constant", constant_values=0.0)
+
+    # 무음 감지
+    rms = float(np.sqrt(np.mean(array**2)))
+    is_silent = rms < _SILENCE_RMS_THRESHOLD
+
+    if is_silent:
+        logger.debug(
+            "prepare_chunk: silent audio detected (RMS=%.6f), pass-through recommended", rms
+        )
+
+    return array, is_silent
 
 
 def _to_audio_array(audio: AudioArray) -> AudioArray:
