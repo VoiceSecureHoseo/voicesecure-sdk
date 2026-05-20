@@ -144,6 +144,7 @@ def test_audio_with_nan_or_inf_raises_value_error():
 
 # ── FR-1: prepare_chunk ──────────────────────────────────────────────────────
 
+
 def test_prepare_chunk_exact_length():
     """정확히 1초(16000 샘플)이면 그대로 반환."""
     audio = np.random.uniform(-0.5, 0.5, SAMPLE_RATE).astype(np.float32)

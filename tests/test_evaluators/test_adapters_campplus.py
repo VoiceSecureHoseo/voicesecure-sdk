@@ -17,21 +17,26 @@ def _make_audio(freq: float, duration: float = 1.0) -> np.ndarray:
 
 # ── import / 클래스 구조 (모델 로드 없이 확인) ──────────────────────────────
 
+
 def test_adapter_importable():
     from voicesecure.evaluators.adapters import CAMPlusAdapter
+
     assert CAMPlusAdapter is not None
 
 
 def test_adapter_has_required_method():
     from voicesecure.evaluators.adapters import CAMPlusAdapter
+
     assert hasattr(CAMPlusAdapter, "extract_embedding")
 
 
 # ── fbank 추출 단독 테스트 (모델 로드 없이 확인) ─────────────────────────────
 
+
 def test_fbank_shape():
     """fbank 출력 shape 확인 — (T, 80)."""
     from voicesecure.evaluators.adapters.campplus import _extract_fbank
+
     audio = _make_audio(200.0)
     feats = _extract_fbank(audio)
     assert feats.ndim == 2
@@ -42,6 +47,7 @@ def test_fbank_shape():
 def test_fbank_no_nan():
     """fbank에 NaN/Inf 없는지 확인."""
     from voicesecure.evaluators.adapters.campplus import _extract_fbank
+
     audio = _make_audio(200.0)
     feats = _extract_fbank(audio)
     assert np.all(np.isfinite(feats))
@@ -50,6 +56,7 @@ def test_fbank_no_nan():
 def test_fbank_too_short_raises():
     """너무 짧은 음성은 ValueError."""
     from voicesecure.evaluators.adapters.campplus import _extract_fbank
+
     audio = np.zeros(10, dtype=np.float32)
     with pytest.raises(ValueError):
         _extract_fbank(audio)
@@ -57,10 +64,12 @@ def test_fbank_too_short_raises():
 
 # ── 실제 모델 로드 테스트 (slow) ─────────────────────────────────────────────
 
+
 @pytest.mark.slow
 def test_campplus_loads():
     """모델이 에러 없이 로드되는지 확인."""
     from voicesecure.evaluators.adapters import CAMPlusAdapter
+
     adapter = CAMPlusAdapter()
     assert adapter._session is not None
 
@@ -69,6 +78,7 @@ def test_campplus_loads():
 def test_embedding_shape():
     """embedding shape이 (512,) float32인지 확인."""
     from voicesecure.evaluators.adapters import CAMPlusAdapter
+
     adapter = CAMPlusAdapter()
     audio = _make_audio(200.0)
     emb = adapter.extract_embedding(audio)
@@ -82,6 +92,7 @@ def test_embedding_shape():
 def test_embedding_no_nan():
     """embedding에 NaN/Inf 없는지 확인."""
     from voicesecure.evaluators.adapters import CAMPlusAdapter
+
     adapter = CAMPlusAdapter()
     audio = _make_audio(200.0)
     emb = adapter.extract_embedding(audio)
@@ -92,6 +103,7 @@ def test_embedding_no_nan():
 def test_same_audio_same_embedding():
     """같은 입력 → 같은 embedding (재현성)."""
     from voicesecure.evaluators.adapters import CAMPlusAdapter
+
     adapter = CAMPlusAdapter()
     audio = _make_audio(200.0)
     emb1 = adapter.extract_embedding(audio)
@@ -103,6 +115,7 @@ def test_same_audio_same_embedding():
 def test_different_audio_different_embedding():
     """다른 음성 → 다른 embedding."""
     from voicesecure.evaluators.adapters import CAMPlusAdapter
+
     adapter = CAMPlusAdapter()
     audio_a = _make_audio(200.0)
     audio_b = _make_audio(800.0)
@@ -116,6 +129,7 @@ def test_self_cosine_distance_near_zero():
     """같은 음성의 cosine distance는 0에 가까워야 함."""
     from voicesecure.evaluators.adapters import CAMPlusAdapter
     from voicesecure.evaluators.base import cosine_distance
+
     adapter = CAMPlusAdapter()
     audio = _make_audio(200.0)
     emb = adapter.extract_embedding(audio)

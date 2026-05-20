@@ -13,7 +13,7 @@ import soundfile as sf
 from voicesecure.types import SAMPLE_RATE, AudioArray, ChunkSizeError, InsufficientAudioError
 
 # FR-1 상수
-_CHUNK_SAMPLES = SAMPLE_RATE          # 16000 — 정확히 1초
+_CHUNK_SAMPLES = SAMPLE_RATE  # 16000 — 정확히 1초
 _MIN_SAMPLES = int(SAMPLE_RATE * 0.1)  # 1600 — 100ms
 _SILENCE_RMS_THRESHOLD = 0.001
 
@@ -106,11 +106,13 @@ def prepare_chunk(audio: AudioArray) -> tuple[AudioArray, bool]:
         array = np.pad(array, (0, pad_width), mode="constant", constant_values=0.0)
 
     # 무음 감지
-    rms = float(np.sqrt(np.mean(array ** 2)))
+    rms = float(np.sqrt(np.mean(array**2)))
     is_silent = rms < _SILENCE_RMS_THRESHOLD
 
     if is_silent:
-        logger.debug("prepare_chunk: silent audio detected (RMS=%.6f), pass-through recommended", rms)
+        logger.debug(
+            "prepare_chunk: silent audio detected (RMS=%.6f), pass-through recommended", rms
+        )
 
     return array, is_silent
 

@@ -18,24 +18,29 @@ def _make_audio(freq: float, duration: float = 1.0) -> np.ndarray:
 
 # ── import / 클래스 구조 (모델 로드 없이 확인) ──────────────────────────────
 
+
 def test_adapter_importable():
     """어댑터 클래스가 import 가능한지 확인."""
     from voicesecure.evaluators.adapters import WavLMSVAdapter
+
     assert WavLMSVAdapter is not None
 
 
 def test_adapter_has_required_method():
     """SpeakerEvaluator가 기대하는 extract_embedding 메서드가 있는지 확인."""
     from voicesecure.evaluators.adapters import WavLMSVAdapter
+
     assert hasattr(WavLMSVAdapter, "extract_embedding")
 
 
 # ── 실제 모델 로드 테스트 (slow) ─────────────────────────────────────────────
 
+
 @pytest.mark.slow
 def test_wavlm_loads():
     """모델이 에러 없이 로드되는지 확인."""
     from voicesecure.evaluators.adapters import WavLMSVAdapter
+
     adapter = WavLMSVAdapter()
     assert adapter.model is not None
     assert adapter.feature_extractor is not None
@@ -45,6 +50,7 @@ def test_wavlm_loads():
 def test_embedding_shape():
     """embedding shape이 1-D float32인지 확인."""
     from voicesecure.evaluators.adapters import WavLMSVAdapter
+
     adapter = WavLMSVAdapter()
     audio = _make_audio(200.0)
     emb = adapter.extract_embedding(audio)
@@ -59,6 +65,7 @@ def test_embedding_shape():
 def test_embedding_no_nan():
     """embedding에 NaN/Inf 없는지 확인."""
     from voicesecure.evaluators.adapters import WavLMSVAdapter
+
     adapter = WavLMSVAdapter()
     audio = _make_audio(200.0)
     emb = adapter.extract_embedding(audio)
@@ -70,6 +77,7 @@ def test_embedding_no_nan():
 def test_same_audio_same_embedding():
     """같은 입력 → 같은 embedding (재현성)."""
     from voicesecure.evaluators.adapters import WavLMSVAdapter
+
     adapter = WavLMSVAdapter()
     audio = _make_audio(200.0)
 
@@ -83,6 +91,7 @@ def test_same_audio_same_embedding():
 def test_different_audio_different_embedding():
     """다른 음성 → 다른 embedding."""
     from voicesecure.evaluators.adapters import WavLMSVAdapter
+
     adapter = WavLMSVAdapter()
     audio_a = _make_audio(200.0)
     audio_b = _make_audio(800.0)

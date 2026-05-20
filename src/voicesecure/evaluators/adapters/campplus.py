@@ -39,7 +39,7 @@ def _extract_fbank(audio: np.ndarray, sample_rate: int = SAMPLE_RATE) -> np.ndar
         shape (T, 80), float32
     """
     frame_length = int(sample_rate * _FRAME_LENGTH_MS / 1000)  # 400
-    frame_shift = int(sample_rate * _FRAME_SHIFT_MS / 1000)    # 160
+    frame_shift = int(sample_rate * _FRAME_SHIFT_MS / 1000)  # 160
     n_fft = frame_length
 
     # pre-emphasis
@@ -50,10 +50,7 @@ def _extract_fbank(audio: np.ndarray, sample_rate: int = SAMPLE_RATE) -> np.ndar
     if n_frames <= 0:
         raise ValueError(f"audio too short for fbank: {len(audio)} samples")
 
-    indices = (
-        np.arange(frame_length)[None, :]
-        + np.arange(n_frames)[:, None] * frame_shift
-    )
+    indices = np.arange(frame_length)[None, :] + np.arange(n_frames)[:, None] * frame_shift
     frames = audio[indices]  # (T, frame_length)
 
     # window
@@ -115,10 +112,12 @@ class CAMPlusAdapter:
         self.repo_id = repo_id
 
         # 디바이스 설정
-        use_cuda = (device == "cuda") or (
-            device is None and _cuda_available()
+        use_cuda = (device == "cuda") or (device is None and _cuda_available())
+        providers = (
+            ["CUDAExecutionProvider", "CPUExecutionProvider"]
+            if use_cuda
+            else ["CPUExecutionProvider"]
         )
-        providers = ["CUDAExecutionProvider", "CPUExecutionProvider"] if use_cuda else ["CPUExecutionProvider"]
 
         logger.info("Downloading %s/%s ...", repo_id, onnx_file)
         onnx_path = hf_hub_download(repo_id, onnx_file)
@@ -140,19 +139,18 @@ class CAMPlusAdapter:
         if audio.dtype != np.float32:
             audio = audio.astype(np.float32)
 
-        feats = _extract_fbank(audio)          # (T, 80)
-        feats = feats[None, :, :]              # (1, T, 80)
+        feats = _extract_fbank(audio)  # (T, 80)
+        feats = feats[None, :, :]  # (1, T, 80)
 
-        outputs = self._session.run(
-            ["embs"], {"feats": feats}
-        )
-        embedding = outputs[0].squeeze(0)      # (512,)
+        outputs = self._session.run(["embs"], {"feats": feats})
+        embedding = outputs[0].squeeze(0)  # (512,)
         return embedding.astype(np.float32)
 
 
 def _cuda_available() -> bool:
     try:
         import torch
+
         return torch.cuda.is_available()
     except ImportError:
         return False

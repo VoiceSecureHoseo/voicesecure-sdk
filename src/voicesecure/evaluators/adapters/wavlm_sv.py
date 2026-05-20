@@ -67,9 +67,7 @@ class WavLMSVAdapter:
             audio = audio.astype(np.float32)
 
         with torch.no_grad():
-            inputs = self.feature_extractor(
-                audio, sampling_rate=SAMPLE_RATE, return_tensors="pt"
-            )
+            inputs = self.feature_extractor(audio, sampling_rate=SAMPLE_RATE, return_tensors="pt")
             input_values = inputs.input_values.to(self.device)
             outputs = self.model(input_values)
 

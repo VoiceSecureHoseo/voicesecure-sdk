@@ -64,9 +64,7 @@ class Wav2Vec2KoreanAdapter:
             audio = audio.astype(np.float32)
 
         with torch.no_grad():
-            inputs = self.processor(
-                audio, sampling_rate=SAMPLE_RATE, return_tensors="pt"
-            )
+            inputs = self.processor(audio, sampling_rate=SAMPLE_RATE, return_tensors="pt")
             input_values = inputs.input_values.to(self.device)
             logits = self.model(input_values).logits
             predicted_ids = torch.argmax(logits, dim=-1)
