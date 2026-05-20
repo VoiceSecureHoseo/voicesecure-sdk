@@ -18,6 +18,30 @@ from voicesecure.types import SAMPLE_RATE, AudioArray
 logger = logging.getLogger(__name__)
 
 _MODEL_NAME = "tts_models/multilingual/multi-dataset/xtts_v2"
+
+
+def _ensure_ffmpeg_path() -> None:
+    """Windows에서 winget으로 설치된 FFmpeg shared bin을 PATH에 자동 추가."""
+    import os
+    import sys
+
+    if sys.platform != "win32":
+        return
+
+    winget_pkgs = os.path.expandvars(
+        r"%LOCALAPPDATA%\Microsoft\WinGet\Packages"
+    )
+    if not os.path.isdir(winget_pkgs):
+        return
+
+    for entry in os.listdir(winget_pkgs):
+        if "FFmpeg.Shared" in entry:
+            for sub in os.listdir(os.path.join(winget_pkgs, entry)):
+                bin_path = os.path.join(winget_pkgs, entry, sub, "bin")
+                if os.path.isdir(bin_path) and bin_path not in os.environ["PATH"]:
+                    os.environ["PATH"] = bin_path + os.pathsep + os.environ["PATH"]
+                    logger.debug("Added FFmpeg shared bin to PATH: %s", bin_path)
+                    return
 _CLONE_TEXT = "안녕하세요"
 _LANGUAGE = "ko"
 
@@ -48,6 +72,7 @@ class XTTSAdapter:
     ) -> None:
         from TTS.api import TTS
 
+        _ensure_ffmpeg_path()
         self.language = language
         self.clone_text = clone_text
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")

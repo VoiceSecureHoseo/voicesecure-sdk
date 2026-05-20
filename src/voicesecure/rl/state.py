@@ -96,8 +96,8 @@ class StateExtractor:
             logger.warning("F0 추정 실패: 유성음 구간 없음. 0으로 대체.")
             f0_mean = 0.0
         else:
-            # sample_rate로 나눠서 정규화 (0~1 범위로 스케일)
-            f0_mean = float(voiced.mean()) / self.sample_rate
+            # F0 최대값(_F0_FMAX=500Hz)으로 나눠서 [0, 1] 범위로 정규화
+            f0_mean = float(voiced.mean()) / _F0_FMAX
 
         return np.array([f0_mean], dtype=np.float32)
 

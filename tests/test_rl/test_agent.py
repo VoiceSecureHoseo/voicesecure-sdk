@@ -36,7 +36,7 @@ def test_act_output_shape():
     """act() 출력 shape 확인."""
     audio = _load_audio()
     agent = RLAgent()
-    action, log_prob, value = agent.act(audio)
+    state, action, log_prob, value = agent.act(audio)
 
     print(f"\n  action shape  : {action.shape}")
     print(f"  log_prob shape: {log_prob.shape}")
@@ -52,7 +52,7 @@ def test_act_no_nan():
     """act() 출력에 NaN/Inf 없는지 확인."""
     audio = _load_audio()
     agent = RLAgent()
-    action, log_prob, value = agent.act(audio)
+    state, action, log_prob, value = agent.act(audio)
 
     print(
         f"\n  action   NaN:{torch.isnan(action).any().item()}  Inf:{torch.isinf(action).any().item()}"
@@ -79,7 +79,7 @@ def test_full_pipeline_one_step():
     reward_fn = DummyReward()
 
     # Step 1: 음성 → state → action (노이즈)
-    action, log_prob, value = agent.act(audio, deterministic=False)
+    state, action, log_prob, value = agent.act(audio, deterministic=False)
 
     # Step 2: 더미 Masker → safe noise
     safe_noise = masker.clamp(audio, action)
@@ -119,7 +119,7 @@ def test_ppo_update_one_step():
     n_steps = 8
     print(f"\n  [에피소드 수집] 총 {n_steps}스텝")
     for i in range(n_steps):
-        action, log_prob, value = agent.act(audio, deterministic=False)
+        state, action, log_prob, value = agent.act(audio, deterministic=False)
         safe_noise = masker.clamp(audio, action)
         modified = mixer.mix(audio, safe_noise)
         reward = reward_fn.compute(modified)
@@ -127,7 +127,7 @@ def test_ppo_update_one_step():
         print(f"  step {i+1}/{n_steps}: reward={reward:.4f}  action_max={action.abs().max():.4f}")
 
         # 다음 state (더미: 같은 음성 재사용)
-        next_action, _, next_value = agent.act(audio, deterministic=False)
+        _, next_action, _, next_value = agent.act(audio, deterministic=False)
 
         transitions.append(
             Transition(
@@ -172,7 +172,7 @@ def test_save_and_load(tmp_path):
     agent = RLAgent()
 
     # 저장 전 결과
-    action_before, _, _ = agent.act(audio, deterministic=True)
+    _, action_before, _, _ = agent.act(audio, deterministic=True)
 
     # 저장 후 불러오기
     path = str(tmp_path / "test_checkpoint.pt")
@@ -180,7 +180,7 @@ def test_save_and_load(tmp_path):
     agent.load(path)
 
     # 불러온 후 결과
-    action_after, _, _ = agent.act(audio, deterministic=True)
+    _, action_after, _, _ = agent.act(audio, deterministic=True)
 
     match = torch.allclose(action_before, action_after)
     max_diff = (action_before - action_after).abs().max().item()
@@ -216,7 +216,7 @@ if __name__ == "__main__":
     transitions = []
     print("\n[에피소드 실행]")
     for ep in range(5):
-        action, log_prob, value = agent.act(audio, deterministic=False)
+        state, action, log_prob, value = agent.act(audio, deterministic=False)
         safe_noise = masker.clamp(audio, action)
         modified = mixer.mix(audio, safe_noise)
         reward = reward_fn.compute(modified)
@@ -242,7 +242,7 @@ if __name__ == "__main__":
     print(f"  entropy     : {metrics['entropy']:.4f}")
 
     # 업데이트 후 action 변화 확인
-    action_after, _, _ = agent.act(audio, deterministic=True)
+    _, action_after, _, _ = agent.act(audio, deterministic=True)
     print(f"\n[업데이트 후] action_max={action_after.abs().max():.6f}")
 
     sys.exit(0)

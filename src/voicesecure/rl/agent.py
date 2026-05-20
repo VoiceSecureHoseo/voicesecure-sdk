@@ -66,7 +66,7 @@ class RLAgent:
 
     def act(
         self, audio: AudioArray, deterministic: bool = False
-    ) -> tuple[Action, torch.Tensor, torch.Tensor]:
+    ) -> tuple[Action, torch.Tensor, torch.Tensor, torch.Tensor]:
         """음성 입력을 받아 노이즈(action)를 생성한다.
 
         추론 시에는 deterministic=True로 호출.
@@ -77,15 +77,15 @@ class RLAgent:
             deterministic: True면 평균 action, False면 분포에서 샘플링
 
         Returns:
+            state:    추출된 state 벡터, shape (STATE_DIM,) — Transition 저장용
             action:   노이즈 spectrogram, shape (n_freq, n_time)
             log_prob: 이 action의 로그확률 (PPO 학습용)
             value:    Critic의 V(s) (PPO 학습용)
         """
-        # 추론 시에는 gradient 불필요
         with torch.no_grad():
             state = self.extractor.extract(audio)
             action, log_prob, value = self.policy(state, deterministic=deterministic)
-        return action, log_prob, value
+        return state, action, log_prob, value
 
     def update(self, transitions: list[Transition]) -> dict:
         """쌓인 Transition들로 PPO 업데이트를 수행한다.

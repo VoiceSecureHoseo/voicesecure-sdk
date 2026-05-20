@@ -94,7 +94,7 @@ class TestPipelineSteps:
 
     def test_act_produces_valid_action(self, agent: RLAgent, audio: np.ndarray) -> None:
         """RLAgent.act가 정상 action 생성."""
-        action, log_prob, value = agent.act(audio)
+        state, action, log_prob, value = agent.act(audio)
         assert action.shape == (ACTION_N_FREQ, ACTION_N_TIME)
         assert not torch.isnan(action).any()
         assert not torch.isnan(log_prob)
@@ -107,7 +107,7 @@ class TestPipelineSteps:
         audio: np.ndarray,
     ) -> None:
         """Masker가 action을 safe_noise로 clamp."""
-        action, _, _ = agent.act(audio)
+        _, action, _, _ = agent.act(audio)
         safe_noise = masker.clamp(audio, action)
         # shape 보존 (시간 차원은 audio STFT 결과에 따라 다를 수 있음)
         assert safe_noise.shape[0] == action.shape[0]
@@ -121,7 +121,7 @@ class TestPipelineSteps:
         audio: np.ndarray,
     ) -> None:
         """Mixer가 변형 음성 생성."""
-        action, _, _ = agent.act(audio)
+        _, action, _, _ = agent.act(audio)
         safe_noise = masker.clamp(audio, action)
         modified = mixer.mix(audio, safe_noise)
         assert modified.shape == audio.shape
@@ -138,7 +138,7 @@ class TestPipelineSteps:
         audio: np.ndarray,
     ) -> None:
         """SafetyChecker가 mixer 출력 통과."""
-        action, _, _ = agent.act(audio)
+        _, action, _, _ = agent.act(audio)
         safe_noise = masker.clamp(audio, action)
         modified = mixer.mix(audio, safe_noise)
         final = safety.check(audio, modified)
@@ -171,7 +171,7 @@ class TestFullPipeline:
     ) -> None:
         """한 step 풀 파이프라인: audio → action → safe_noise → mixed → safe → reward."""
         # Step 1: action
-        action, log_prob, value = agent.act(audio)
+        state, action, log_prob, value = agent.act(audio)
 
         # Step 2: 청각 임계치 이내로 clamp
         safe_noise = masker.clamp(audio, action)
@@ -218,7 +218,7 @@ class TestFullPipeline:
         transitions = []
 
         for _ in range(n_steps):
-            action, log_prob, value = agent.act(audio, deterministic=False)
+            state, action, log_prob, value = agent.act(audio, deterministic=False)
             safe_noise = masker.clamp(audio, action)
             modified = mixer.mix(audio, safe_noise)
             final = safety.check(audio, modified)
@@ -261,13 +261,13 @@ class TestFullPipeline:
     ) -> None:
         """같은 입력 + deterministic 모드 → 같은 출력 (재현성)."""
         # 1차 실행
-        action1, _, _ = agent.act(audio, deterministic=True)
+        _, action1, _, _ = agent.act(audio, deterministic=True)
         safe_noise1 = masker.clamp(audio, action1)
         modified1 = mixer.mix(audio, safe_noise1)
         final1 = safety.check(audio, modified1)
 
         # 2차 실행
-        action2, _, _ = agent.act(audio, deterministic=True)
+        _, action2, _, _ = agent.act(audio, deterministic=True)
         safe_noise2 = masker.clamp(audio, action2)
         modified2 = mixer.mix(audio, safe_noise2)
         final2 = safety.check(audio, modified2)
@@ -308,7 +308,7 @@ if __name__ == "__main__":
 
     # 한 step 풀 파이프라인
     print("\n[Step 1] RLAgent.act")
-    action, log_prob, value = agent.act(audio)
+    state, action, log_prob, value = agent.act(audio)
     print(f"  action.shape    = {action.shape}")
     print(f"  action min/max  = {action.min():.4f} / {action.max():.4f}")
     print(f"  log_prob        = {log_prob.item():.4f}")
@@ -339,7 +339,7 @@ if __name__ == "__main__":
     print("\n[Step 6] PPO update (8 transitions)")
     transitions = []
     for _ in range(8):
-        a, lp, v = agent.act(audio, deterministic=False)
+        _, a, lp, v = agent.act(audio, deterministic=False)
         sn = masker.clamp(audio, a)
         m = mixer.mix(audio, sn)
         f = safety.check(audio, m)

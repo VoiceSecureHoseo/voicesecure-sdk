@@ -218,8 +218,13 @@ __marimo__/
 .streamlit/secrets.toml
 
 # === VoiceSecure 추가 ===
-# 데이터셋 — LibriSpeech 원본 (용량 크고 라이선스 별도)
+# Claude 내부 메모리/설정
+.claude/
+# 테스트용 음성 파일
+tests/voice/
+# 데이터셋 — 용량 크고 라이선스 별도
 Original/
+kss/
 data/
 datasets/
 .venv/

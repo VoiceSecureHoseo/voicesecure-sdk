@@ -310,7 +310,7 @@ class PsychoacousticMasker:
             if len(peaks) == 0:
                 continue
             is_tonal = self.classify_tonal(frame, peaks)
-            for peak_idx, level, tonal in zip(peaks, levels, is_tonal, strict=False):
+            for peak_idx, level, tonal in zip(peaks, levels, is_tonal, strict=True):
                 # Non-tonal은 5 dB penalty (덜 효과적 masker)
                 effective_level = level if tonal else level - 5.0
                 masker_bark = freqs_bark[peak_idx]
