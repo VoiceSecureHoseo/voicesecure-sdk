@@ -118,7 +118,15 @@ class PsychoacousticMasker:
         # log(0) 방지 epsilon (-160 dB)
         epsilon = 1e-16
         power_db = 10.0 * torch.log10(power + epsilon)
-        return power_db.numpy().astype(np.float32)
+
+        # MP3 Psychoacoustic Model 1 표준 SPL 정규화
+        # SPL(k) = 96 - max(PSD) + PSD(k)
+        # 스펙트럼 최대값을 96 dB SPL로 고정 → 신호 레벨에 적응형으로 동작
+        # 0 dBFS = 96 dB SPL (16비트 오디오 dynamic range 기준 관례)
+        power_db_np = power_db.numpy().astype(np.float32)
+        max_psd = power_db_np.max()
+        power_spl = 96.0 - max_psd + power_db_np  # dB SPL 정규화
+        return power_spl
 
     # ------------------------------------------------------------------
     # Stage 2: Bark Scale Conversion
@@ -363,6 +371,10 @@ class PsychoacousticMasker:
     ) -> torch.Tensor:
         """RL이 만든 raw noise를 청각 임계치 이내로 element-wise clamp.
 
+        # [개선 고려] 현재는 동시 마스킹(Simultaneous Masking)만 적용.
+        #            시간축 마스킹(Temporal Masking) 추가 시 큰 소리 직후
+        #            짧은 구간에서도 더 많은 노이즈 허용 가능.
+
         safe_noise[f, t] = sign(raw_noise[f, t]) * min(|raw_noise[f, t]|, threshold[f, t])
 
         Parameters
@@ -377,26 +389,33 @@ class PsychoacousticMasker:
         safe_noise
             shape (n_freq, n_time), 모든 element가 threshold 이내 보장
         """
-        # dB threshold 계산
+        # dB threshold 계산 (dB SPL 기준)
         threshold_db = self.compute_threshold(audio)  # (n_freq, n_time_audio)
-        # dB → linear amplitude (10^(dB/20))
-        threshold_linear = (10.0 ** (threshold_db / 20.0)).astype(np.float32)
-        threshold_torch = torch.from_numpy(threshold_linear)
 
-        # raw_noise와 threshold shape align (시간 차원)
-        n_freq_noise, n_time_noise = raw_noise.shape
-        n_freq_thr, n_time_thr = threshold_torch.shape
+        # dB SPL → dBFS → linear amplitude 변환
+        # 0 dBFS = 96 dB SPL (16비트 dynamic range 기준, MP3/Schönherr/Qin 표준 관례)
+        _SPL_TO_DBFS_OFFSET = 96.0
+        threshold_dbfs = threshold_db - _SPL_TO_DBFS_OFFSET
+        threshold_linear = torch.from_numpy(
+            (10.0 ** (threshold_dbfs / 20.0)).astype(np.float32)
+        )  # (n_freq, n_time_audio)
+
+        # raw_noise에서 방향(부호)만 추출
+        # RL은 "어느 주파수/방향으로 노이즈를 넣을지"만 결정하고,
+        # 크기는 항상 심리음향 임계치 최대치로 채워넣음.
+        # → 같은 에너지 제약 안에서 AI 임베딩을 최대한 흔드는 방향을 학습.
+        sign = torch.sign(raw_noise)
+
+        # shape align (시간 차원)
+        n_freq_noise, n_time_noise = sign.shape
+        n_freq_thr, n_time_thr = threshold_linear.shape
         if n_freq_noise != n_freq_thr:
             raise ValueError(f"n_freq mismatch: noise={n_freq_noise}, threshold={n_freq_thr}")
-        # 시간 align (mixer와 동일 전략)
         if n_time_noise > n_time_thr:
-            raw_noise = raw_noise[:, :n_time_thr]
+            sign = sign[:, :n_time_thr]
         elif n_time_noise < n_time_thr:
-            threshold_torch = threshold_torch[:, :n_time_noise]
+            threshold_linear = threshold_linear[:, :n_time_noise]
 
-        # element-wise clamp (부호 유지)
-        sign = torch.sign(raw_noise)
-        magnitude = torch.abs(raw_noise)
-        safe_magnitude = torch.minimum(magnitude, threshold_torch)
-        safe_noise = sign * safe_magnitude
+        # 방향 × threshold = 심리음향 허용 최대 노이즈
+        safe_noise = sign * threshold_linear
         return safe_noise

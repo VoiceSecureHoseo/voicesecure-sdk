@@ -57,6 +57,13 @@ PPO_BUFFER_SIZE = 32
 # 너무 느리면 값을 키워서 조정 (예: 20, 50).
 TTS_EVAL_INTERVAL = 10
 
+# reward 가중치: WavLM(0.4) + CAM++(0.4) + TTS 클로닝 방어(0.2)
+# TTS는 매 TTS_EVAL_INTERVAL마다만 계산되므로 가중치를 낮게 설정.
+# 나머지 에피소드는 직전 tts_defense 값을 캐싱해서 사용.
+REWARD_WEIGHT_WAVLM = 0.4
+REWARD_WEIGHT_CAM = 0.4
+REWARD_WEIGHT_TTS = 0.2
+
 # 체크포인트 저장 주기 (에피소드 단위).
 # 기본 1000 에피소드마다 저장. Colab 런타임 제한 고려해서 설정.
 CHECKPOINT_INTERVAL = 1000
@@ -256,6 +263,7 @@ def train(args: argparse.Namespace) -> None:
     global_episode = start_episode
     transition_buffer: list[Transition] = []
     epoch_rewards: list[float] = []
+    last_tts_defense: float = 0.0  # TTS 클로닝 방어 점수 캐시 (직전 값 재사용)
 
     for epoch in range(start_epoch, args.epochs):
         # 에폭마다 파일 목록 셔플 (패턴 암기 방지)
@@ -288,8 +296,13 @@ def train(args: argparse.Namespace) -> None:
             # ── 임베딩 거리 계산 → reward ────────────────────────────
             wavlm_dist = cosine_distance(orig_wavlm_emb, mod_wavlm_emb)
             cam_dist = cosine_distance(orig_cam_emb, mod_cam_emb)
-            # WavLM + CosyVoice3 CAM++ 거리 평균을 reward로 사용
-            reward = float((wavlm_dist + cam_dist) / 2.0)
+            # WavLM(0.4) + CAM++(0.4) + TTS 클로닝 방어(0.2) 가중 합산
+            # TTS는 매 TTS_EVAL_INTERVAL마다 갱신, 나머지는 직전 값 재사용
+            reward = float(
+                REWARD_WEIGHT_WAVLM * wavlm_dist
+                + REWARD_WEIGHT_CAM * cam_dist
+                + REWARD_WEIGHT_TTS * last_tts_defense
+            )
             epoch_rewards.append(reward)
 
             # ── next_state 추출 (변조 음성 기준) ────────────────────
@@ -336,12 +349,15 @@ def train(args: argparse.Namespace) -> None:
                     tts_cam_dist = cosine_distance(orig_cam_emb, clone_cam_emb)
                     tts_defense = float((tts_wavlm_dist + tts_cam_dist) / 2.0)
 
+                    last_tts_defense = tts_defense  # 다음 에피소드 reward에 캐싱
                     writer.add_scalar("eval/tts_defense", tts_defense, global_episode)
                     writer.add_scalar("eval/tts_wavlm_dist", tts_wavlm_dist, global_episode)
                     writer.add_scalar("eval/tts_cam_dist", tts_cam_dist, global_episode)
                     logger.info(
                         "  TTS 방어 점수: %.4f (wavlm=%.4f, cam=%.4f)",
-                        tts_defense, tts_wavlm_dist, tts_cam_dist,
+                        tts_defense,
+                        tts_wavlm_dist,
+                        tts_cam_dist,
                     )
                 except Exception as e:
                     logger.warning("TTS 평가 실패 (건너뜀): %s", e)
@@ -349,14 +365,21 @@ def train(args: argparse.Namespace) -> None:
             # ── 체크포인트 저장 ──────────────────────────────────────
             if global_episode % args.checkpoint_interval == 0:
                 save_checkpoint(
-                    agent, global_episode, epoch, best_reward,
-                    checkpoint_dir, f"episode_{global_episode}.pt",
+                    agent,
+                    global_episode,
+                    epoch,
+                    best_reward,
+                    checkpoint_dir,
+                    f"episode_{global_episode}.pt",
                 )
 
             if global_episode % 100 == 0:
                 logger.info(
                     "episode=%d | epoch=%d/%d | reward=%.4f",
-                    global_episode, epoch + 1, args.epochs, reward,
+                    global_episode,
+                    epoch + 1,
+                    args.epochs,
+                    reward,
                 )
 
         # ── 에폭 종료: best 체크포인트 갱신 ─────────────────────────
@@ -364,14 +387,20 @@ def train(args: argparse.Namespace) -> None:
         writer.add_scalar("train/epoch_mean_reward", epoch_mean_reward, epoch + 1)
         logger.info(
             "에폭 %d/%d 완료 | 평균 reward=%.4f",
-            epoch + 1, args.epochs, epoch_mean_reward,
+            epoch + 1,
+            args.epochs,
+            epoch_mean_reward,
         )
 
         if epoch_mean_reward > best_reward:
             best_reward = epoch_mean_reward
             save_checkpoint(
-                agent, global_episode, epoch + 1, best_reward,
-                checkpoint_dir, "best.pt",
+                agent,
+                global_episode,
+                epoch + 1,
+                best_reward,
+                checkpoint_dir,
+                "best.pt",
             )
             logger.info("best 체크포인트 갱신: reward=%.4f", best_reward)
 
@@ -393,40 +422,57 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="VoiceSecure 훈련 스크립트")
 
     parser.add_argument(
-        "--data_dir", type=str, default="../CosyVoice/kss",
+        "--data_dir",
+        type=str,
+        default="../CosyVoice/kss",
         help="KSS 데이터셋 루트 경로 (Labels.txt + 화자 폴더 포함)",
     )
     parser.add_argument(
-        "--model_dir", type=str,
+        "--model_dir",
+        type=str,
         default="CosyVoice/pretrained_models/Fun-CosyVoice3-0.5B-2512",
         help="CosyVoice3 pretrained_models 경로",
     )
     parser.add_argument(
-        "--cosyvoice_root", type=str, default="CosyVoice",
+        "--cosyvoice_root",
+        type=str,
+        default="CosyVoice",
         help="CosyVoice 레포 루트 경로",
     )
     parser.add_argument(
-        "--epochs", type=int, default=3,
+        "--epochs",
+        type=int,
+        default=3,
         help="훈련 에폭 수. 1 에폭 = 전체 데이터셋 파일 수만큼 에피소드.",
     )
     parser.add_argument(
-        "--checkpoint_dir", type=str, default="checkpoints",
+        "--checkpoint_dir",
+        type=str,
+        default="checkpoints",
         help="체크포인트 + 로그 저장 경로 (상대경로 권장)",
     )
     parser.add_argument(
-        "--checkpoint_interval", type=int, default=CHECKPOINT_INTERVAL,
+        "--checkpoint_interval",
+        type=int,
+        default=CHECKPOINT_INTERVAL,
         help="체크포인트 저장 주기 (에피소드 단위). 기본값 1000.",
     )
     parser.add_argument(
-        "--lr", type=float, default=3e-4,
+        "--lr",
+        type=float,
+        default=3e-4,
         help="PPO 옵티마이저 learning rate",
     )
     parser.add_argument(
-        "--resume", type=str, default=None,
+        "--resume",
+        type=str,
+        default=None,
         help="이어서 훈련할 체크포인트 경로. 예: checkpoints/episode_1000.pt",
     )
     parser.add_argument(
-        "--seed", type=int, default=42,
+        "--seed",
+        type=int,
+        default=42,
         help="재현성을 위한 랜덤 시드",
     )
 

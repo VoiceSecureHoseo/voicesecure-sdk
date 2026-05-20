@@ -100,6 +100,9 @@ class Mixer:
         # ── Step 2: magnitude + safe_noise, phase 유지 ───────────────
         # 사람 청각은 phase 변화에 둔감하고 magnitude 변화에 민감
         # → magnitude에만 노이즈 더하고 phase는 그대로 유지
+        # [개선 고려] 스펙트럼 워핑(포먼트 이동) 또는 피치 perturbation 추가 시
+        #            magnitude 덧셈 대신 주파수 bin 자체를 이동시키는 방식으로 변경.
+        #            AI 화자 인식 방해 효과가 단순 노이즈보다 강할 수 있음.
         magnitude = torch.abs(spec)  # (n_freq, n_time_actual)
         phase = torch.angle(spec)  # (n_freq, n_time_actual)
 

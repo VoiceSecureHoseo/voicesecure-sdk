@@ -68,6 +68,11 @@ class PolicyNetwork(nn.Module):
         # ── Actor head ───────────────────────────────────────────────
         # 공유 표현 → 주파수 패턴 (n_freq,) 출력
         # 타일링으로 (n_freq, n_time) 확장하므로 출력 차원이 작음
+        # [개선 고려] 현재는 시간축이 동일한 패턴 반복 (타일링).
+        #            RNN/Transformer 도입 시 시간에 따른 동적 변조 가능.
+        # TODO: 출력을 (n_freq×2,)로 확장해서 노이즈 방향 + 스펙트럼 워핑 방향을
+        #       동시에 학습. Mixer에서 워핑 적용 로직 추가 필요.
+        #       변경 범위: policy.py, types.py, masker.py, mixer.py, agent.py, train.py
         self.actor_mean = nn.Sequential(
             nn.Linear(_HIDDEN_DIM, n_freq),
             nn.Tanh(),  # [-1, 1] 범위 제한 (Masker clamp 전 안정화)
