@@ -16,6 +16,10 @@ def __getattr__(name: str):
         from voicesecure.evaluators.adapters.wavlm_sv import WavLMSVAdapter
 
         return WavLMSVAdapter
+    if name == "XTTSAdapter":
+        from voicesecure.evaluators.adapters.xtts import XTTSAdapter
+
+        return XTTSAdapter
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
@@ -23,4 +27,5 @@ __all__ = [
     "CAMPlusAdapter",
     "Wav2Vec2KoreanAdapter",
     "WavLMSVAdapter",
+    "XTTSAdapter",
 ]

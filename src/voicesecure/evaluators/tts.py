@@ -51,24 +51,24 @@ class TTSEvaluator(Evaluator):
         modified = self.validate_audio(modified, name="modified")
 
         original_features = self.precompute(original)
-        clone_ov2 = self.synthesize_clone(self._openvoice_model, modified, model_name="OpenVoice2")
+        # clone_ov2 = self.synthesize_clone(self._openvoice_model, modified, model_name="OpenVoice2")
         clone_xtts = self.synthesize_clone(self._xtts_model, modified, model_name="XTTS")
 
-        clone_ov2_embedding = self.extract_embedding(
-            self._speaker_model, clone_ov2, model_name="speaker-distance"
-        )
+        # clone_ov2_embedding = self.extract_embedding(
+        #     self._speaker_model, clone_ov2, model_name="speaker-distance"
+        # )
         clone_xtts_embedding = self.extract_embedding(
             self._speaker_model, clone_xtts, model_name="speaker-distance"
         )
 
-        openvoice_dist = cosine_distance(
-            original_features["original_embedding"], clone_ov2_embedding
-        )
+        # openvoice_dist = cosine_distance(
+        #     original_features["original_embedding"], clone_ov2_embedding
+        # )
         xtts_dist = cosine_distance(original_features["original_embedding"], clone_xtts_embedding)
-        raw_metric = (openvoice_dist + xtts_dist) / 2.0
+        raw_metric = xtts_dist
 
         return EvaluatorOutput(
             score=self._normalizer(raw_metric),
             raw_metric=raw_metric,
-            metadata={"openvoice_dist": openvoice_dist, "xtts_dist": xtts_dist},
+            metadata={"xtts_dist": xtts_dist},
         )
