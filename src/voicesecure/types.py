@@ -60,6 +60,15 @@ class RewardComponents(TypedDict):
     asr_cer: float  # ASR Character Error Rate (낮을수록 좋음)
 
 
+# ===== FR-1 예외 =====
+class InsufficientAudioError(ValueError):
+    """입력 길이가 100ms(1600 샘플) 미만일 때."""
+
+
+class ChunkSizeError(ValueError):
+    """입력 길이가 16000 샘플(1초)을 초과할 때. 호출자가 청크 분할 후 재호출 필요."""
+
+
 # ===== 학습 한 step의 transition =====
 @dataclass
 class Transition:
