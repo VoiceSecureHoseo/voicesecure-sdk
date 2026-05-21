@@ -3,21 +3,37 @@
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 실제 모듈로 교체하는 방법 (팀원 모듈 완성 후):
 
-    # test_agent.py 상단에서 아래처럼 교체
-
     # [교체 전 - 더미]
     from dummy_modules import DummyMasker, DummyMixer, DummyReward
     masker    = DummyMasker()
     mixer     = DummyMixer()
     reward_fn = DummyReward()
+    ...
+    reward = reward_fn.compute(modified_audio)
 
     # [교체 후 - 실제]
+    # Masker/Mixer는 1:1 교체 가능하지만 reward는 evaluator + RewardFunction
+    # 두 단계 합성이므로 호출부 자체를 다음과 같이 바꾼다.
     from voicesecure.modulation.masker import PsychoacousticMasker
-    from voicesecure.modulation.mixer import Mixer
-    from voicesecure.evaluators.speaker import SpeakerEvaluator
+    from voicesecure.modulation.mixer   import Mixer
+    from voicesecure.evaluators        import SpeakerEvaluator, TTSEvaluator, ASREvaluator
+    from voicesecure.reward.function   import RewardFunction
+
     masker    = PsychoacousticMasker()
     mixer     = Mixer()
-    reward_fn = SpeakerEvaluator()
+    sv_eval   = SpeakerEvaluator(wavlm_model=..., cam_model=...)
+    tts_eval  = TTSEvaluator(openvoice_model=..., xtts_model=..., speaker_model=...)
+    asr_eval  = ASREvaluator(asr_model=..., original_text="...")
+    reward_fn = RewardFunction()
+    ...
+    components = {
+        "sv_score":  sv_eval.evaluate(original, modified).score,
+        "tts_score": tts_eval.evaluate(original, modified).score,
+        "asr_cer":   asr_eval.evaluate(original, modified).raw_metric,
+    }
+    reward = reward_fn.compute(components)
+
+    # 통합 예시 전체 흐름은 tests/test_integration/test_full_pipeline.py 참고.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
 
@@ -130,6 +146,10 @@ class DummyReward:
     """
 
     def compute(self, modified_audio: AudioArray) -> Reward:
-        # TODO: 실제 SpeakerEvaluator.compute()로 교체
-        #       실제는 SV/TTS/ASR evaluator로 변형 음성 평가 후 reward 계산
+        # TODO: 실제 흐름으로 교체.
+        #   1) SV/TTS/ASR evaluator로 modified_audio 평가 → score dict
+        #   2) RewardFunction.compute(components: RewardComponents) 호출
+        # 즉 이 한 줄(`reward_fn.compute(modified_audio)`)을 evaluator 호출 +
+        # RewardFunction.compute(dict)의 2단계 합성으로 바꿔야 한다.
+        # (SpeakerEvaluator에는 compute() 메서드가 없다 — evaluate()만 있다.)
         return float(np.random.uniform(0.0, 1.0))

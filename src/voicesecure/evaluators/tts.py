@@ -44,13 +44,26 @@ class TTSEvaluator(Evaluator):
             )
         }
 
-    def evaluate(self, original: AudioArray, modified: AudioArray) -> EvaluatorOutput:
-        """Return normalized clone-failure distance for modified audio."""
+    def evaluate(
+        self,
+        original: AudioArray,
+        modified: AudioArray,
+        precomputed_original_features: dict[str, Any] | None = None,
+    ) -> EvaluatorOutput:
+        """Return normalized clone-failure distance for modified audio.
+
+        If ``precomputed_original_features`` is provided (e.g. fetched from
+        :class:`voicesecure.utils.cache.FeatureCache`), the original speaker
+        embedding is reused instead of being recomputed.
+        """
 
         original = self.validate_audio(original, name="original")
         modified = self.validate_audio(modified, name="modified")
 
-        original_features = self.precompute(original)
+        if precomputed_original_features is not None:
+            original_features = precomputed_original_features
+        else:
+            original_features = self.precompute(original)
         clone_ov2 = self.synthesize_clone(self._openvoice_model, modified, model_name="OpenVoice2")
         clone_xtts = self.synthesize_clone(self._xtts_model, modified, model_name="XTTS")
 

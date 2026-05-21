@@ -141,6 +141,29 @@ class PolicyNetwork(nn.Module):
 
         return action, log_prob, value
 
+    def compute_value(self, states: State) -> torch.Tensor:
+        """Critic head만 호출해 V(s)를 반환한다.
+
+        ``evaluate_actions``는 (log_probs, values)를 함께 반환하므로
+        value만 필요할 때(예: GAE bootstrap)는 이 메서드를 쓰는 게 의도가 명확하다.
+
+        Args:
+            states: shape (batch, 16) 또는 (16,)
+
+        Returns:
+            values: shape (batch,) 또는 ()
+        """
+        squeezed = states.dim() == 1
+        if squeezed:
+            states = states.unsqueeze(0)
+
+        shared_out = self.shared(states)
+        values = self.critic(shared_out).squeeze(-1)
+
+        if squeezed:
+            values = values.squeeze(0)
+        return values
+
     def evaluate_actions(self, states: State, actions: Action) -> tuple[torch.Tensor, torch.Tensor]:
         """PPO 업데이트 시 기존 action에 대한 log_prob와 value를 재계산한다.
 

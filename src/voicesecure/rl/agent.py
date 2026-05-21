@@ -111,9 +111,9 @@ class RLAgent:
         old_values = torch.stack([t.value.detach() for t in transitions])  # (N,)
 
         # 마지막 스텝의 next_value: done이면 0, 아니면 Critic으로 V(s') 계산
+        # (action은 V(s')와 무관하므로 evaluate_actions가 아니라 compute_value 사용)
         with torch.no_grad():
-            _, next_values = self.policy.evaluate_actions(next_states, actions)
-            next_values = next_values.detach()
+            next_values = self.policy.compute_value(next_states).detach()
 
         # ── GAE (Generalized Advantage Estimation) ────────────────────
         # advantage = 실제 받은 reward - Critic이 예측한 V(s)

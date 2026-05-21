@@ -1,13 +1,19 @@
 """Feature cache module."""
 
 from collections import OrderedDict
+from typing import Any
 
-from voicesecure.evaluators.base import Evaluator
 from voicesecure.types import AudioArray
 
 
 class FeatureCache:
-    """Evaluator별 feature를 메모리에 캐싱하는 클래스."""
+    """Evaluator별 feature를 메모리에 캐싱하는 클래스.
+
+    cache key는 ``(evaluator.__class__.__name__, audio_id)`` 이며,
+    evaluator 객체는 duck typing으로만 사용된다 — ``precompute(audio)`` 메서드와
+    ``__class__.__name__`` 속성만 있으면 어떤 타입이든 허용한다.
+    (Evaluator 추상 클래스를 import하지 않으므로 utils → evaluators 순환 의존이 없다.)
+    """
 
     def __init__(self, max_size: int = 10000) -> None:
         """캐시 초기화.
@@ -24,14 +30,14 @@ class FeatureCache:
     def get_or_compute(
         self,
         audio_id: str,
-        evaluator: Evaluator,
+        evaluator: Any,
         audio: AudioArray,
     ) -> dict:
         """캐시된 feature 반환 또는 새로 계산.
 
         Args:
             audio_id: 오디오 고유 ID.
-            evaluator: precompute(audio) 메서드를 가진 evaluator.
+            evaluator: precompute(audio) 메서드를 가진 evaluator (duck typed).
             audio: 원본 오디오.
 
         Returns:
@@ -57,7 +63,7 @@ class FeatureCache:
 
         return features
 
-    def clear(self, evaluator: Evaluator | None = None) -> None:
+    def clear(self, evaluator: Any | None = None) -> None:
         """캐시 삭제. evaluator 지정 시 해당 evaluator만 삭제."""
         if evaluator is None:
             self._cache.clear()
@@ -72,7 +78,7 @@ class FeatureCache:
     @staticmethod
     def _make_cache_key(
         audio_id: str,
-        evaluator: Evaluator,
+        evaluator: Any,
     ) -> tuple[str, str]:
         """evaluator 이름과 audio_id를 조합해 cache key를 만든다."""
         evaluator_name = evaluator.__class__.__name__
