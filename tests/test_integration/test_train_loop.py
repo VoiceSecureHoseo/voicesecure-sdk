@@ -14,14 +14,14 @@ import numpy as np
 import pytest
 import torch
 
-pytestmark = pytest.mark.slow
-
 from voicesecure.evaluators.adapters.ecapa_tdnn import ECAPATDNNAdapter
 from voicesecure.evaluators.base import cosine_distance
 from voicesecure.modulation.masker import PsychoacousticMasker
 from voicesecure.modulation.mixer import Mixer
 from voicesecure.rl.agent import RLAgent
 from voicesecure.types import SAMPLE_RATE, AudioArray, Embedding, Transition
+
+pytestmark = pytest.mark.slow
 
 # ── 더미 어댑터 ───────────────────────────────────────────────────────────────
 
@@ -216,7 +216,6 @@ class TestTTSEvalEpisode:
             ecapa=ecapa,
             cosy=cosy,
         )
-        emb_reward = float(REWARD_WEIGHT_ECAPA * ecapa_dist + REWARD_WEIGHT_CAM * cam_dist)
         # TTS 평가 에피소드 reward는 clone_dist이므로 emb_dist_reward와 다를 수 있음
         assert isinstance(reward, float)
         assert not np.isnan(reward)

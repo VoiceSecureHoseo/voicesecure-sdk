@@ -19,11 +19,11 @@ import torch
 import torch.nn.functional as F
 
 from voicesecure.evaluators.adapters.wavlm_sv import WavLMSVAdapter
-
-pytestmark = pytest.mark.slow
 from voicesecure.evaluators.base import cosine_distance
 from voicesecure.modulation.masker import PsychoacousticMasker
 from voicesecure.modulation.mixer import Mixer
+
+pytestmark = pytest.mark.slow
 
 ORIGINAL_DIR = Path(__file__).parents[2] / "Original"
 OUTPUT_DIR = Path(__file__).parents[1] / "voice"
@@ -92,10 +92,7 @@ def fgsm_direction(
     waveform에서 직접 gradient를 구해 STFT magnitude 방향으로 변환.
     feature_extractor가 numpy 경유 → gradient 끊김 → input_values에 직접 grad 붙임.
     """
-    from voicesecure.types import SAMPLE_RATE as SR
-
     device = wavlm.device
-    feature_extractor = wavlm.feature_extractor
     model = wavlm.model
 
     # input_values를 직접 만들어서 gradient 추적
@@ -160,8 +157,8 @@ def test_embedding_distance(sample_audio: tuple[np.ndarray, Path]) -> None:
     dist = cosine_distance(orig_emb, mod_emb)
 
     print(f"\n원본 vs 변조 WavLM 코사인 거리 (노이즈+워핑): {dist:.6f}")
-    print(f"  → 0에 가까울수록 AI가 같은 사람으로 인식 (방어 효과 없음)")
-    print(f"  → 클수록 방어 효과 있음 (최대 2.0)")
+    print("  → 0에 가까울수록 AI가 같은 사람으로 인식 (방어 효과 없음)")
+    print("  → 클수록 방어 효과 있음 (최대 2.0)")
     print(f"노이즈 RMS: {safe_noise.abs().mean().item():.6f}")
     print(f"원본 RMS:   {np.sqrt(np.mean(audio**2)):.6f}")
 
@@ -193,7 +190,7 @@ def test_fgsm_embedding_distance(sample_audio: tuple[np.ndarray, Path]) -> None:
     dist = cosine_distance(orig_emb, mod_emb)
 
     print(f"\nFGSM 방향 WavLM 코사인 거리: {dist:.6f}")
-    print(f"랜덤 노이즈 거리 (이전):      0.000813")
+    print("랜덤 노이즈 거리 (이전):      0.000813")
     print(f"  → FGSM이 랜덤 대비 {dist / 0.000813:.1f}배 효과")
     print(f"노이즈 RMS: {safe_noise.abs().mean().item():.6f}")
     print(f"원본 RMS:   {np.sqrt(np.mean(audio**2)):.6f}")

@@ -98,7 +98,6 @@ class PolicyNetwork(nn.Module):
         if squeezed:
             state = state.unsqueeze(0)  # (36,) → (1, 36)
 
-        batch = state.shape[0]
         shared_out = self.shared(state)  # (batch, hidden)
 
         # ── 주파수 패턴 ──────────────────────────────────────────────────

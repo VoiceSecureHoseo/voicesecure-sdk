@@ -18,7 +18,7 @@ import logging
 import numpy as np
 import torch
 
-from voicesecure.types import SAMPLE_RATE, AudioArray, Embedding
+from voicesecure.types import AudioArray, Embedding
 
 logger = logging.getLogger(__name__)
 

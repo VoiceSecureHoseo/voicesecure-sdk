@@ -1,7 +1,6 @@
 """StateExtractor 테스트 (36-dim state)."""
 
 import numpy as np
-import pytest
 import torch
 
 from voicesecure.rl.state import StateExtractor
@@ -84,7 +83,7 @@ def test_feature_values(capsys):
     with capsys.disabled():
         print(f"\n  {'특징':<20} {'값':>10}")
         print(f"  {'-'*32}")
-        for label, val in zip(LABELS, vals):
+        for label, val in zip(LABELS, vals, strict=True):
             print(f"  {label:<20} {val:>10.4f}")
 
     # 스펙트럼 flux: [0, 1] 범위
