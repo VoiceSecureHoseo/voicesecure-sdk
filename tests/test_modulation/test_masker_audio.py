@@ -16,7 +16,6 @@ import numpy as np
 import pytest
 import soundfile as sf
 import torch
-
 import torch.nn.functional as F
 
 from voicesecure.evaluators.adapters.wavlm_sv import WavLMSVAdapter

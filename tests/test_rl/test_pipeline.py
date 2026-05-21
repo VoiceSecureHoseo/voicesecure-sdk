@@ -1,12 +1,12 @@
 """StateExtractor → PolicyNetwork 파이프라인 테스트."""
 
 import os
+from math import gcd
 
 import numpy as np
 import pytest
 import soundfile as sf
 import torch
-from math import gcd
 from scipy.signal import resample_poly
 
 from voicesecure.rl.policy import PolicyNetwork
