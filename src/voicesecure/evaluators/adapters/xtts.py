@@ -100,13 +100,21 @@ class XTTSAdapter:
             _write_wav(tmp_ref.name, reference_audio, SAMPLE_RATE)
             ref_path = tmp_ref.name
 
-        # tts() returns a list of floats (no file IO / torchcodec needed)
         samples = self._tts.tts(
             text=self.clone_text,
             language=self.language,
             speaker_wav=ref_path,
         )
         cloned = np.array(samples, dtype=np.float32)
+
+        # XTTS 출력은 24000Hz — 16kHz로 리샘플링
+        from math import gcd
+        from scipy.signal import resample_poly
+        xtts_sr = self._tts.synthesizer.output_sample_rate
+        if xtts_sr != SAMPLE_RATE:
+            g = gcd(SAMPLE_RATE, xtts_sr)
+            cloned = resample_poly(cloned, SAMPLE_RATE // g, xtts_sr // g).astype(np.float32)
+
         return cloned
 
 

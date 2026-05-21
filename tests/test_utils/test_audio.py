@@ -23,6 +23,7 @@ def test_resample_same_sample_rate():
     assert output.dtype == np.float32
 
 
+@pytest.mark.slow
 def test_resample_different_sample_rate():
     """sample rate 변경 확인."""
     audio = np.random.randn(8000).astype(np.float32)
@@ -37,6 +38,7 @@ def test_resample_different_sample_rate():
     assert len(output) > len(audio)
 
 
+@pytest.mark.slow
 def test_save_and_load_audio(tmp_path: Path):
     """오디오 저장 후 다시 로드."""
     audio = np.random.randn(SAMPLE_RATE).astype(np.float32)

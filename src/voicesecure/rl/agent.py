@@ -66,7 +66,7 @@ class RLAgent:
 
     def act(
         self, audio: AudioArray, deterministic: bool = False
-    ) -> tuple[Action, torch.Tensor, torch.Tensor, torch.Tensor]:
+    ) -> tuple[Action, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """음성 입력을 받아 노이즈(action)를 생성한다.
 
         추론 시에는 deterministic=True로 호출.
@@ -77,15 +77,19 @@ class RLAgent:
             deterministic: True면 평균 action, False면 분포에서 샘플링
 
         Returns:
-            state:    추출된 state 벡터, shape (STATE_DIM,) — Transition 저장용
-            action:   노이즈 spectrogram, shape (n_freq, n_time)
-            log_prob: 이 action의 로그확률 (PPO 학습용)
-            value:    Critic의 V(s) (PPO 학습용)
+            state:        추출된 state 벡터, shape (STATE_DIM,)
+            action:       노이즈 spectrogram, shape (n_freq, n_time)
+            log_prob:     이 action의 로그확률 (PPO 학습용)
+            value:        Critic의 V(s) (PPO 학습용)
+            freq_pattern: tanh(freq_raw), shape (n_freq,) — evaluate_actions 역산용
+            time_gate:    sigmoid(time_raw), shape (n_time,) — evaluate_actions 역산용
         """
         with torch.no_grad():
             state = self.extractor.extract(audio)
-            action, log_prob, value = self.policy(state, deterministic=deterministic)
-        return state, action, log_prob, value
+            action, log_prob, value, freq_pattern, time_gate = self.policy(
+                state, deterministic=deterministic
+            )
+        return state, action, log_prob, value, freq_pattern, time_gate
 
     def update(self, transitions: list[Transition]) -> dict:
         """쌓인 Transition들로 PPO 업데이트를 수행한다.
@@ -102,24 +106,24 @@ class RLAgent:
             metrics: {"policy_loss": float, "value_loss": float, "entropy": float}
         """
         # ── Transition 리스트 → 텐서로 변환 ──────────────────────────
-        states = torch.stack([t.state for t in transitions])  # (N, 16)
-        next_states = torch.stack([t.next_state for t in transitions])  # (N, 16)
-        actions = torch.stack([t.action for t in transitions])  # (N, n_freq, n_time)
-        rewards = torch.tensor([t.reward for t in transitions], dtype=torch.float32)
-        dones = torch.tensor([t.done for t in transitions], dtype=torch.float32)
+        states = torch.stack([t.state for t in transitions])               # (N, STATE_DIM)
+        actions = torch.stack([t.action for t in transitions])             # (N, n_freq, n_time)
         old_log_probs = torch.stack([t.log_prob.detach() for t in transitions])  # (N,)
-        old_values = torch.stack([t.value.detach() for t in transitions])  # (N,)
+        old_values = torch.stack([t.value.detach() for t in transitions])        # (N,)
+        freq_patterns = torch.stack([t.freq_pattern.detach() for t in transitions])  # (N, n_freq)
+        time_gates = torch.stack([t.time_gate.detach() for t in transitions])        # (N, n_time)
 
-        # 마지막 스텝의 next_value: done이면 0, 아니면 Critic으로 V(s') 계산
-        with torch.no_grad():
-            _, next_values = self.policy.evaluate_actions(next_states, actions)
-            next_values = next_values.detach()
+        # rewards는 old_values와 같은 device로 생성 (GPU 환경 대비)
+        device = old_values.device
+        rewards = torch.tensor(
+            [t.reward for t in transitions], dtype=torch.float32, device=device
+        )
 
-        # ── GAE (Generalized Advantage Estimation) ────────────────────
-        # advantage = 실제 받은 reward - Critic이 예측한 V(s)
-        # GAE는 여러 스텝의 TD error를 지수 가중 평균해서 variance 줄임
-        advantages = self._compute_gae(rewards, old_values, next_values, dones)
-        returns = advantages + old_values  # target value = advantage + V(s)
+        # ── advantage 계산 ────────────────────────────────────────────
+        # 1 step = 1 episode (done=True 고정) 구조이므로 next_value는 항상 0.
+        # advantage = reward - V(s) 로 단순화 (GAE next_value forward pass 불필요)
+        advantages = self._compute_advantage(rewards, old_values)
+        returns = rewards  # target = 즉각 reward (done=True → 미래 가치 없음)
 
         # advantage 정규화 (학습 안정화)
         advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
@@ -132,13 +136,14 @@ class RLAgent:
         for _ in range(self.ppo_epochs):
             # 현재 정책으로 다시 forward — 기존 action에 대한 log_prob 재계산
             # 새로 샘플링하는 게 아니라 이전에 선택한 action을 현재 정책으로 평가
-            new_log_probs, new_values = self.policy.evaluate_actions(states, actions)
+            new_log_probs, new_values, entropy = self.policy.evaluate_actions(
+                states, actions, freq_patterns, time_gates
+            )
 
             # ratio = 새 정책 확률 / 이전 정책 확률
             ratio = (new_log_probs - old_log_probs).exp()
 
             # PPO clipped loss
-            # min()으로 ratio가 너무 크거나 작으면 gradient를 차단
             surr1 = ratio * advantages
             surr2 = ratio.clamp(1 - self.epsilon, 1 + self.epsilon) * advantages
             policy_loss = -torch.min(surr1, surr2).mean()
@@ -146,11 +151,7 @@ class RLAgent:
             # Value loss: Critic이 예측한 V(s)와 실제 return의 차이
             value_loss = nn.functional.mse_loss(new_values, returns)
 
-            # Entropy bonus: 정책이 너무 확정적이 되지 않도록 탐색 장려
-            # log_prob가 작을수록(더 다양한 action) entropy 높음
-            entropy = -new_log_probs.mean()
-
-            # 전체 loss
+            # 전체 loss (entropy는 Normal 분포의 해석적 entropy)
             loss = policy_loss + self.value_coef * value_loss - self.entropy_coef * entropy
 
             self.optimizer.zero_grad()
@@ -190,29 +191,15 @@ class RLAgent:
         self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
         logger.info("체크포인트 로드: %s", path)
 
-    def _compute_gae(
+    def _compute_advantage(
         self,
         rewards: torch.Tensor,
         values: torch.Tensor,
-        next_values: torch.Tensor,
-        dones: torch.Tensor,
     ) -> torch.Tensor:
-        """GAE(Generalized Advantage Estimation)로 advantage를 계산한다.
+        """advantage 계산.
 
-        단순 advantage = reward - V(s) 대신 여러 스텝을 보아 variance를 줄인다.
-        gae_lambda=1이면 Monte Carlo, 0이면 TD(0)와 동일.
+        1 step = 1 episode (done=True 고정) 구조이므로 next_value = 0.
+        advantage = reward - V(s)
+        multi-step 구조로 바뀌면 GAE로 교체 필요.
         """
-        advantages = torch.zeros_like(rewards)
-        last_gae = 0.0
-
-        for t in reversed(range(len(rewards))):
-            # done이면 에피소드 끝 → next_value 무시
-            next_value = next_values[t].item() * (1 - dones[t].item())
-
-            # TD error: 실제 reward + 할인된 다음 V(s') - 현재 V(s)
-            delta = rewards[t] + self.gamma * next_value - values[t]
-            # GAE: TD error를 지수 가중 평균
-            last_gae = delta + self.gamma * self.gae_lambda * (1 - dones[t]) * last_gae
-            advantages[t] = last_gae
-
-        return advantages
+        return rewards - values

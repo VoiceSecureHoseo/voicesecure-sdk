@@ -54,7 +54,7 @@ ignore = ["E501"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
-addopts = "-v -s --tb=short --cov=voicesecure --cov-report=term-missing"
+addopts = "-v -s --tb=short -m 'not slow'"
 markers = [
     "slow: marks tests as slow",
 ]

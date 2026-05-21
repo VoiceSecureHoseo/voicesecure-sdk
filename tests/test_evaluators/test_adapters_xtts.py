@@ -1,13 +1,15 @@
 """XTTSAdapter 테스트.
 
-@pytest.mark.slow 테스트는 실제 모델 다운로드가 필요하므로
-nightly 또는 수동 실행: pytest -m slow tests/test_evaluators/test_adapters_xtts.py
+XTTS는 현재 train 파이프라인에서 사용하지 않음 (CosyVoice3 사용).
+수동 실행: pytest -m slow tests/test_evaluators/test_adapters_xtts.py
 """
 
 import numpy as np
 import pytest
 
 from voicesecure.types import SAMPLE_RATE
+
+pytestmark = pytest.mark.slow
 
 
 def _make_audio(freq: float, duration: float = 3.0) -> np.ndarray:
