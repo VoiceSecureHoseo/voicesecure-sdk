@@ -79,7 +79,9 @@ def test_ppo_update_one_step():
 
     transitions = []
     for _ in range(8):
-        state, action, log_prob, value, freq_pattern, time_gate = agent.act(audio, deterministic=False)
+        state, action, log_prob, value, freq_pattern, time_gate = agent.act(
+            audio, deterministic=False
+        )
         safe_noise = masker.clamp(audio, action)
         modified = mixer.mix(audio, safe_noise)
         reward = reward_fn.compute(modified)

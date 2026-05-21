@@ -110,6 +110,7 @@ class XTTSAdapter:
         # XTTS 출력은 24000Hz — 16kHz로 리샘플링
         from math import gcd
         from scipy.signal import resample_poly
+
         xtts_sr = self._tts.synthesizer.output_sample_rate
         if xtts_sr != SAMPLE_RATE:
             g = gcd(SAMPLE_RATE, xtts_sr)

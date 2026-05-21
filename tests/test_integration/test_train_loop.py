@@ -14,13 +14,14 @@ import numpy as np
 import pytest
 import torch
 
+pytestmark = pytest.mark.slow
+
 from voicesecure.evaluators.adapters.ecapa_tdnn import ECAPATDNNAdapter
 from voicesecure.evaluators.base import cosine_distance
 from voicesecure.modulation.masker import PsychoacousticMasker
 from voicesecure.modulation.mixer import Mixer
 from voicesecure.rl.agent import RLAgent
 from voicesecure.types import SAMPLE_RATE, AudioArray, Embedding, Transition
-
 
 # ── 더미 어댑터 ───────────────────────────────────────────────────────────────
 
@@ -38,7 +39,9 @@ class _DummyCosyVoiceAdapter:
 
     def clone(self, reference_audio: AudioArray, text: str = "") -> AudioArray:
         # 약간 왜곡된 오디오를 반환 (클로닝 시뮬레이션)
-        noise = np.random.default_rng(seed=0).standard_normal(len(reference_audio)).astype(np.float32)
+        noise = (
+            np.random.default_rng(seed=0).standard_normal(len(reference_audio)).astype(np.float32)
+        )
         cloned = reference_audio + 0.05 * noise
         return np.clip(cloned, -1.0, 1.0).astype(np.float32)
 
@@ -171,9 +174,7 @@ class TestSingleEpisode:
         # cosine distance ∈ [0, 2]
         assert 0.0 <= reward <= 2.0
 
-    def test_transition_fields(
-        self, sample_audio, agent, masker, mixer, ecapa, cosy
-    ) -> None:
+    def test_transition_fields(self, sample_audio, agent, masker, mixer, ecapa, cosy) -> None:
         orig_ecapa = ecapa.extract_embedding(sample_audio)
         orig_cam = cosy.extract_embedding(sample_audio)
         transition, reward, _, _ = _run_episode(
@@ -188,6 +189,7 @@ class TestSingleEpisode:
             cosy=cosy,
         )
         from voicesecure.types import ACTION_N_FREQ, ACTION_N_TIME
+
         assert transition.action.shape == (ACTION_N_FREQ, ACTION_N_TIME)
         assert not torch.isnan(transition.log_prob)
         assert not torch.isnan(transition.value)
@@ -278,9 +280,7 @@ class TestPPOUpdateLoop:
         assert not np.isnan(metrics["value_loss"])
         assert not np.isnan(metrics["entropy"])
 
-    def test_rewards_are_positive(
-        self, sample_audio, agent, masker, mixer, ecapa, cosy
-    ) -> None:
+    def test_rewards_are_positive(self, sample_audio, agent, masker, mixer, ecapa, cosy) -> None:
         """cosine distance는 항상 양수 (reward ≥ 0)."""
         orig_ecapa = ecapa.extract_embedding(sample_audio)
         orig_cam = cosy.extract_embedding(sample_audio)

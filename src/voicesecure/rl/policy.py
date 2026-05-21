@@ -102,50 +102,52 @@ class PolicyNetwork(nn.Module):
         shared_out = self.shared(state)  # (batch, hidden)
 
         # ── 주파수 패턴 ──────────────────────────────────────────────────
-        freq_mean = self.actor_freq(shared_out)                          # (batch, n_freq)
+        freq_mean = self.actor_freq(shared_out)  # (batch, n_freq)
         log_std_f = self.log_std_freq.clamp(_LOG_STD_MIN, _LOG_STD_MAX)
         std_f = log_std_f.exp()
         dist_f = Normal(freq_mean, std_f)
-        freq_raw = freq_mean if deterministic else dist_f.rsample()      # (batch, n_freq)
-        freq_pattern = torch.tanh(freq_raw)                              # (batch, n_freq) ∈ [-1,1]
+        freq_raw = freq_mean if deterministic else dist_f.rsample()  # (batch, n_freq)
+        freq_pattern = torch.tanh(freq_raw)  # (batch, n_freq) ∈ [-1,1]
 
         # tanh change-of-variables log_prob 보정
-        log_prob_f = (
-            dist_f.log_prob(freq_raw).sum(dim=-1)
-            - torch.log(1 - freq_pattern**2 + 1e-6).sum(dim=-1)
+        log_prob_f = dist_f.log_prob(freq_raw).sum(dim=-1) - torch.log(
+            1 - freq_pattern**2 + 1e-6
+        ).sum(
+            dim=-1
         )  # (batch,)
 
         # ── 시간 게이트 ──────────────────────────────────────────────────
-        time_mean = self.actor_time(shared_out)                          # (batch, n_time)
+        time_mean = self.actor_time(shared_out)  # (batch, n_time)
         log_std_t = self.log_std_time.clamp(_LOG_STD_MIN, _LOG_STD_MAX)
         std_t = log_std_t.exp()
         dist_t = Normal(time_mean, std_t)
-        time_raw = time_mean if deterministic else dist_t.rsample()      # (batch, n_time)
-        time_gate = torch.sigmoid(time_raw)                              # (batch, n_time) ∈ [0,1]
+        time_raw = time_mean if deterministic else dist_t.rsample()  # (batch, n_time)
+        time_gate = torch.sigmoid(time_raw)  # (batch, n_time) ∈ [0,1]
 
         # sigmoid change-of-variables log_prob 보정
         # sigmoid(x) = s, log|ds/dx| = log(s*(1-s))
-        log_prob_t = (
-            dist_t.log_prob(time_raw).sum(dim=-1)
-            - torch.log(time_gate * (1 - time_gate) + 1e-6).sum(dim=-1)
+        log_prob_t = dist_t.log_prob(time_raw).sum(dim=-1) - torch.log(
+            time_gate * (1 - time_gate) + 1e-6
+        ).sum(
+            dim=-1
         )  # (batch,)
 
         # ── 외적으로 action 조합 ─────────────────────────────────────────
         # action[b, f, t] = freq_pattern[b, f] * time_gate[b, t]
         action = torch.bmm(
-            freq_pattern.unsqueeze(2),   # (batch, n_freq, 1)
-            time_gate.unsqueeze(1),      # (batch, 1, n_time)
+            freq_pattern.unsqueeze(2),  # (batch, n_freq, 1)
+            time_gate.unsqueeze(1),  # (batch, 1, n_time)
         )  # (batch, n_freq, n_time)
 
         log_prob = log_prob_f + log_prob_t  # 독립 분포 합산
         value = self.critic(shared_out).squeeze(-1)  # (batch,)
 
         if squeezed:
-            action = action.squeeze(0)           # (n_freq, n_time)
+            action = action.squeeze(0)  # (n_freq, n_time)
             log_prob = log_prob.squeeze(0)
             value = value.squeeze(0)
             freq_pattern = freq_pattern.squeeze(0)  # (n_freq,)
-            time_gate = time_gate.squeeze(0)         # (n_time,)
+            time_gate = time_gate.squeeze(0)  # (n_time,)
 
         return action, log_prob, value, freq_pattern, time_gate
 
@@ -176,27 +178,25 @@ class PolicyNetwork(nn.Module):
         shared_out = self.shared(states)
 
         # ── 주파수 패턴 역산 (SB3 TanhBijector.inverse 방식) ──────────────
-        freq_mean = self.actor_freq(shared_out)                          # (batch, n_freq)
+        freq_mean = self.actor_freq(shared_out)  # (batch, n_freq)
         log_std_f = self.log_std_freq.clamp(_LOG_STD_MIN, _LOG_STD_MAX)
         dist_f = Normal(freq_mean, log_std_f.exp())
 
-        fp = freq_patterns.clamp(-1 + 1e-6, 1 - 1e-6)    # (batch, n_freq)
-        freq_raw = torch.atanh(fp)                          # 정확한 역산
-        log_prob_f = (
-            dist_f.log_prob(freq_raw).sum(dim=-1)
-            - torch.log(1 - fp**2 + 1e-6).sum(dim=-1)
+        fp = freq_patterns.clamp(-1 + 1e-6, 1 - 1e-6)  # (batch, n_freq)
+        freq_raw = torch.atanh(fp)  # 정확한 역산
+        log_prob_f = dist_f.log_prob(freq_raw).sum(dim=-1) - torch.log(1 - fp**2 + 1e-6).sum(
+            dim=-1
         )  # (batch,)
 
         # ── 시간 게이트 역산 (sigmoid 역함수 = logit) ─────────────────────
-        time_mean = self.actor_time(shared_out)                          # (batch, n_time)
+        time_mean = self.actor_time(shared_out)  # (batch, n_time)
         log_std_t = self.log_std_time.clamp(_LOG_STD_MIN, _LOG_STD_MAX)
         dist_t = Normal(time_mean, log_std_t.exp())
 
-        tg = time_gates.clamp(1e-6, 1 - 1e-6)             # (batch, n_time)
-        time_raw = torch.logit(tg)                          # 정확한 역산
-        log_prob_t = (
-            dist_t.log_prob(time_raw).sum(dim=-1)
-            - torch.log(tg * (1 - tg) + 1e-6).sum(dim=-1)
+        tg = time_gates.clamp(1e-6, 1 - 1e-6)  # (batch, n_time)
+        time_raw = torch.logit(tg)  # 정확한 역산
+        log_prob_t = dist_t.log_prob(time_raw).sum(dim=-1) - torch.log(tg * (1 - tg) + 1e-6).sum(
+            dim=-1
         )  # (batch,)
 
         # entropy: Normal 분포의 해석적 entropy (= 0.5 + 0.5*log(2π) + log_std)

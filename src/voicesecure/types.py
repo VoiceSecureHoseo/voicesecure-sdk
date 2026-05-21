@@ -80,7 +80,7 @@ class Transition:
     reward: Reward
     next_state: State
     done: bool
-    log_prob: torch.Tensor   # 정책의 로그확률 (PPO ratio 계산용)
-    value: torch.Tensor      # Critic의 V(s)
+    log_prob: torch.Tensor  # 정책의 로그확률 (PPO ratio 계산용)
+    value: torch.Tensor  # Critic의 V(s)
     freq_pattern: torch.Tensor  # tanh(freq_raw), shape (n_freq,) — evaluate_actions 역산용
-    time_gate: torch.Tensor     # sigmoid(time_raw), shape (n_time,) — evaluate_actions 역산용
+    time_gate: torch.Tensor  # sigmoid(time_raw), shape (n_time,) — evaluate_actions 역산용

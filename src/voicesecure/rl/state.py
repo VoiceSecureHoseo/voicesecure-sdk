@@ -67,18 +67,23 @@ class StateExtractor:
         mag_frames = self._compute_stft_magnitude(audio)  # (n_frames, n_freq)
 
         band_mean, band_std = self._compute_band_energy(mag_frames)  # (3,), (3,)
-        spectral_flux = self._compute_spectral_flux(mag_frames)       # (1,)
-        mfcc_mean, mfcc_std = self._compute_mfcc(audio)               # (13,), (13,)
-        f0_mean, f0_std = self._compute_f0(audio)                     # (1,), (1,)
-        rms = self._compute_rms(mag_frames)                           # (1,)
+        spectral_flux = self._compute_spectral_flux(mag_frames)  # (1,)
+        mfcc_mean, mfcc_std = self._compute_mfcc(audio)  # (13,), (13,)
+        f0_mean, f0_std = self._compute_f0(audio)  # (1,), (1,)
+        rms = self._compute_rms(mag_frames)  # (1,)
 
-        state_np = np.concatenate([
-            band_mean, band_std,   # 6
-            spectral_flux,         # 1
-            mfcc_mean, mfcc_std,   # 26
-            f0_mean, f0_std,       # 2
-            rms,                   # 1
-        ])  # 총 36-dim
+        state_np = np.concatenate(
+            [
+                band_mean,
+                band_std,  # 6
+                spectral_flux,  # 1
+                mfcc_mean,
+                mfcc_std,  # 26
+                f0_mean,
+                f0_std,  # 2
+                rms,  # 1
+            ]
+        )  # 총 36-dim
 
         assert state_np.shape == (STATE_DIM,), f"state shape 오류: {state_np.shape}"
         return torch.from_numpy(state_np).float()
@@ -125,16 +130,14 @@ class StateExtractor:
             masks.append(mask)
         return masks
 
-    def _compute_band_energy(
-        self, mag_frames: np.ndarray
-    ) -> tuple[np.ndarray, np.ndarray]:
+    def _compute_band_energy(self, mag_frames: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """저/중/고역 대역별 에너지 mean + std.
 
         Returns:
             band_mean: (3,) — 각 대역의 프레임 평균 에너지
             band_std:  (3,) — 각 대역의 프레임간 에너지 변동성
         """
-        power = mag_frames ** 2  # (n_frames, n_freq)
+        power = mag_frames**2  # (n_frames, n_freq)
         means, stds = [], []
         for mask in self._band_masks:
             band_energy = power[:, mask].mean(axis=1)  # (n_frames,)
@@ -158,7 +161,7 @@ class StateExtractor:
         if mag_frames.shape[0] < 2:
             return np.array([0.0], dtype=np.float32)
         diff = np.diff(mag_frames, axis=0)  # (n_frames-1, n_freq)
-        flux = float(np.sqrt((diff ** 2).mean()))
+        flux = float(np.sqrt((diff**2).mean()))
         # 정규화: 일반적 범위 [0, 0.1] → [0, 1]
         return np.array([np.clip(flux * 10.0, 0.0, 1.0)], dtype=np.float32)
 
@@ -239,10 +242,10 @@ class StateExtractor:
 
         f0_list = []
         for start in range(0, len(audio) - frame_len, hop):
-            frame = audio[start: start + frame_len].astype(np.float64)
+            frame = audio[start : start + frame_len].astype(np.float64)
             corr = np.correlate(frame, frame, mode="full")
-            corr = corr[len(corr) // 2:]
-            search = corr[min_lag: max_lag + 1]
+            corr = corr[len(corr) // 2 :]
+            search = corr[min_lag : max_lag + 1]
             if search.size == 0 or corr[0] < 1e-10:
                 continue
             peak_lag = int(np.argmax(search)) + min_lag
@@ -259,7 +262,7 @@ class StateExtractor:
 
     def _compute_rms(self, mag_frames: np.ndarray) -> np.ndarray:
         """전체 RMS energy (magnitude frames 기반)."""
-        rms = float(np.sqrt((mag_frames ** 2).mean()))
+        rms = float(np.sqrt((mag_frames**2).mean()))
         # log scale 정규화
         rms_log = float(np.log(rms + 1e-10))
         return np.array([np.clip(rms_log / 5.0, -1.0, 1.0)], dtype=np.float32)

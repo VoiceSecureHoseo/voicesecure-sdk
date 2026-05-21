@@ -71,9 +71,9 @@ def test_band_energy_ordering():
     state = StateExtractor().extract(low_audio)
     band_lo_mean = state[0].item()
     band_hi_mean = state[2].item()
-    assert band_lo_mean > band_hi_mean, (
-        f"저역 강한 신호인데 band_lo({band_lo_mean:.3f}) <= band_hi({band_hi_mean:.3f})"
-    )
+    assert (
+        band_lo_mean > band_hi_mean
+    ), f"저역 강한 신호인데 band_lo({band_lo_mean:.3f}) <= band_hi({band_hi_mean:.3f})"
 
 
 def test_feature_values(capsys):

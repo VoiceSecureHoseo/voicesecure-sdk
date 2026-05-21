@@ -106,18 +106,16 @@ class RLAgent:
             metrics: {"policy_loss": float, "value_loss": float, "entropy": float}
         """
         # ── Transition 리스트 → 텐서로 변환 ──────────────────────────
-        states = torch.stack([t.state for t in transitions])               # (N, STATE_DIM)
-        actions = torch.stack([t.action for t in transitions])             # (N, n_freq, n_time)
+        states = torch.stack([t.state for t in transitions])  # (N, STATE_DIM)
+        actions = torch.stack([t.action for t in transitions])  # (N, n_freq, n_time)
         old_log_probs = torch.stack([t.log_prob.detach() for t in transitions])  # (N,)
-        old_values = torch.stack([t.value.detach() for t in transitions])        # (N,)
+        old_values = torch.stack([t.value.detach() for t in transitions])  # (N,)
         freq_patterns = torch.stack([t.freq_pattern.detach() for t in transitions])  # (N, n_freq)
-        time_gates = torch.stack([t.time_gate.detach() for t in transitions])        # (N, n_time)
+        time_gates = torch.stack([t.time_gate.detach() for t in transitions])  # (N, n_time)
 
         # rewards는 old_values와 같은 device로 생성 (GPU 환경 대비)
         device = old_values.device
-        rewards = torch.tensor(
-            [t.reward for t in transitions], dtype=torch.float32, device=device
-        )
+        rewards = torch.tensor([t.reward for t in transitions], dtype=torch.float32, device=device)
 
         # ── advantage 계산 ────────────────────────────────────────────
         # 1 step = 1 episode (done=True 고정) 구조이므로 next_value는 항상 0.
