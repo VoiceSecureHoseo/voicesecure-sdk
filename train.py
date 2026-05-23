@@ -22,6 +22,7 @@ Colab 사용법:
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import os
 import random
@@ -133,6 +134,93 @@ def load_dataset(data_dir: str) -> list[dict]:
     return samples
 
 
+def load_dataset_aihub(
+    data_dir: str,
+    max_speakers: int | None = None,
+    max_files_per_speaker: int | None = None,
+) -> list[dict]:
+    """AIHub 014 다화자 음성합성 데이터 로더.
+
+    구조:
+        data_dir/
+            원천데이터/TS*/.../[화자ID]_[코드]_[이니셜]/*.wav
+            라벨링데이터/TL*/.../[화자ID]_[코드]_[이니셜]/*.json
+
+    각 JSON에는 전사/화자/녹음 메타데이터가 들어있다.
+    WAV와 JSON은 파일명 stem이 동일하며, TL <-> TS 폴더에 1:1 대응된다.
+
+    Args:
+        data_dir:               원천/라벨링 폴더의 부모 경로.
+        max_speakers:           로드할 최대 화자 수. None=전체.
+        max_files_per_speaker:  화자당 최대 파일 수. None=전체. 데이터 균형 맞출 때 유용.
+    """
+    data_dir = Path(data_dir)
+    wav_root = data_dir / "원천데이터"
+    json_root = data_dir / "라벨링데이터"
+
+    if not wav_root.exists() or not json_root.exists():
+        raise FileNotFoundError(
+            f"AIHub 구조 아님 (원천데이터/, 라벨링데이터/ 둘 다 필요): {data_dir}"
+        )
+
+    samples_by_speaker: dict[str, list[dict]] = {}
+    missing_wav = 0
+
+    for json_path in json_root.rglob("*.json"):
+        # JSON 경로 -> WAV 경로 매핑 (TL* -> TS*, .json -> .wav)
+        rel = json_path.relative_to(json_root)
+        wav_rel_str = str(rel).replace("TL", "TS", 1)
+        wav_rel = Path(wav_rel_str).with_suffix(".wav")
+        wav_path = wav_root / wav_rel
+        if not wav_path.exists():
+            missing_wav += 1
+            continue
+
+        try:
+            with open(json_path, encoding="utf-8") as f:
+                meta = json.load(f)
+            text = meta["전사정보"]["OrgLabelText"]
+            speaker_id = meta["화자정보"]["SpeakerName"]
+        except (KeyError, json.JSONDecodeError) as e:
+            logger.warning("JSON 파싱 실패, 건너뜀 %s: %s", json_path.name, e)
+            continue
+
+        if not text:
+            continue
+
+        samples_by_speaker.setdefault(speaker_id, []).append(
+            {
+                "path": wav_path,
+                "text": text,
+                "file_id": wav_path.stem,
+                "speaker_id": speaker_id,
+            }
+        )
+
+    if missing_wav > 0:
+        logger.warning("WAV 누락 %d개 (JSON은 있지만 매칭 WAV 없음)", missing_wav)
+
+    # 화자별 정렬 후 cap 적용
+    speakers = sorted(samples_by_speaker.keys())
+    if max_speakers is not None:
+        speakers = speakers[:max_speakers]
+
+    samples: list[dict] = []
+    for spk in speakers:
+        spk_samples = sorted(samples_by_speaker[spk], key=lambda s: s["file_id"])
+        if max_files_per_speaker is not None:
+            spk_samples = spk_samples[:max_files_per_speaker]
+        samples.extend(spk_samples)
+
+    logger.info(
+        "AIHub 로드 완료: %d 화자, %d 파일 (전체 화자 %d명 중)",
+        len(speakers),
+        len(samples),
+        len(samples_by_speaker),
+    )
+    return samples
+
+
 # ── 임베딩 캐시 ───────────────────────────────────────────────────────────────
 
 
@@ -233,7 +321,14 @@ def train(args: argparse.Namespace) -> None:
     agent = RLAgent(config={"lr": args.lr})
 
     # ── 데이터 로드 ──────────────────────────────────────────────────
-    samples = load_dataset(args.data_dir)
+    if args.data_format == "aihub":
+        samples = load_dataset_aihub(
+            args.data_dir,
+            max_speakers=args.max_speakers,
+            max_files_per_speaker=args.max_files_per_speaker,
+        )
+    else:
+        samples = load_dataset(args.data_dir)
     total_files = len(samples)
     logger.info("1 에폭 = %d 에피소드", total_files)
 
@@ -409,6 +504,26 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--lr", type=float, default=3e-4)
     parser.add_argument("--resume", type=str, default=None)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument(
+        "--data_format",
+        type=str,
+        default="kss",
+        choices=["kss", "aihub"],
+        help="kss: data_dir/{1,2,3,4}/*.wav + Labels.txt. "
+        "aihub: data_dir/{원천데이터,라벨링데이터}/...",
+    )
+    parser.add_argument(
+        "--max_speakers",
+        type=int,
+        default=None,
+        help="(aihub) 로드할 최대 화자 수. None=전체.",
+    )
+    parser.add_argument(
+        "--max_files_per_speaker",
+        type=int,
+        default=None,
+        help="(aihub) 화자당 최대 파일 수. 데이터 균형 맞출 때 사용. None=전체.",
+    )
 
     return parser.parse_args()
 
