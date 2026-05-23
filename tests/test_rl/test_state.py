@@ -1,121 +1,95 @@
-"""StateExtractor 테스트.
+"""StateExtractor 테스트 (36-dim state)."""
 
-pytest -v -s 로 실행하면 특징값까지 출력됨.
-파일 하나만 골라서 결과를 바로 확인하는 수동 테스트 포함.
-실행: python tests/test_rl/test_state.py
-"""
-
-import os
-
-import librosa
 import numpy as np
-import pytest
 import torch
 
 from voicesecure.rl.state import StateExtractor
 from voicesecure.types import SAMPLE_RATE, STATE_DIM
 
-# ★ 테스트할 파일 경로 — 원하는 파일로 바꾸면 됨
-# 프로젝트 루트(voicesecure-sdk/) 기준 상대경로
-_ROOT = os.path.join(os.path.dirname(__file__), "..", "..")
-TEST_FILE = os.path.normpath(
-    os.path.join(_ROOT, "Original", "100", "121669", "100-121669-0000.wav")
+LABELS = (
+    ["band_lo_mean", "band_mid_mean", "band_hi_mean"]
+    + ["band_lo_std", "band_mid_std", "band_hi_std"]
+    + ["spectral_flux"]
+    + [f"mfcc_mean_{i+1:02d}" for i in range(13)]
+    + [f"mfcc_std_{i+1:02d}" for i in range(13)]
+    + ["f0_mean", "f0_std"]
+    + ["rms"]
 )
+assert len(LABELS) == STATE_DIM
 
-LABELS = [f"MFCC_{i+1:02d}" for i in range(13)] + ["F0_mean", "duration", "rms"]
+
+def _synth_audio(seed: int = 42) -> np.ndarray:
+    rng = np.random.default_rng(seed)
+    t = np.arange(SAMPLE_RATE, dtype=np.float32) / SAMPLE_RATE
+    audio = (
+        0.3 * np.sin(2 * np.pi * 200 * t)
+        + 0.2 * np.sin(2 * np.pi * 800 * t)
+        + 0.1 * np.sin(2 * np.pi * 3000 * t)
+        + 0.02 * rng.standard_normal(SAMPLE_RATE).astype(np.float32)
+    )
+    return audio.astype(np.float32)
 
 
-@pytest.mark.slow
 def test_output_shape():
-    """state shape이 (16,) 인지 확인."""
-    audio, sr = librosa.load(TEST_FILE, sr=SAMPLE_RATE, mono=True)
-    extractor = StateExtractor(sample_rate=sr)
-    state = extractor.extract(audio)
-
-    print(f"\n  shape: {state.shape}")
+    state = StateExtractor().extract(_synth_audio())
     assert state.shape == (STATE_DIM,), f"shape 오류: {state.shape}"
 
 
-@pytest.mark.slow
 def test_output_dtype():
-    """state dtype이 float32 인지 확인."""
-    audio, sr = librosa.load(TEST_FILE, sr=SAMPLE_RATE, mono=True)
-    extractor = StateExtractor(sample_rate=sr)
-    state = extractor.extract(audio)
-
-    print(f"\n  dtype: {state.dtype}")
-    assert state.dtype == torch.float32, f"dtype 오류: {state.dtype}"
+    state = StateExtractor().extract(_synth_audio())
+    assert state.dtype == torch.float32
 
 
-@pytest.mark.slow
 def test_no_nan_or_inf():
-    """state에 NaN/Inf 없는지 확인."""
-    audio, sr = librosa.load(TEST_FILE, sr=SAMPLE_RATE, mono=True)
-    extractor = StateExtractor(sample_rate=sr)
-    state = extractor.extract(audio)
-
-    print(f"\n  NaN: {torch.isnan(state).any().item()}")
-    print(f"  Inf: {torch.isinf(state).any().item()}")
+    state = StateExtractor().extract(_synth_audio())
     assert not torch.isnan(state).any(), "NaN 검출"
     assert not torch.isinf(state).any(), "Inf 검출"
 
 
-@pytest.mark.slow
-def test_feature_values():
-    """각 특징값 출력 — 실제 추출된 값 확인."""
-    audio, sr = librosa.load(TEST_FILE, sr=SAMPLE_RATE, mono=True)
-    extractor = StateExtractor(sample_rate=sr)
-    state = extractor.extract(audio)
-
-    print(f"\n  파일: {TEST_FILE.split(chr(92))[-1]}  ({len(audio)/sr:.2f}초)")
-    print(f"  {'특징':<12} {'값':>12}")
-    print(f"  {'-'*25}")
-    for label, val in zip(LABELS, state.tolist(), strict=True):
-        print(f"  {label:<12} {val:>12.6f}")
-
-    # MFCC는 음수도 정상, F0/duration/rms는 0 이상이어야 함
-    assert state[13].item() >= 0.0, "F0_mean 음수"
-    assert state[14].item() >= 0.0, "duration 음수"
-    assert state[15].item() >= 0.0, "rms 음수"
-
-
 def test_silent_audio():
-    """무음 입력 시 F0 fallback이 동작하는지 확인 (0으로 채워짐)."""
+    """무음 입력 — NaN/Inf 없고 shape 유지."""
     silent = np.zeros(SAMPLE_RATE, dtype=np.float32)
-    extractor = StateExtractor()
-    state = extractor.extract(silent)
-
-    print(f"\n  무음 state: {state.tolist()}")
-    print(f"  F0_mean: {state[13].item():.6f}")
+    state = StateExtractor().extract(silent)
     assert state.shape == (STATE_DIM,)
     assert not torch.isnan(state).any()
-    # librosa.yin은 무음에서도 최솟값(fmin/sr)을 반환할 수 있어 0 보장 안 됨
-    # F0_mean이 정상 범위(0 이상)인지만 확인
-    assert state[13].item() >= 0.0, "F0_mean 음수"
+    assert not torch.isinf(state).any()
 
 
-# ------------------------------------------------------------------ #
-# 수동 실행 — 결과 바로 확인                                           #
-# python tests/test_rl/test_state.py                                  #
-# ------------------------------------------------------------------ #
-if __name__ == "__main__":
-    import sys
+def test_different_audio_different_state():
+    """다른 음성 → 다른 state."""
+    ext = StateExtractor()
+    s1 = ext.extract(_synth_audio(seed=42))
+    s2 = ext.extract(_synth_audio(seed=99))
+    assert not torch.allclose(s1, s2), "다른 음성인데 state가 동일"
 
-    audio, sr = librosa.load(TEST_FILE, sr=SAMPLE_RATE, mono=True)
-    print(f"파일      : {TEST_FILE.split(chr(92))[-1]}")
-    print(f"샘플 수   : {len(audio)}  ({len(audio)/sr:.2f}초)")
-    print(f"샘플레이트: {sr} Hz")
-    print()
 
-    extractor = StateExtractor(sample_rate=sr)
-    state = extractor.extract(audio)
+def test_band_energy_ordering():
+    """저역이 강한 신호 → band_lo_mean > band_hi_mean."""
+    t = np.arange(SAMPLE_RATE, dtype=np.float32) / SAMPLE_RATE
+    low_audio = (0.8 * np.sin(2 * np.pi * 200 * t)).astype(np.float32)
+    state = StateExtractor().extract(low_audio)
+    band_lo_mean = state[0].item()
+    band_hi_mean = state[2].item()
+    assert (
+        band_lo_mean > band_hi_mean
+    ), f"저역 강한 신호인데 band_lo({band_lo_mean:.3f}) <= band_hi({band_hi_mean:.3f})"
 
-    print(f"state shape : {state.shape}")
-    print(f"state dtype : {state.dtype}")
-    print()
-    print(f"{'특징':<12} {'값':>12}")
-    print(f"{'-'*25}")
-    for label, val in zip(LABELS, state.tolist(), strict=True):
-        print(f"{label:<12} {val:>12.6f}")
 
-    sys.exit(0)
+def test_feature_values(capsys):
+    """각 특징값 출력 — 값 범위 확인."""
+    state = StateExtractor().extract(_synth_audio())
+    vals = state.tolist()
+
+    with capsys.disabled():
+        print(f"\n  {'특징':<20} {'값':>10}")
+        print(f"  {'-'*32}")
+        for label, val in zip(LABELS, vals, strict=True):
+            print(f"  {label:<20} {val:>10.4f}")
+
+    # 스펙트럼 flux: [0, 1] 범위
+    assert 0.0 <= state[6].item() <= 1.0, f"spectral_flux 범위 오류: {state[6].item()}"
+    # F0: [0, 1] 정규화
+    assert 0.0 <= state[-3].item() <= 1.0, f"f0_mean 범위 오류: {state[-3].item()}"
+    assert 0.0 <= state[-2].item() <= 1.0, f"f0_std 범위 오류: {state[-2].item()}"
+    # rms: [-1, 1] log 정규화
+    assert -1.0 <= state[-1].item() <= 1.0, f"rms 범위 오류: {state[-1].item()}"

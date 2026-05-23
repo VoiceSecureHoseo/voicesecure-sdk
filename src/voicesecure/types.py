@@ -18,14 +18,15 @@ AUDIO_DTYPE = np.float32
 AUDIO_RANGE = (-1.0, 1.0)
 
 # ===== State (RL) =====
-# RL Agent의 입력 state. 16-dim 벡터.
+# RL Agent의 입력 state. 36-dim 벡터.
 # torch.Tensor로 통일 (PPO 학습 시 GPU 이동 편하게)
-State = torch.Tensor  # shape: (16,) or (batch, 16), dtype=float32
-STATE_DIM = 16
+State = torch.Tensor  # shape: (36,) or (batch, 36), dtype=float32
+STATE_DIM = 36
 
 # ===== Action (RL) =====
-# RL Agent의 출력. 노이즈 spectrogram (주파수 × 시간)
-# v1.0: float32 tensor, shape (n_freq_bins, n_time_frames)
+# RL Agent의 출력. 노이즈 방향 spectrogram.
+# shape: (n_freq_bins, n_time_frames)
+#   값 범위 [-1, 1]: 부호가 노이즈 방향, 심리음향 임계치로 scale
 Action = torch.Tensor
 
 # n_freq_bins = n_fft/2 + 1 = 257 (STFT 파라미터 고정값)
@@ -81,3 +82,5 @@ class Transition:
     done: bool
     log_prob: torch.Tensor  # 정책의 로그확률 (PPO ratio 계산용)
     value: torch.Tensor  # Critic의 V(s)
+    freq_pattern: torch.Tensor  # tanh(freq_raw), shape (n_freq,) — evaluate_actions 역산용
+    time_gate: torch.Tensor  # sigmoid(time_raw), shape (n_time,) — evaluate_actions 역산용

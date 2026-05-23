@@ -36,7 +36,7 @@ class WavLMSVAdapter:
     def __init__(
         self,
         model_name: str = _MODEL_NAME,
-        device: str | None = None,
+        device: str | torch.device | None = None,
     ) -> None:
         self.model_name = model_name
         self.device = torch.device(

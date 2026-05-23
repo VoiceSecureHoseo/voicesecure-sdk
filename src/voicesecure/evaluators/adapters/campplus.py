@@ -1,8 +1,11 @@
-"""CAM++ 화자 검증 어댑터.
+"""CAM++ 화자 검증 어댑터 (Wespeaker, 미사용).
 
-SpeakerEvaluator (evaluators/speaker.py)의 cam_model 인자로 주입.
-Wespeaker의 ONNX 모델을 사용해 의존성을 최소화한다.
-모델 weights는 HuggingFace에서 다운로드 (repo에 포함하지 않음).
+[주의] 이 파일은 현재 훈련에 사용되지 않는다.
+Colab 훈련 환경에서는 CosyVoice3 내부 CAM++ (192-dim) 을 사용한다.
+→ CosyVoiceAdapter.extract_embedding() 참고 (adapters/cosyvoice.py)
+
+이 파일은 Windows 개발 환경 참고용 더미로 남겨둔다.
+Wespeaker voxceleb CAM++ (512-dim), 영어 위주 VoxCeleb 학습.
 """
 
 from __future__ import annotations

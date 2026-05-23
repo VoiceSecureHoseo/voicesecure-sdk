@@ -65,7 +65,7 @@ class Mixer:
         audio: AudioArray,
         safe_noise: torch.Tensor,
     ) -> AudioArray:
-        """원본 음성에 안전 노이즈를 spectral domain에서 더한 후 시간 영역으로 복원.
+        """원본 음성에 안전 노이즈를 더해 변조 음성 생성.
 
         Parameters
         ----------
@@ -74,7 +74,6 @@ class Mixer:
         safe_noise
             마스킹 임계치 이내로 clamp된 노이즈 spectrogram.
             shape (n_freq, n_time), float32.
-            n_freq = n_fft // 2 + 1 = 257.
 
         Returns
         -------
@@ -84,9 +83,7 @@ class Mixer:
         """
         original_length = len(audio)
 
-        # ── Step 1: STFT (실수 → 복소수 spectrogram) ──────────────────
         audio_torch = torch.from_numpy(audio).float()
-
         spec = torch.stft(
             audio_torch,
             n_fft=self.config.n_fft,
@@ -94,28 +91,15 @@ class Mixer:
             win_length=self.config.win_length,
             window=self._window,
             return_complex=True,
-        )
-        # spec shape: (n_freq, n_time_actual), complex64
+        )  # (n_freq, n_time_actual)
 
-        # ── Step 2: magnitude + safe_noise, phase 유지 ───────────────
-        # 사람 청각은 phase 변화에 둔감하고 magnitude 변화에 민감
-        # → magnitude에만 노이즈 더하고 phase는 그대로 유지
-        magnitude = torch.abs(spec)  # (n_freq, n_time_actual)
-        phase = torch.angle(spec)  # (n_freq, n_time_actual)
+        magnitude = torch.abs(spec)
+        phase = torch.angle(spec)
 
-        # safe_noise shape align (입력 길이에 따라 spec의 n_time이 달라질 수 있음)
-        safe_noise = self._align_noise_shape(safe_noise, target_shape=spec.shape)
-
-        # 마그니튜드에 노이즈 더하기
-        new_magnitude = magnitude + safe_noise
-
-        # magnitude는 항상 ≥ 0이어야 하므로 음수 방지
-        new_magnitude = torch.clamp(new_magnitude, min=0.0)
-
-        # 새 complex spectrogram = new_magnitude * e^(i*phase)
+        safe_noise = self._align_noise_shape(safe_noise, target_shape=magnitude.shape)
+        new_magnitude = torch.clamp(magnitude + safe_noise, min=0.0)
         new_spec = torch.polar(new_magnitude, phase)
 
-        # ── Step 3: iSTFT (복소수 → 시간 영역) ────────────────────────
         modified = torch.istft(
             new_spec,
             n_fft=self.config.n_fft,
@@ -124,18 +108,12 @@ class Mixer:
             window=self._window,
         )
 
-        # ── Step 4: clipping [-1, 1] ─────────────────────────────────
         modified = torch.clamp(modified, -1.0, 1.0)
-
-        # ── Step 5: 원본 길이로 truncate (STFT padding 제거) ──────────
         modified = modified[:original_length]
-
-        # 원본보다 짧으면 zero-padding으로 길이 맞춤
         if len(modified) < original_length:
             modified = torch.nn.functional.pad(modified, (0, original_length - len(modified)))
 
-        # ── Step 6: numpy 변환 + dtype 확정 ──────────────────────────
-        return modified.numpy().astype(np.float32)
+        return modified.detach().numpy().astype(np.float32)
 
     def _align_noise_shape(
         self,

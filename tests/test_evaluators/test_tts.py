@@ -25,9 +25,7 @@ def test_tts_evaluator_scores_two_clone_models():
     result = evaluator.evaluate(original, modified)
 
     assert 0.0 <= result.score <= 1.0
-    assert result.raw_metric == pytest.approx(
-        (result.metadata["openvoice_dist"] + result.metadata["xtts_dist"]) / 2.0
-    )
+    assert result.raw_metric == pytest.approx(result.metadata["xtts_dist"])
 
 
 def test_tts_evaluator_sampling_interval():
