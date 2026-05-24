@@ -65,7 +65,8 @@ class CosyVoiceAdapter:
 
         from cosyvoice.cli.cosyvoice import CosyVoice3
 
-        # device 미지정 시 CUDA 자동 감지
+        # CosyVoice3는 device 인자를 받지 않음 — 내부 torch.cuda.is_available()로 자동 감지.
+        # device 파라미터는 API 호환성을 위해 받지만 CosyVoice3에는 전달하지 않는다.
         if device is None:
             try:
                 import torch
@@ -74,8 +75,8 @@ class CosyVoiceAdapter:
             except ImportError:
                 device = "cpu"
 
-        logger.info("Loading CosyVoice3 from %s (device=%s)...", model_dir, device)
-        self._model = CosyVoice3(model_dir, device=device)
+        logger.info("Loading CosyVoice3 from %s (auto device: %s)...", model_dir, device)
+        self._model = CosyVoice3(model_dir)
         self._sample_rate = self._model.sample_rate
         logger.info("CosyVoiceAdapter ready (sample_rate=%d).", self._sample_rate)
 
