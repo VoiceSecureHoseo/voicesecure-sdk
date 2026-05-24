@@ -65,7 +65,8 @@ class CosyVoiceAdapter:
 
         from cosyvoice.cli.cosyvoice import CosyVoice3
 
-        # device 미지정 시 CUDA 자동 감지
+        # CosyVoice3는 device 인자를 받지 않음 — 내부 torch.cuda.is_available()로 자동 감지.
+        # device 파라미터는 API 호환성을 위해 받지만 CosyVoice3에는 전달하지 않는다.
         if device is None:
             try:
                 import torch
@@ -74,8 +75,15 @@ class CosyVoiceAdapter:
             except ImportError:
                 device = "cpu"
 
-        logger.info("Loading CosyVoice3 from %s (device=%s)...", model_dir, device)
-        self._model = CosyVoice3(model_dir, device=device)
+        logger.info("Loading CosyVoice3 from %s (auto device: %s)...", model_dir, device)
+        self._model = CosyVoice3(model_dir)
+
+        # transformers/Qwen2 호환성: CosyVoice3 LLM weights는 BFloat16이지만 fp16=False
+        # 모드라 autocast 없음 → dtype mismatch 방지를 위해 fp32 강제.
+        if hasattr(self._model, "model") and hasattr(self._model.model, "llm"):
+            self._model.model.llm = self._model.model.llm.float()
+            logger.info("CosyVoice3 LLM를 float32로 변환 (BF16 weights 호환성).")
+
         self._sample_rate = self._model.sample_rate
         logger.info("CosyVoiceAdapter ready (sample_rate=%d).", self._sample_rate)
 
@@ -102,10 +110,14 @@ class CosyVoiceAdapter:
             ref_path = tmp.name
 
         try:
+            # CosyVoice3는 prompt_text 끝에 <|endofprompt|> (token 151646) 요구.
+            # 없으면 inference 내부 assertion 실패. CosyVoice2와 다른 API 사양.
+            end_of_prompt = "<|endofprompt|>"
+            prompt_text = text if text.endswith(end_of_prompt) else text + end_of_prompt
             chunks = []
             for result in self._model.inference_zero_shot(
                 text,
-                text,  # prompt_text = clone_text (같은 텍스트로 zero-shot)
+                prompt_text,
                 ref_path,
                 stream=False,
             ):
