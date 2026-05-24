@@ -239,7 +239,10 @@ def build_embedding_cache(
     """
     if cache_path.exists():
         logger.info("임베딩 캐시 로드: %s", cache_path)
-        cache = torch.load(cache_path, map_location="cpu")
+        # PyTorch 2.6+ weights_only 기본값이 True로 바뀌어 numpy 객체 포함된
+        # cache (ECAPA/CAM++ embedding은 np.ndarray) 로드 실패. 본인이 만든
+        # 파일이므로 신뢰 가능 → weights_only=False.
+        cache = torch.load(cache_path, map_location="cpu", weights_only=False)
         logger.info("캐시 로드 완료: %d개", len(cache))
         return cache
 
@@ -288,7 +291,8 @@ def save_checkpoint(
 
 
 def load_checkpoint(agent: RLAgent, path: Path) -> tuple[int, int, float]:
-    checkpoint = torch.load(path, map_location="cpu")
+    # weights_only=False — torch 2.6+ 호환 (optimizer state 등 비-tensor 객체 포함 가능)
+    checkpoint = torch.load(path, map_location="cpu", weights_only=False)
     agent.policy.load_state_dict(checkpoint["policy_state_dict"])
     agent.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
     episode = checkpoint.get("episode", 0)
