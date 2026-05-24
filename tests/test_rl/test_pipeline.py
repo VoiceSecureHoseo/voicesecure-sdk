@@ -33,7 +33,7 @@ def test_pipeline_shape():
     policy = PolicyNetwork()
 
     state = extractor.extract(audio)
-    action, log_prob, value = policy(state)
+    action, log_prob, value, freq_pattern, time_gate = policy(state)
 
     assert state.shape == (STATE_DIM,)
     assert action.shape == (ACTION_N_FREQ, ACTION_N_TIME)
@@ -46,7 +46,7 @@ def test_pipeline_no_nan():
     policy = PolicyNetwork()
 
     state = extractor.extract(audio)
-    action, log_prob, value = policy(state)
+    action, log_prob, value, freq_pattern, time_gate = policy(state)
 
     assert not torch.isnan(action).any()
     assert not torch.isnan(log_prob).any()
@@ -68,8 +68,8 @@ def test_different_audio_different_action():
     state1 = extractor.extract(audio1)
     state2 = extractor.extract(audio2)
 
-    action1, _, _ = policy(state1, deterministic=True)
-    action2, _, _ = policy(state2, deterministic=True)
+    action1, _, _, _, _ = policy(state1, deterministic=True)
+    action2, _, _, _, _ = policy(state2, deterministic=True)
 
     assert not torch.allclose(state1, state2)
     assert not torch.allclose(action1, action2)
