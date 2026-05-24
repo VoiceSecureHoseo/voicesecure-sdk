@@ -402,7 +402,7 @@ def train(args: argparse.Namespace) -> None:
             if global_episode % TTS_EVAL_INTERVAL == 0:
                 logger.info("[TTS 평가] episode=%d, file=%s", global_episode, file_id)
                 try:
-                    cloned = cosy.clone(modified, text=text)
+                    cloned = cosy.clone(modified, text=text, prompt_text=text)
                     clone_ecapa_emb = ecapa.extract_embedding(cloned)
                     clone_cam_emb = cosy.extract_embedding(cloned)
 

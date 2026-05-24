@@ -87,15 +87,20 @@ class CosyVoiceAdapter:
         self._sample_rate = self._model.sample_rate
         logger.info("CosyVoiceAdapter ready (sample_rate=%d).", self._sample_rate)
 
-    def clone(self, reference_audio: AudioArray, text: str = _DEFAULT_TEXT) -> AudioArray:
+    def clone(
+        self,
+        reference_audio: AudioArray,
+        text: str = _DEFAULT_TEXT,
+        prompt_text: str | None = None,
+    ) -> AudioArray:
         """reference_audio 화자 목소리로 text를 합성한다.
 
-        훈련 시 Labels.txt에서 읽은 원본 텍스트를 text 인자로 전달한다.
-        → 같은 텍스트로 클로닝해서 텍스트 변수 없이 화자 방어 효과만 측정 가능.
-
         Args:
-            reference_audio: 변조된 음성, shape (num_samples,), float32, [-1, 1], 16kHz mono
-            text:            합성할 텍스트. 기본값 "안녕하세요".
+            reference_audio: 레퍼런스(변조) 음성, shape (num_samples,), float32, [-1, 1], 16kHz mono
+            text:            새로 합성할 텍스트. 기본값 "안녕하세요".
+            prompt_text:     레퍼런스 오디오에서 실제 발화한 텍스트.
+                             None이면 text와 동일하게 사용.
+                             CosyVoice3는 tts_text ≠ prompt_text일 때 클로닝 품질이 좋음.
 
         Returns:
             클론 음성, shape (num_samples,), float32, [-1, 1]
@@ -105,6 +110,10 @@ class CosyVoiceAdapter:
         if reference_audio.dtype != np.float32:
             reference_audio = reference_audio.astype(np.float32)
 
+        # prompt_text가 없으면 text와 동일하게 사용
+        if prompt_text is None:
+            prompt_text = text
+
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
             sf.write(tmp.name, reference_audio, SAMPLE_RATE)
             ref_path = tmp.name
@@ -113,11 +122,14 @@ class CosyVoiceAdapter:
             # CosyVoice3는 prompt_text 끝에 <|endofprompt|> (token 151646) 요구.
             # 없으면 inference 내부 assertion 실패. CosyVoice2와 다른 API 사양.
             end_of_prompt = "<|endofprompt|>"
-            prompt_text = text if text.endswith(end_of_prompt) else text + end_of_prompt
+            prompt_text_with_token = (
+                prompt_text if prompt_text.endswith(end_of_prompt)
+                else prompt_text + end_of_prompt
+            )
             chunks = []
             for result in self._model.inference_zero_shot(
                 text,
-                prompt_text,
+                prompt_text_with_token,
                 ref_path,
                 stream=False,
             ):
