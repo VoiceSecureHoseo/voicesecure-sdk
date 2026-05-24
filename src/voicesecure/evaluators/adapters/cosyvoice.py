@@ -102,10 +102,14 @@ class CosyVoiceAdapter:
             ref_path = tmp.name
 
         try:
+            # CosyVoice3는 prompt_text 끝에 <|endofprompt|> (token 151646) 요구.
+            # 없으면 inference 내부 assertion 실패. CosyVoice2와 다른 API 사양.
+            end_of_prompt = "<|endofprompt|>"
+            prompt_text = text if text.endswith(end_of_prompt) else text + end_of_prompt
             chunks = []
             for result in self._model.inference_zero_shot(
                 text,
-                text,  # prompt_text = clone_text (같은 텍스트로 zero-shot)
+                prompt_text,
                 ref_path,
                 stream=False,
             ):
