@@ -41,7 +41,9 @@ def test_xtts_loads():
     from voicesecure.evaluators.adapters import XTTSAdapter
 
     adapter = XTTSAdapter()
-    assert adapter._tts is not None
+    # 저수준 API 기반 — TTS.api.TTS 대신 Xtts 직접 사용
+    assert adapter._model is not None
+    assert adapter.model_dir and adapter.model_dir.endswith("xtts_v2")
 
 
 @pytest.mark.slow
