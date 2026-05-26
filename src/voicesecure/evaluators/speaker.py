@@ -32,13 +32,27 @@ class SpeakerEvaluator(Evaluator):
             "cam_embedding": self.extract_embedding(self._cam_model, original, model_name="CAM++"),
         }
 
-    def evaluate(self, original: AudioArray, modified: AudioArray) -> EvaluatorOutput:
-        """Return normalized speaker distance between original and modified audio."""
+    def evaluate(
+        self,
+        original: AudioArray,
+        modified: AudioArray,
+        precomputed_original_features: dict[str, Any] | None = None,
+    ) -> EvaluatorOutput:
+        """Return normalized speaker distance between original and modified audio.
+
+        If ``precomputed_original_features`` is provided (e.g. fetched from
+        :class:`voicesecure.utils.cache.FeatureCache`), the WavLM-SV/CAM++
+        embeddings of ``original`` are reused instead of being recomputed.
+        Mirrors the same kwarg already exposed by :class:`TTSEvaluator.evaluate`.
+        """
 
         original = self.validate_audio(original, name="original")
         modified = self.validate_audio(modified, name="modified")
 
-        original_features = self.precompute(original)
+        if precomputed_original_features is not None:
+            original_features = precomputed_original_features
+        else:
+            original_features = self.precompute(original)
         wavlm_mod = self.extract_embedding(self._wavlm_model, modified, model_name="WavLM-SV")
         cam_mod = self.extract_embedding(self._cam_model, modified, model_name="CAM++")
 
