@@ -31,9 +31,7 @@ def test_tts_evaluator_scores_xtts_clone():
 
 
 def test_tts_evaluator_sampling_interval():
-    evaluator = TTSEvaluator(
-        CloneModel(1.0), EnergyEmbeddingModel(), sampling_interval=10
-    )
+    evaluator = TTSEvaluator(CloneModel(1.0), EnergyEmbeddingModel(), sampling_interval=10)
 
     assert evaluator.should_evaluate(0)
     assert not evaluator.should_evaluate(9)
