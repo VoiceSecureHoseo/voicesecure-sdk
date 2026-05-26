@@ -1,4 +1,8 @@
-"""TTS clone-resistance evaluator using OpenVoice2 and XTTS adapters."""
+"""TTS clone-resistance evaluator using an XTTS adapter.
+
+OpenVoice2는 SDK에서 의도적으로 제외됨. 의도된 "공격 시뮬레이션 2종"
+중 XTTS만 정식 어댑터(``XTTSAdapter``, 저수준 Xtts API)로 구현되어 있다.
+"""
 
 from __future__ import annotations
 
@@ -9,11 +13,10 @@ from voicesecure.types import AudioArray, EvaluatorOutput
 
 
 class TTSEvaluator(Evaluator):
-    """Score how poorly OpenVoice2 and XTTS can clone a modified voice."""
+    """Score how poorly XTTS can clone a modified voice."""
 
     def __init__(
         self,
-        openvoice_model: Any | None = None,
         xtts_model: Any | None = None,
         speaker_model: Any | None = None,
         normalizer: Normalizer = clip_unit_interval,
@@ -21,7 +24,6 @@ class TTSEvaluator(Evaluator):
     ) -> None:
         if sampling_interval < 1:
             raise ValueError("sampling_interval must be >= 1.")
-        self._openvoice_model = openvoice_model
         self._xtts_model = xtts_model
         self._speaker_model = speaker_model
         self._normalizer = normalizer
@@ -44,26 +46,32 @@ class TTSEvaluator(Evaluator):
             )
         }
 
-    def evaluate(self, original: AudioArray, modified: AudioArray) -> EvaluatorOutput:
-        """Return normalized clone-failure distance for modified audio."""
+    def evaluate(
+        self,
+        original: AudioArray,
+        modified: AudioArray,
+        precomputed_original_features: dict[str, Any] | None = None,
+    ) -> EvaluatorOutput:
+        """Return normalized clone-failure distance for modified audio.
+
+        If ``precomputed_original_features`` is provided (e.g. fetched from
+        :class:`voicesecure.utils.cache.FeatureCache`), the original speaker
+        embedding is reused instead of being recomputed.
+        """
 
         original = self.validate_audio(original, name="original")
         modified = self.validate_audio(modified, name="modified")
 
-        original_features = self.precompute(original)
-        # clone_ov2 = self.synthesize_clone(self._openvoice_model, modified, model_name="OpenVoice2")
-        clone_xtts = self.synthesize_clone(self._xtts_model, modified, model_name="XTTS")
+        if precomputed_original_features is not None:
+            original_features = precomputed_original_features
+        else:
+            original_features = self.precompute(original)
 
-        # clone_ov2_embedding = self.extract_embedding(
-        #     self._speaker_model, clone_ov2, model_name="speaker-distance"
-        # )
+        clone_xtts = self.synthesize_clone(self._xtts_model, modified, model_name="XTTS")
         clone_xtts_embedding = self.extract_embedding(
             self._speaker_model, clone_xtts, model_name="speaker-distance"
         )
 
-        # openvoice_dist = cosine_distance(
-        #     original_features["original_embedding"], clone_ov2_embedding
-        # )
         xtts_dist = cosine_distance(original_features["original_embedding"], clone_xtts_embedding)
         raw_metric = xtts_dist
 

@@ -220,8 +220,11 @@ class XTTSAdapter:
         self._model.load_checkpoint(config, checkpoint_dir=self.model_dir, eval=True)
         self._model.to(self.device)
 
-        logger.info("XTTSAdapter ready (temperature=%.2f, repetition_penalty=%.1f).",
-                    self.temperature, self.repetition_penalty)
+        logger.info(
+            "XTTSAdapter ready (temperature=%.2f, repetition_penalty=%.1f).",
+            self.temperature,
+            self.repetition_penalty,
+        )
 
     def clone(self, reference_audio: AudioArray) -> AudioArray:
         """reference_audio 화자 목소리로 clone_text를 합성한다.
