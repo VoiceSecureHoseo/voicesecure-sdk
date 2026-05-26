@@ -1,22 +1,30 @@
-"""VoiceSecure 훈련 스크립트.
+"""VoiceSecure 훈련 스크립트 (SDK Evaluator 기반).
+
+의도된 매핑을 그대로 따른다:
+    - 화자 식별  : WavLM-SV + CAM++       → SpeakerEvaluator
+    - 공격 시뮬  : XTTS (저수준 API)        → TTSEvaluator
+    - 음질        : wav2vec2-large-xlsr-korean → ASREvaluator
+    - reward 결합 : RewardFunction (alpha·sv + beta·tts - lambda·max(0, cer - threshold))
 
 훈련 흐름:
-    1. 전체 데이터셋 로드 + 원본 임베딩 캐싱 (ECAPA + CosyVoice3 CAM++)
-    2. 에폭 루프 (1 에폭 = 전체 파일 수만큼 에피소드, 매 에폭 셔플)
-    3. 에피소드마다:
-        - RLAgent.act() → raw_noise (n_freq, n_time)
-        - Masker.clamp() → safe_noise (심리음향 마스킹)
-        - Mixer.mix() → 변조 음성
-        - ECAPA + CAM++ 임베딩 거리 평균 → reward
-        - Transition 버퍼에 추가
-        - PPO_BUFFER_SIZE(32)개 쌓이면 PPO 업데이트
-    4. 매 TTS_EVAL_INTERVAL 에피소드마다:
-        - CosyVoice3 실제 클로닝 → 클론 임베딩 vs 원본 임베딩 → 방어 점수 로깅
+    1. 데이터셋 로드 (KSS 또는 AIHub 014)
+    2. 전체 원본 음성의 화자 임베딩 캐싱
+       (SpeakerEvaluator.precompute 결과 → 디스크에 .pt로 보존)
+    3. 에폭 루프 (매 에폭 셔플)
+    4. 에피소드마다:
+        - RLAgent.act() → raw_noise
+        - Masker.clamp() → safe_noise
+        - Mixer.mix() → modified
+        - SpeakerEvaluator.evaluate(..., precomputed_original_features=sv_cached) → sv_score
+        - ASREvaluator.evaluate(..., original_text=sample[text]) → asr_cer
+        - 매 TTS_EVAL_INTERVAL마다 TTSEvaluator.evaluate(...) → tts_score (그 외에는 last_tts_score 캐싱)
+        - RewardFunction.compute({sv_score, tts_score, asr_cer}) → reward
+        - Transition 버퍼 → PPO_BUFFER_SIZE 차면 agent.update()
     5. 매 CHECKPOINT_INTERVAL 에피소드마다 체크포인트 저장
 
 Colab 사용법:
-    python train.py --data_dir /path/to/kss --epochs 3
-    python train.py --data_dir /path/to/kss --resume checkpoints/episode_1000.pt
+    python train.py --data_dir /path/to/aihub --data_format aihub --epochs 3
+    python train.py --data_dir /path/to/kss  --data_format kss   --epochs 3
 """
 
 from __future__ import annotations
@@ -35,11 +43,14 @@ import torch
 from scipy.signal import resample_poly
 from torch.utils.tensorboard import SummaryWriter
 
-from voicesecure.evaluators.adapters.cosyvoice import CosyVoiceAdapter
-from voicesecure.evaluators.adapters.ecapa_tdnn import ECAPATDNNAdapter
-from voicesecure.evaluators.base import cosine_distance
+from voicesecure.evaluators import ASREvaluator, SpeakerEvaluator, TTSEvaluator
+from voicesecure.evaluators.adapters.campplus import CAMPlusAdapter
+from voicesecure.evaluators.adapters.wav2vec2_asr import Wav2Vec2KoreanAdapter
+from voicesecure.evaluators.adapters.wavlm_sv import WavLMSVAdapter
+from voicesecure.evaluators.adapters.xtts import XTTSAdapter
 from voicesecure.modulation.masker import PsychoacousticMasker
 from voicesecure.modulation.mixer import Mixer
+from voicesecure.reward.function import RewardFunction
 from voicesecure.rl.agent import RLAgent
 from voicesecure.types import AudioArray, Transition
 
@@ -53,25 +64,32 @@ logger = logging.getLogger("train")
 
 PPO_BUFFER_SIZE = 32
 
-# CosyVoice3 실제 클로닝 평가 주기 (에피소드 단위)
+# XTTS 클로닝 평가 주기 (에피소드 단위). XTTS clone 1회가 무거워서 매 step은 비현실적.
 TTS_EVAL_INTERVAL = 10
 
-# reward 가중치
-REWARD_WEIGHT_ECAPA = 0.5   # ECAPA 임베딩 거리 가중치
-REWARD_WEIGHT_CAM = 0.5     # CAM++ 임베딩 거리 가중치
-
-# cosine distance 정규화 스케일
-# ECAPA/CAM++ cosine distance 실측 분포: ~0.002~0.05 (심리음향 노이즈 한도 내)
-# 0.05를 "충분한 방어" 기준으로 보고 그 이상은 1.0으로 clip
+# cosine distance 정규화 스케일.
+# WavLM/CAM++ cosine distance 실측 분포는 심리음향 마스킹 한도 내에서 ~0.002~0.05.
+# 0.05를 "충분한 방어" 기준점으로 보고 그 이상은 1.0으로 clip → score가 [0,1] 전체에 펴짐.
 EMB_DIST_SCALE = 0.05
 
-# TTS 평가 에피소드에서 emb_reward vs tts_reward 혼합 비율
-# reward = REWARD_ALPHA * emb_reward + (1 - REWARD_ALPHA) * tts_reward
-# 0.3: TTS 클로닝 방어(실제 공격 시나리오)에 70% 가중치
-REWARD_ALPHA = 0.3
+# RewardFunction 기본 가중치 (SDK default와 동일)
+#   reward = alpha * sv_score + beta * tts_score - lambda_asr * max(0, asr_cer - cer_threshold)
+REWARD_ALPHA = 0.6     # sv_score 가중치
+REWARD_BETA = 0.4      # tts_score 가중치
+REWARD_LAMBDA_ASR = 1.0
+REWARD_CER_THRESHOLD = 0.3
 
 CHECKPOINT_INTERVAL = 1000
 SAMPLE_RATE = 16000
+
+
+def emb_dist_normalizer(raw_dist: float) -> float:
+    """cosine distance(0~1) → 학습 가능한 스코어로 매핑.
+
+    실측 cosine distance가 0.002~0.05 수준이라 그대로 쓰면 reward가 너무 작아
+    학습 신호가 약함. EMB_DIST_SCALE(0.05)로 나눠 1.0에 clip.
+    """
+    return float(min(max(raw_dist, 0.0) / EMB_DIST_SCALE, 1.0))
 
 
 # ── 데이터 로딩 ───────────────────────────────────────────────────────────────
@@ -80,15 +98,14 @@ SAMPLE_RATE = 16000
 def load_audio(path: Path, sample_rate: int = SAMPLE_RATE) -> AudioArray:
     """wav 파일을 16kHz mono float32로 로드 (soundfile + resample_poly).
 
-    librosa 대신 soundfile 사용 — Colab에서 speechbrain k2 lazy-loader와
-    librosa의 충돌을 피하기 위함.
+    librosa 대신 soundfile 사용 — Colab에서 다른 패키지와 충돌을 피하기 위함.
     """
     data, sr = sf.read(str(path), dtype="float32", always_2d=True)
     audio = data.mean(axis=1).astype(np.float32)
     if sr != sample_rate:
         g = gcd(sample_rate, sr)
         audio = resample_poly(audio, sample_rate // g, sr // g).astype(np.float32)
-    max_val = np.abs(audio).max()
+    max_val = float(np.abs(audio).max())
     if max_val > 1e-6:
         audio = audio / max(max_val, 1.0)
     return audio
@@ -102,8 +119,8 @@ def load_dataset(data_dir: str) -> list[dict]:
             1/  2/  3/  4/   ← 화자 폴더
             Labels.txt       ← "파일명(확장자없음) 텍스트" 형식
     """
-    data_dir = Path(data_dir)
-    labels_path = data_dir / "Labels.txt"
+    data_dir_p = Path(data_dir)
+    labels_path = data_dir_p / "Labels.txt"
 
     if not labels_path.exists():
         raise FileNotFoundError(f"Labels.txt not found: {labels_path}")
@@ -118,8 +135,8 @@ def load_dataset(data_dir: str) -> list[dict]:
             if len(parts) == 2:
                 labels[parts[0]] = parts[1]
 
-    samples = []
-    for speaker_dir in sorted(data_dir.iterdir()):
+    samples: list[dict] = []
+    for speaker_dir in sorted(data_dir_p.iterdir()):
         if not speaker_dir.is_dir():
             continue
         for wav_path in sorted(speaker_dir.glob("*.wav")):
@@ -145,18 +162,10 @@ def load_dataset_aihub(
         data_dir/
             원천데이터/TS*/.../[화자ID]_[코드]_[이니셜]/*.wav
             라벨링데이터/TL*/.../[화자ID]_[코드]_[이니셜]/*.json
-
-    각 JSON에는 전사/화자/녹음 메타데이터가 들어있다.
-    WAV와 JSON은 파일명 stem이 동일하며, TL <-> TS 폴더에 1:1 대응된다.
-
-    Args:
-        data_dir:               원천/라벨링 폴더의 부모 경로.
-        max_speakers:           로드할 최대 화자 수. None=전체.
-        max_files_per_speaker:  화자당 최대 파일 수. None=전체. 데이터 균형 맞출 때 유용.
     """
-    data_dir = Path(data_dir)
-    wav_root = data_dir / "원천데이터"
-    json_root = data_dir / "라벨링데이터"
+    data_dir_p = Path(data_dir)
+    wav_root = data_dir_p / "원천데이터"
+    json_root = data_dir_p / "라벨링데이터"
 
     if not wav_root.exists() or not json_root.exists():
         raise FileNotFoundError(
@@ -167,7 +176,6 @@ def load_dataset_aihub(
     missing_wav = 0
 
     for json_path in json_root.rglob("*.json"):
-        # JSON 경로 -> WAV 경로 매핑 (TL* -> TS*, .json -> .wav)
         rel = json_path.relative_to(json_root)
         wav_rel_str = str(rel).replace("TL", "TS", 1)
         wav_rel = Path(wav_rel_str).with_suffix(".wav")
@@ -200,7 +208,6 @@ def load_dataset_aihub(
     if missing_wav > 0:
         logger.warning("WAV 누락 %d개 (JSON은 있지만 매칭 WAV 없음)", missing_wav)
 
-    # 화자별 정렬 후 cap 적용
     speakers = sorted(samples_by_speaker.keys())
     if max_speakers is not None:
         speakers = speakers[:max_speakers]
@@ -226,34 +233,28 @@ def load_dataset_aihub(
 
 def build_embedding_cache(
     samples: list[dict],
-    ecapa: ECAPATDNNAdapter,
-    cosy: CosyVoiceAdapter,
+    sv_eval: SpeakerEvaluator,
     cache_path: Path,
 ) -> dict[str, dict]:
-    """전체 원본 음성의 ECAPA + CAM++ 임베딩을 미리 추출해 캐싱.
+    """전체 원본 음성의 화자 임베딩을 미리 추출해 캐싱.
 
-    캐시 파일(embedding_cache.pt)이 있으면 로드, 없으면 새로 계산 후 저장.
-
-    Returns:
-        {"1_0000": {"ecapa": np.ndarray(192,), "cam": np.ndarray(192,)}, ...}
+    SpeakerEvaluator.precompute() 결과를 그대로 저장 — 캐시 형식은
+    {"wavlm_embedding": np.ndarray, "cam_embedding": np.ndarray}.
+    TTSEvaluator도 같은 wavlm_embedding 을 재활용하므로 별도 캐시 불필요.
     """
     if cache_path.exists():
         logger.info("임베딩 캐시 로드: %s", cache_path)
-        # PyTorch 2.6+ weights_only 기본값이 True로 바뀌어 numpy 객체 포함된
-        # cache (ECAPA/CAM++ embedding은 np.ndarray) 로드 실패. 본인이 만든
-        # 파일이므로 신뢰 가능 → weights_only=False.
+        # PyTorch 2.6+ weights_only 기본값 True 우회 (numpy 객체 포함)
         cache = torch.load(cache_path, map_location="cpu", weights_only=False)
         logger.info("캐시 로드 완료: %d개", len(cache))
         return cache
 
     logger.info("임베딩 캐시 생성 시작 (%d개 파일)...", len(samples))
-    cache = {}
+    cache: dict[str, dict] = {}
 
     for i, sample in enumerate(samples):
         audio = load_audio(sample["path"])
-        ecapa_emb = ecapa.extract_embedding(audio)
-        cam_emb = cosy.extract_embedding(audio)
-        cache[sample["file_id"]] = {"ecapa": ecapa_emb, "cam": cam_emb}
+        cache[sample["file_id"]] = sv_eval.precompute(audio)
 
         if (i + 1) % 100 == 0:
             logger.info("  캐시 진행: %d / %d", i + 1, len(samples))
@@ -291,7 +292,6 @@ def save_checkpoint(
 
 
 def load_checkpoint(agent: RLAgent, path: Path) -> tuple[int, int, float]:
-    # weights_only=False — torch 2.6+ 호환 (optimizer state 등 비-tensor 객체 포함 가능)
     checkpoint = torch.load(path, map_location="cpu", weights_only=False)
     agent.policy.load_state_dict(checkpoint["policy_state_dict"])
     agent.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
@@ -312,14 +312,38 @@ def train(args: argparse.Namespace) -> None:
     checkpoint_dir = Path(args.checkpoint_dir)
     writer = SummaryWriter(log_dir=str(checkpoint_dir / "logs"))
 
-    # ── 모델 초기화 ──────────────────────────────────────────────────
-    logger.info("모델 초기화 중...")
-    ecapa = ECAPATDNNAdapter(device=str(device))
-    cosy = CosyVoiceAdapter(
-        model_dir=args.model_dir,
-        cosyvoice_root=args.cosyvoice_root,
-        device=str(device),
+    # ── 어댑터 초기화 (의도된 매핑) ──────────────────────────────────
+    logger.info("어댑터 로드 중...")
+    wavlm = WavLMSVAdapter(device=str(device))
+    cam = CAMPlusAdapter(device=str(device))
+    xtts = XTTSAdapter(model_dir=args.xtts_model_dir) if args.use_tts else None
+    asr_adapter = Wav2Vec2KoreanAdapter(device=str(device)) if args.use_asr else None
+
+    # ── SDK Evaluator 조합 ──────────────────────────────────────────
+    sv_eval = SpeakerEvaluator(
+        wavlm_model=wavlm,
+        cam_model=cam,
+        normalizer=emb_dist_normalizer,
     )
+    tts_eval: TTSEvaluator | None = None
+    if xtts is not None:
+        tts_eval = TTSEvaluator(
+            xtts_model=xtts,
+            speaker_model=wavlm,           # 의도된 매핑: WavLM이 TTS 평가의 화자 모델 역할
+            normalizer=emb_dist_normalizer,
+            sampling_interval=args.tts_eval_interval,
+        )
+    asr_eval: ASREvaluator | None = None
+    if asr_adapter is not None:
+        asr_eval = ASREvaluator(asr_model=asr_adapter)
+
+    reward_fn = RewardFunction(
+        alpha=args.reward_alpha,
+        beta=args.reward_beta,
+        lambda_asr=args.reward_lambda_asr,
+        cer_threshold=args.reward_cer_threshold,
+    )
+
     masker = PsychoacousticMasker()
     mixer = Mixer()
     agent = RLAgent(config={"lr": args.lr})
@@ -336,9 +360,9 @@ def train(args: argparse.Namespace) -> None:
     total_files = len(samples)
     logger.info("1 에폭 = %d 에피소드", total_files)
 
-    # ── 임베딩 캐시 ──────────────────────────────────────────────────
+    # ── 원본 임베딩 캐시 (SpeakerEvaluator.precompute 결과) ──────────
     cache = build_embedding_cache(
-        samples, ecapa, cosy, cache_path=checkpoint_dir / "embedding_cache.pt"
+        samples, sv_eval, cache_path=checkpoint_dir / "embedding_cache_sdk.pt"
     )
 
     # ── Resume ───────────────────────────────────────────────────────
@@ -352,7 +376,8 @@ def train(args: argparse.Namespace) -> None:
     global_episode = start_episode
     transition_buffer: list[Transition] = []
     epoch_rewards: list[float] = []
-    last_tts_defense: float = 0.0
+    last_tts_score: float = 0.0          # TTS 미평가 에피소드에서 직전 값 재사용
+    last_asr_cer: float = 0.0            # ASR 미평가 에피소드에서 직전 값 재사용
 
     for epoch in range(start_epoch, args.epochs):
         epoch_samples = samples.copy()
@@ -364,77 +389,67 @@ def train(args: argparse.Namespace) -> None:
             file_id = sample["file_id"]
             text = sample["text"]
 
-            # ── 원본 음성 로드 + 캐시 임베딩 ──────────────────────────
+            # ── 원본 음성 + 캐시 임베딩 ────────────────────────────────
             original = load_audio(sample["path"])
-            orig_ecapa_emb = cache[file_id]["ecapa"]
-            orig_cam_emb = cache[file_id]["cam"]
+            sv_cached = cache[file_id]
+            # TTSEvaluator의 캐시는 {"original_embedding": ...} 형식. WavLM 재사용.
+            tts_cached = {"original_embedding": sv_cached["wavlm_embedding"]}
 
             # ── RLAgent: state 추출 + 노이즈 생성 ──────────────────────
             state, action, log_prob, value, freq_pattern, time_gate = agent.act(original)
 
-            # ── 심리음향 마스킹으로 노이즈 clamp ───────────────────────
+            # ── 심리음향 마스킹 → 변조 음성 ──────────────────────────────
             safe_noise = masker.clamp(original, action)
-
-            # ── 변조 음성 생성 ──────────────────────────────────────────
             modified = mixer.mix(original, safe_noise)
 
-            # ── 변조 음성 임베딩 추출 (ECAPA + CAM++) ──────────────────
-            mod_ecapa_emb = ecapa.extract_embedding(modified)
-            mod_cam_emb = cosy.extract_embedding(modified)
+            # ── SpeakerEvaluator (매 에피소드) ─────────────────────────
+            sv_out = sv_eval.evaluate(
+                original, modified, precomputed_original_features=sv_cached
+            )
+            sv_score = sv_out.score
+            writer.add_scalar("train/sv_score", sv_score, global_episode)
+            writer.add_scalar("train/sv_raw", sv_out.raw_metric, global_episode)
 
-            # ── 임베딩 거리 (기본 reward 재료) ──────────────────────────
-            ecapa_dist = cosine_distance(orig_ecapa_emb, mod_ecapa_emb)
-            cam_dist = cosine_distance(orig_cam_emb, mod_cam_emb)
-            raw_emb_dist = float(REWARD_WEIGHT_ECAPA * ecapa_dist + REWARD_WEIGHT_CAM * cam_dist)
-            # cosine distance 실측값이 0.002~0.05 수준이므로 [0,1]로 정규화
-            emb_dist_reward = min(raw_emb_dist / EMB_DIST_SCALE, 1.0)
+            # ── ASREvaluator (있을 때만, 매 에피소드) ──────────────────
+            if asr_eval is not None:
+                try:
+                    asr_out = asr_eval.evaluate(original, modified, original_text=text)
+                    last_asr_cer = float(asr_out.raw_metric)
+                    writer.add_scalar("train/asr_cer", last_asr_cer, global_episode)
+                except Exception as e:
+                    logger.warning("ASR 평가 실패: %s", e)
 
-            # ── next_state: done=True 고정 구조라 GAE에서 사용 안 됨
-            # state 재사용으로 불필요한 StateExtractor forward pass 제거
-            next_state = state
-
-            # ── CosyVoice3 클로닝 평가 + reward 가중합 ─────────────────
-            # 평소: reward = emb_dist_reward (빠른 근사 신호)
-            # TTS 평가 에피소드(10마다): reward = ALPHA*emb + (1-ALPHA)*tts_defense
-            #   → 실제 공격 시나리오(TTS 클로닝)를 primary 학습 신호로 유지하면서
-            #     emb_reward를 30% 섞어 분포 충격 완화
-            reward = emb_dist_reward
-            if global_episode % TTS_EVAL_INTERVAL == 0:
+            # ── TTSEvaluator (sampling_interval 마다만) ────────────────
+            if tts_eval is not None and tts_eval.should_evaluate(global_episode):
                 logger.info("[TTS 평가] episode=%d, file=%s", global_episode, file_id)
                 try:
-                    cloned = cosy.clone(modified, text=text)
-                    clone_ecapa_emb = ecapa.extract_embedding(cloned)
-                    clone_cam_emb = cosy.extract_embedding(cloned)
-
-                    tts_ecapa_dist = cosine_distance(orig_ecapa_emb, clone_ecapa_emb)
-                    tts_cam_dist = cosine_distance(orig_cam_emb, clone_cam_emb)
-                    tts_defense = min(float((tts_ecapa_dist + tts_cam_dist) / 2.0) / EMB_DIST_SCALE, 1.0)
-
-                    # 가중합: emb_reward 30% + tts_defense 70%
-                    reward = REWARD_ALPHA * emb_dist_reward + (1.0 - REWARD_ALPHA) * tts_defense
-                    last_tts_defense = tts_defense
-
-                    writer.add_scalar("eval/tts_defense", tts_defense, global_episode)
-                    writer.add_scalar("eval/tts_ecapa_dist", tts_ecapa_dist, global_episode)
-                    writer.add_scalar("eval/tts_cam_dist", tts_cam_dist, global_episode)
-                    writer.add_scalar("eval/tts_reward", reward, global_episode)
-                    logger.info(
-                        "  TTS reward: %.4f (emb=%.4f * %.1f + tts=%.4f * %.1f)",
-                        reward, emb_dist_reward, REWARD_ALPHA,
-                        tts_defense, 1.0 - REWARD_ALPHA,
+                    tts_out = tts_eval.evaluate(
+                        original, modified,
+                        precomputed_original_features=tts_cached,
                     )
+                    last_tts_score = tts_out.score
+                    writer.add_scalar("eval/tts_score", last_tts_score, global_episode)
+                    writer.add_scalar("eval/tts_raw", tts_out.raw_metric, global_episode)
                 except Exception as e:
-                    logger.warning("TTS 평가 실패, emb_dist 사용: %s", e)
+                    logger.warning("TTS 평가 실패: %s", e)
 
+            # ── RewardFunction ────────────────────────────────────────
+            components = {
+                "sv_score": float(np.clip(sv_score, 0.0, 1.0)),
+                "tts_score": float(np.clip(last_tts_score, 0.0, 1.0)),
+                "asr_cer": float(np.clip(last_asr_cer, 0.0, 1.0)),
+            }
+            reward = reward_fn.compute(components)
             epoch_rewards.append(reward)
 
             # ── Transition 버퍼 ─────────────────────────────────────────
+            # done=True 고정 — 1-step episode 구조. next_state는 state 재사용.
             transition_buffer.append(
                 Transition(
                     state=state,
                     action=action,
                     reward=reward,
-                    next_state=next_state,
+                    next_state=state,
                     done=True,
                     log_prob=log_prob,
                     value=value,
@@ -452,8 +467,6 @@ def train(args: argparse.Namespace) -> None:
                 writer.add_scalar("train/entropy", metrics["entropy"], global_episode)
 
             writer.add_scalar("train/reward", reward, global_episode)
-            writer.add_scalar("train/ecapa_dist", ecapa_dist, global_episode)
-            writer.add_scalar("train/cam_dist", cam_dist, global_episode)
 
             # ── 체크포인트 저장 ─────────────────────────────────────────
             if global_episode % args.checkpoint_interval == 0:
@@ -464,8 +477,9 @@ def train(args: argparse.Namespace) -> None:
 
             if global_episode % 100 == 0:
                 logger.info(
-                    "episode=%d | epoch=%d/%d | reward=%.4f",
-                    global_episode, epoch + 1, args.epochs, reward,
+                    "episode=%d | epoch=%d/%d | reward=%.4f | sv=%.3f tts=%.3f cer=%.3f",
+                    global_episode, epoch + 1, args.epochs,
+                    reward, sv_score, last_tts_score, last_asr_cer,
                 )
 
         # ── 에폭 종료 ───────────────────────────────────────────────
@@ -494,20 +508,10 @@ def train(args: argparse.Namespace) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="VoiceSecure 훈련 스크립트")
+    parser = argparse.ArgumentParser(description="VoiceSecure 훈련 스크립트 (SDK Evaluator 기반)")
 
-    parser.add_argument("--data_dir", type=str, default="../CosyVoice/kss")
-    parser.add_argument(
-        "--model_dir", type=str,
-        default="CosyVoice/pretrained_models/Fun-CosyVoice3-0.5B-2512",
-    )
-    parser.add_argument("--cosyvoice_root", type=str, default="CosyVoice")
-    parser.add_argument("--epochs", type=int, default=3)
-    parser.add_argument("--checkpoint_dir", type=str, default="checkpoints")
-    parser.add_argument("--checkpoint_interval", type=int, default=CHECKPOINT_INTERVAL)
-    parser.add_argument("--lr", type=float, default=3e-4)
-    parser.add_argument("--resume", type=str, default=None)
-    parser.add_argument("--seed", type=int, default=42)
+    # 데이터
+    parser.add_argument("--data_dir", type=str, default="../kss")
     parser.add_argument(
         "--data_format",
         type=str,
@@ -516,18 +520,45 @@ def parse_args() -> argparse.Namespace:
         help="kss: data_dir/{1,2,3,4}/*.wav + Labels.txt. "
         "aihub: data_dir/{원천데이터,라벨링데이터}/...",
     )
+    parser.add_argument("--max_speakers", type=int, default=None)
+    parser.add_argument("--max_files_per_speaker", type=int, default=None)
+
+    # XTTS 모델
     parser.add_argument(
-        "--max_speakers",
-        type=int,
+        "--xtts_model_dir",
+        type=str,
         default=None,
-        help="(aihub) 로드할 최대 화자 수. None=전체.",
+        help="XTTS v2 모델 폴더. None이면 coqui-tts 캐시 자동 탐색 → HuggingFace 자동 다운로드.",
+    )
+
+    # Evaluator on/off
+    parser.add_argument(
+        "--use_tts",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="XTTS 평가 사용 여부 (default True). 끄면 tts_score=0으로 고정.",
     )
     parser.add_argument(
-        "--max_files_per_speaker",
-        type=int,
-        default=None,
-        help="(aihub) 화자당 최대 파일 수. 데이터 균형 맞출 때 사용. None=전체.",
+        "--use_asr",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="wav2vec2 ASR 평가 사용 여부 (default True). 끄면 asr_cer=0으로 고정.",
     )
+    parser.add_argument("--tts_eval_interval", type=int, default=TTS_EVAL_INTERVAL)
+
+    # Reward 가중치
+    parser.add_argument("--reward_alpha", type=float, default=REWARD_ALPHA)
+    parser.add_argument("--reward_beta", type=float, default=REWARD_BETA)
+    parser.add_argument("--reward_lambda_asr", type=float, default=REWARD_LAMBDA_ASR)
+    parser.add_argument("--reward_cer_threshold", type=float, default=REWARD_CER_THRESHOLD)
+
+    # 학습
+    parser.add_argument("--epochs", type=int, default=3)
+    parser.add_argument("--checkpoint_dir", type=str, default="checkpoints")
+    parser.add_argument("--checkpoint_interval", type=int, default=CHECKPOINT_INTERVAL)
+    parser.add_argument("--lr", type=float, default=3e-4)
+    parser.add_argument("--resume", type=str, default=None)
+    parser.add_argument("--seed", type=int, default=42)
 
     return parser.parse_args()
 

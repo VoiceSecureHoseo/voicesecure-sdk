@@ -104,7 +104,7 @@ def test_integration_with_tts_evaluator():
 
     xtts = XTTSAdapter()
     wavlm = WavLMSVAdapter()
-    evaluator = TTSEvaluator(xtts_model=xtts, speaker_model=wavlm)  # openvoice_model 생략
+    evaluator = TTSEvaluator(xtts_model=xtts, speaker_model=wavlm)
 
     original = _make_audio(200.0)
     modified = _make_audio(800.0)
