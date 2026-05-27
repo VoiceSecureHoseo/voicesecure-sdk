@@ -32,7 +32,6 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import os
 import random
 from math import gcd
 from pathlib import Path
@@ -74,8 +73,8 @@ EMB_DIST_SCALE = 0.05
 
 # RewardFunction 기본 가중치 (SDK default와 동일)
 #   reward = alpha * sv_score + beta * tts_score - lambda_asr * max(0, asr_cer - cer_threshold)
-REWARD_ALPHA = 0.6     # sv_score 가중치
-REWARD_BETA = 0.4      # tts_score 가중치
+REWARD_ALPHA = 0.6  # sv_score 가중치
+REWARD_BETA = 0.4  # tts_score 가중치
 REWARD_LAMBDA_ASR = 1.0
 REWARD_CER_THRESHOLD = 0.3
 
@@ -151,17 +150,59 @@ def load_dataset(data_dir: str) -> list[dict]:
     return samples
 
 
+def _extract_text_speaker(meta: dict, fallback_speaker: str) -> tuple[str, str] | None:
+    """AIHub JSON 메타에서 (text, speaker_id) 추출. 두 데이터셋 자동 감지.
+
+    지원 형식:
+        1) AIHub 014 다화자 음성합성:
+             meta["전사정보"]["OrgLabelText"]
+             meta["화자정보"]["SpeakerName"]
+        2) AIHub 자유대화(일반남여):
+             meta["발화정보"]["stt"]
+             meta["녹음자정보"]["recorderId"]  (없으면 "recorder")
+
+    Args:
+        meta: JSON dict
+        fallback_speaker: 어느 키도 못 찾을 때 사용할 speaker_id
+            (보통 파일명에서 추출한 화자 식별자)
+
+    Returns:
+        (text, speaker_id). text 없거나 형식 불일치면 None.
+    """
+    # 형식 1: 014 다화자 음성합성
+    if "전사정보" in meta:
+        text = meta.get("전사정보", {}).get("OrgLabelText", "")
+        speaker_id = meta.get("화자정보", {}).get("SpeakerName") or fallback_speaker
+        if text:
+            return text, speaker_id
+
+    # 형식 2: 자유대화(일반남여)
+    if "발화정보" in meta:
+        text = meta.get("발화정보", {}).get("stt", "")
+        recorder_info = meta.get("녹음자정보", {})
+        speaker_id = (
+            recorder_info.get("recorderId") or recorder_info.get("recorder") or fallback_speaker
+        )
+        if text:
+            return text, speaker_id
+
+    return None
+
+
 def load_dataset_aihub(
     data_dir: str,
     max_speakers: int | None = None,
     max_files_per_speaker: int | None = None,
 ) -> list[dict]:
-    """AIHub 014 다화자 음성합성 데이터 로더.
+    """AIHub 음성 데이터 로더 (다화자 음성합성 014 / 자유대화 일반남여 자동 감지).
 
     구조:
         data_dir/
-            원천데이터/TS*/.../[화자ID]_[코드]_[이니셜]/*.wav
-            라벨링데이터/TL*/.../[화자ID]_[코드]_[이니셜]/*.json
+            원천데이터/TS*/.../[그룹]/*.wav
+            라벨링데이터/TL*/.../[그룹]/*.json
+
+    JSON 키 형식은 ``_extract_text_speaker``가 자동 감지한다.
+    speaker_id가 메타에 없으면 wav 파일명의 첫 토큰(보통 화자 식별자)을 사용.
     """
     data_dir_p = Path(data_dir)
     wav_root = data_dir_p / "원천데이터"
@@ -174,6 +215,7 @@ def load_dataset_aihub(
 
     samples_by_speaker: dict[str, list[dict]] = {}
     missing_wav = 0
+    unparseable = 0
 
     for json_path in json_root.rglob("*.json"):
         rel = json_path.relative_to(json_root)
@@ -187,14 +229,21 @@ def load_dataset_aihub(
         try:
             with open(json_path, encoding="utf-8") as f:
                 meta = json.load(f)
-            text = meta["전사정보"]["OrgLabelText"]
-            speaker_id = meta["화자정보"]["SpeakerName"]
-        except (KeyError, json.JSONDecodeError) as e:
+        except json.JSONDecodeError as e:
             logger.warning("JSON 파싱 실패, 건너뜀 %s: %s", json_path.name, e)
+            unparseable += 1
             continue
 
-        if not text:
+        # 자유대화 파일명: "일반남여_일반통합01_M_1456144760_37_전라_실내_012587.wav"
+        # 토큰 [3] = 사용자ID. 014도 첫 토큰이 화자 코드라 동일하게 fallback으로 사용.
+        tokens = wav_path.stem.split("_")
+        fallback_speaker = tokens[3] if len(tokens) >= 4 else tokens[0]
+
+        extracted = _extract_text_speaker(meta, fallback_speaker=fallback_speaker)
+        if extracted is None:
+            unparseable += 1
             continue
+        text, speaker_id = extracted
 
         samples_by_speaker.setdefault(speaker_id, []).append(
             {
@@ -207,6 +256,8 @@ def load_dataset_aihub(
 
     if missing_wav > 0:
         logger.warning("WAV 누락 %d개 (JSON은 있지만 매칭 WAV 없음)", missing_wav)
+    if unparseable > 0:
+        logger.warning("JSON 형식 미지원 %d개 (014/자유대화 둘 다 키 매칭 실패)", unparseable)
 
     speakers = sorted(samples_by_speaker.keys())
     if max_speakers is not None:
@@ -329,7 +380,7 @@ def train(args: argparse.Namespace) -> None:
     if xtts is not None:
         tts_eval = TTSEvaluator(
             xtts_model=xtts,
-            speaker_model=wavlm,           # 의도된 매핑: WavLM이 TTS 평가의 화자 모델 역할
+            speaker_model=wavlm,  # 의도된 매핑: WavLM이 TTS 평가의 화자 모델 역할
             normalizer=emb_dist_normalizer,
             sampling_interval=args.tts_eval_interval,
         )
@@ -376,8 +427,8 @@ def train(args: argparse.Namespace) -> None:
     global_episode = start_episode
     transition_buffer: list[Transition] = []
     epoch_rewards: list[float] = []
-    last_tts_score: float = 0.0          # TTS 미평가 에피소드에서 직전 값 재사용
-    last_asr_cer: float = 0.0            # ASR 미평가 에피소드에서 직전 값 재사용
+    last_tts_score: float = 0.0  # TTS 미평가 에피소드에서 직전 값 재사용
+    last_asr_cer: float = 0.0  # ASR 미평가 에피소드에서 직전 값 재사용
 
     for epoch in range(start_epoch, args.epochs):
         epoch_samples = samples.copy()
@@ -403,9 +454,7 @@ def train(args: argparse.Namespace) -> None:
             modified = mixer.mix(original, safe_noise)
 
             # ── SpeakerEvaluator (매 에피소드) ─────────────────────────
-            sv_out = sv_eval.evaluate(
-                original, modified, precomputed_original_features=sv_cached
-            )
+            sv_out = sv_eval.evaluate(original, modified, precomputed_original_features=sv_cached)
             sv_score = sv_out.score
             writer.add_scalar("train/sv_score", sv_score, global_episode)
             writer.add_scalar("train/sv_raw", sv_out.raw_metric, global_episode)
@@ -424,7 +473,8 @@ def train(args: argparse.Namespace) -> None:
                 logger.info("[TTS 평가] episode=%d, file=%s", global_episode, file_id)
                 try:
                     tts_out = tts_eval.evaluate(
-                        original, modified,
+                        original,
+                        modified,
                         precomputed_original_features=tts_cached,
                     )
                     last_tts_score = tts_out.score
@@ -471,15 +521,24 @@ def train(args: argparse.Namespace) -> None:
             # ── 체크포인트 저장 ─────────────────────────────────────────
             if global_episode % args.checkpoint_interval == 0:
                 save_checkpoint(
-                    agent, global_episode, epoch, best_reward,
-                    checkpoint_dir, f"episode_{global_episode}.pt",
+                    agent,
+                    global_episode,
+                    epoch,
+                    best_reward,
+                    checkpoint_dir,
+                    f"episode_{global_episode}.pt",
                 )
 
             if global_episode % 100 == 0:
                 logger.info(
                     "episode=%d | epoch=%d/%d | reward=%.4f | sv=%.3f tts=%.3f cer=%.3f",
-                    global_episode, epoch + 1, args.epochs,
-                    reward, sv_score, last_tts_score, last_asr_cer,
+                    global_episode,
+                    epoch + 1,
+                    args.epochs,
+                    reward,
+                    sv_score,
+                    last_tts_score,
+                    last_asr_cer,
                 )
 
         # ── 에폭 종료 ───────────────────────────────────────────────
