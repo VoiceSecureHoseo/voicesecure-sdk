@@ -32,7 +32,6 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import os
 import random
 from math import gcd
 from pathlib import Path
@@ -70,12 +69,12 @@ TTS_EVAL_INTERVAL = 10
 # cosine distance 정규화 스케일.
 # WavLM/CAM++ cosine distance 실측 분포는 심리음향 마스킹 한도 내에서 ~0.002~0.05.
 # 0.05를 "충분한 방어" 기준점으로 보고 그 이상은 1.0으로 clip → score가 [0,1] 전체에 펴짐.
-EMB_DIST_SCALE = 0.05
+EMB_DIST_SCALE = 0.30
 
 # RewardFunction 기본 가중치 (SDK default와 동일)
 #   reward = alpha * sv_score + beta * tts_score - lambda_asr * max(0, asr_cer - cer_threshold)
-REWARD_ALPHA = 0.6     # sv_score 가중치
-REWARD_BETA = 0.4      # tts_score 가중치
+REWARD_ALPHA = 0.6  # sv_score 가중치
+REWARD_BETA = 0.4  # tts_score 가중치
 REWARD_LAMBDA_ASR = 1.0
 REWARD_CER_THRESHOLD = 0.3
 
@@ -329,7 +328,7 @@ def train(args: argparse.Namespace) -> None:
     if xtts is not None:
         tts_eval = TTSEvaluator(
             xtts_model=xtts,
-            speaker_model=wavlm,           # 의도된 매핑: WavLM이 TTS 평가의 화자 모델 역할
+            speaker_model=wavlm,  # 의도된 매핑: WavLM이 TTS 평가의 화자 모델 역할
             normalizer=emb_dist_normalizer,
             sampling_interval=args.tts_eval_interval,
         )
@@ -376,8 +375,8 @@ def train(args: argparse.Namespace) -> None:
     global_episode = start_episode
     transition_buffer: list[Transition] = []
     epoch_rewards: list[float] = []
-    last_tts_score: float = 0.0          # TTS 미평가 에피소드에서 직전 값 재사용
-    last_asr_cer: float = 0.0            # ASR 미평가 에피소드에서 직전 값 재사용
+    last_tts_score: float = 0.0  # TTS 미평가 에피소드에서 직전 값 재사용
+    last_asr_cer: float = 0.0  # ASR 미평가 에피소드에서 직전 값 재사용
 
     for epoch in range(start_epoch, args.epochs):
         epoch_samples = samples.copy()
@@ -403,9 +402,7 @@ def train(args: argparse.Namespace) -> None:
             modified = mixer.mix(original, safe_noise)
 
             # ── SpeakerEvaluator (매 에피소드) ─────────────────────────
-            sv_out = sv_eval.evaluate(
-                original, modified, precomputed_original_features=sv_cached
-            )
+            sv_out = sv_eval.evaluate(original, modified, precomputed_original_features=sv_cached)
             sv_score = sv_out.score
             writer.add_scalar("train/sv_score", sv_score, global_episode)
             writer.add_scalar("train/sv_raw", sv_out.raw_metric, global_episode)
@@ -424,7 +421,8 @@ def train(args: argparse.Namespace) -> None:
                 logger.info("[TTS 평가] episode=%d, file=%s", global_episode, file_id)
                 try:
                     tts_out = tts_eval.evaluate(
-                        original, modified,
+                        original,
+                        modified,
                         precomputed_original_features=tts_cached,
                     )
                     last_tts_score = tts_out.score
@@ -471,15 +469,24 @@ def train(args: argparse.Namespace) -> None:
             # ── 체크포인트 저장 ─────────────────────────────────────────
             if global_episode % args.checkpoint_interval == 0:
                 save_checkpoint(
-                    agent, global_episode, epoch, best_reward,
-                    checkpoint_dir, f"episode_{global_episode}.pt",
+                    agent,
+                    global_episode,
+                    epoch,
+                    best_reward,
+                    checkpoint_dir,
+                    f"episode_{global_episode}.pt",
                 )
 
             if global_episode % 100 == 0:
                 logger.info(
                     "episode=%d | epoch=%d/%d | reward=%.4f | sv=%.3f tts=%.3f cer=%.3f",
-                    global_episode, epoch + 1, args.epochs,
-                    reward, sv_score, last_tts_score, last_asr_cer,
+                    global_episode,
+                    epoch + 1,
+                    args.epochs,
+                    reward,
+                    sv_score,
+                    last_tts_score,
+                    last_asr_cer,
                 )
 
         # ── 에폭 종료 ───────────────────────────────────────────────
