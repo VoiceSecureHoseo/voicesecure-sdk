@@ -328,7 +328,12 @@ def train(args: argparse.Namespace) -> None:
     if xtts is not None:
         tts_eval = TTSEvaluator(
             xtts_model=xtts,
-            speaker_model=wavlm,  # 의도된 매핑: WavLM이 TTS 평가의 화자 모델 역할
+            # XTTS 자체 speaker encoder 를 거리 잣대로 사용 — clone 후 다시 외부
+            # 인코더(WavLM/CAM++)로 측정하면 학습된 perturbation 이 XTTS 내부
+            # 잠재 공간으로 잘 전이되지 않아 clone 화자가 그대로 복원된다.
+            # XTTSAdapter.extract_embedding 이 get_conditioning_latents 의
+            # speaker_embedding 을 노출한다.
+            speaker_model=xtts,
             normalizer=emb_dist_normalizer,
             sampling_interval=args.tts_eval_interval,
         )
@@ -391,8 +396,10 @@ def train(args: argparse.Namespace) -> None:
             # ── 원본 음성 + 캐시 임베딩 ────────────────────────────────
             original = load_audio(sample["path"])
             sv_cached = cache[file_id]
-            # TTSEvaluator의 캐시는 {"original_embedding": ...} 형식. WavLM 재사용.
-            tts_cached = {"original_embedding": sv_cached["wavlm_embedding"]}
+            # TTS 잣대가 XTTS 자체 encoder 로 바뀌면서 WavLM 캐시를 재사용할 수
+            # 없다 (잠재 공간이 다름). TTSEvaluator 내부에서 매 평가마다 원본
+            # XTTS embedding 을 새로 계산하도록 precomputed 를 넘기지 않는다.
+            tts_cached = None
 
             # ── RLAgent: state 추출 + 노이즈 생성 ──────────────────────
             state, action, log_prob, value, freq_pattern, time_gate = agent.act(original)
