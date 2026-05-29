@@ -35,7 +35,7 @@ import tempfile
 import numpy as np
 import torch
 
-from voicesecure.types import SAMPLE_RATE, AudioArray
+from voicesecure.types import SAMPLE_RATE, AudioArray, Embedding
 
 logger = logging.getLogger(__name__)
 
@@ -225,6 +225,49 @@ class XTTSAdapter:
             self.temperature,
             self.repetition_penalty,
         )
+
+    def extract_embedding(self, audio: AudioArray) -> Embedding:
+        """XTTS의 자체 speaker encoder로 화자 임베딩을 추출한다.
+
+        ``self._model.get_conditioning_latents(audio_path=[wav])`` 의 두 번째
+        반환값(speaker_embedding)을 그대로 노출. 이걸 TTSEvaluator의
+        ``speaker_model`` 자리에 끼우면 reward 계산이 "XTTS 자기 자신 입장에서
+        두 음성이 같은 화자인가" 를 직접 측정하게 된다.
+
+        WavLM-SV/CAM++ 같은 외부 검증 인코더로 측정하면 학습된 perturbation 이
+        XTTS 의 speaker encoder 가 보는 잠재 공간으로 잘 transfer되지 않아
+        clone 화자가 그대로 유지되는 현상이 있다. 이 메서드는 그 갭을 없애려는
+        목적의 직접 잣대다.
+
+        Args:
+            audio: shape (num_samples,), float32, [-1, 1], 16kHz mono
+
+        Returns:
+            shape (D,), float32. D는 XTTS speaker encoder 차원 (보통 512).
+        """
+        if audio.ndim != 1:
+            raise ValueError(f"audio must be 1-D, got shape {audio.shape}")
+        if audio.dtype != np.float32:
+            audio = audio.astype(np.float32)
+
+        # XTTS는 파일 경로 기반 API라 임시 wav로 우회
+        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp_ref:
+            ref_path = tmp_ref.name
+        try:
+            _write_wav(ref_path, audio, SAMPLE_RATE)
+            with torch.no_grad():
+                _, speaker_embedding = self._model.get_conditioning_latents(audio_path=[ref_path])
+            # speaker_embedding 모양은 모델 빌드에 따라 (1, D, 1) 또는 (1, D) 등.
+            # 안전하게 1-D float32로 평탄화한다.
+            emb = speaker_embedding.detach().squeeze().cpu().numpy().astype(np.float32)
+            if emb.ndim != 1:
+                emb = emb.flatten()
+            return emb
+        finally:
+            try:
+                os.unlink(ref_path)
+            except OSError:
+                pass
 
     def clone(self, reference_audio: AudioArray) -> AudioArray:
         """reference_audio 화자 목소리로 clone_text를 합성한다.
