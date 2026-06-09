@@ -46,7 +46,6 @@ from voicesecure.evaluators import ASREvaluator, SpeakerEvaluator, TTSEvaluator
 from voicesecure.evaluators.adapters.campplus import CAMPlusAdapter
 from voicesecure.evaluators.adapters.wav2vec2_asr import Wav2Vec2KoreanAdapter
 from voicesecure.evaluators.adapters.wavlm_sv import WavLMSVAdapter
-from voicesecure.evaluators.adapters.xtts import XTTSAdapter
 from voicesecure.modulation.masker import PsychoacousticMasker
 from voicesecure.modulation.mixer import Mixer
 from voicesecure.reward.function import RewardFunction
@@ -315,7 +314,25 @@ def train(args: argparse.Namespace) -> None:
     logger.info("어댑터 로드 중...")
     wavlm = WavLMSVAdapter(device=str(device))
     cam = CAMPlusAdapter(device=str(device))
-    xtts = XTTSAdapter(model_dir=args.xtts_model_dir) if args.use_tts else None
+
+    # TTS 공격 시뮬레이션 모델 선택 — xtts 또는 cosyvoice
+    tts_attacker = None
+    if args.use_tts:
+        if args.tts_model_type == "cosyvoice":
+            from voicesecure.evaluators.adapters.cosyvoice import CosyVoiceAdapter
+
+            logger.info("CosyVoice3 어댑터 로드 중 (model_dir=%s)...", args.cosy_model_dir)
+            tts_attacker = CosyVoiceAdapter(
+                model_dir=args.cosy_model_dir,
+                cosyvoice_root=args.cosy_root,
+                device=str(device),
+            )
+        else:
+            from voicesecure.evaluators.adapters.xtts import XTTSAdapter
+
+            logger.info("XTTS v2 어댑터 로드 중...")
+            tts_attacker = XTTSAdapter(model_dir=args.xtts_model_dir)
+
     asr_adapter = Wav2Vec2KoreanAdapter(device=str(device)) if args.use_asr else None
 
     # ── SDK Evaluator 조합 ──────────────────────────────────────────
@@ -325,15 +342,15 @@ def train(args: argparse.Namespace) -> None:
         normalizer=emb_dist_normalizer,
     )
     tts_eval: TTSEvaluator | None = None
-    if xtts is not None:
+    if tts_attacker is not None:
         tts_eval = TTSEvaluator(
-            xtts_model=xtts,
-            # XTTS 자체 speaker encoder 를 거리 잣대로 사용 — clone 후 다시 외부
-            # 인코더(WavLM/CAM++)로 측정하면 학습된 perturbation 이 XTTS 내부
+            xtts_model=tts_attacker,
+            # TTS 모델 자체 speaker encoder 를 거리 잣대로 사용 — clone 후 다시
+            # 외부 인코더(WavLM/CAM++)로 측정하면 학습된 perturbation 이 TTS 내부
             # 잠재 공간으로 잘 전이되지 않아 clone 화자가 그대로 복원된다.
-            # XTTSAdapter.extract_embedding 이 get_conditioning_latents 의
-            # speaker_embedding 을 노출한다.
-            speaker_model=xtts,
+            # XTTS: get_conditioning_latents 의 speaker_embedding.
+            # CosyVoice3: 내부 CAM++ (192-dim) 임베딩.
+            speaker_model=tts_attacker,
             normalizer=emb_dist_normalizer,
             sampling_interval=args.tts_eval_interval,
         )
@@ -537,12 +554,31 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max_speakers", type=int, default=None)
     parser.add_argument("--max_files_per_speaker", type=int, default=None)
 
-    # XTTS 모델
+    # TTS 공격 시뮬레이션 모델
+    parser.add_argument(
+        "--tts_model_type",
+        type=str,
+        default="xtts",
+        choices=["xtts", "cosyvoice"],
+        help="TTS 공격 모델 선택. xtts=Coqui XTTS v2, cosyvoice=Fun-CosyVoice3-0.5B.",
+    )
     parser.add_argument(
         "--xtts_model_dir",
         type=str,
         default=None,
         help="XTTS v2 모델 폴더. None이면 coqui-tts 캐시 자동 탐색 → HuggingFace 자동 다운로드.",
+    )
+    parser.add_argument(
+        "--cosy_model_dir",
+        type=str,
+        default="pretrained_models/Fun-CosyVoice3-0.5B-2512",
+        help="CosyVoice3 pretrained_models 폴더. tts_model_type=cosyvoice 일 때 사용.",
+    )
+    parser.add_argument(
+        "--cosy_root",
+        type=str,
+        default="CosyVoice",
+        help="CosyVoice repo 루트 (sys.path 등록용). tts_model_type=cosyvoice 일 때 사용.",
     )
 
     # Evaluator on/off
