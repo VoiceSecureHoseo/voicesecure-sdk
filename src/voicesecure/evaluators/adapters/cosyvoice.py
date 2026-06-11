@@ -63,10 +63,19 @@ class CosyVoiceAdapter:
         sys.path.insert(0, cosyvoice_root)
         sys.path.insert(0, os.path.join(cosyvoice_root, "third_party", "Matcha-TTS"))
 
-        from cosyvoice.cli.cosyvoice import CosyVoice3
+        # model_dir 이름으로 v2/v3 자동 감지
+        # CosyVoice2-0.5B 는 한국어 공식 지원, CosyVoice3 는 endofprompt 토큰 요구
+        self._is_v2 = "CosyVoice2" in model_dir or "cosyvoice2" in model_dir.lower()
 
-        # CosyVoice3는 device 인자를 받지 않음 — 내부 torch.cuda.is_available()로 자동 감지.
-        # device 파라미터는 API 호환성을 위해 받지만 CosyVoice3에는 전달하지 않는다.
+        if self._is_v2:
+            from cosyvoice.cli.cosyvoice import CosyVoice2 as CosyVoiceClass
+
+            version = "CosyVoice2"
+        else:
+            from cosyvoice.cli.cosyvoice import CosyVoice3 as CosyVoiceClass
+
+            version = "CosyVoice3"
+
         if device is None:
             try:
                 import torch
@@ -75,17 +84,19 @@ class CosyVoiceAdapter:
             except ImportError:
                 device = "cpu"
 
-        logger.info("Loading CosyVoice3 from %s (auto device: %s)...", model_dir, device)
-        self._model = CosyVoice3(model_dir)
+        logger.info("Loading %s from %s (auto device: %s)...", version, model_dir, device)
+        self._model = CosyVoiceClass(model_dir, load_jit=False, load_trt=False, fp16=False)
 
-        # transformers/Qwen2 호환성: CosyVoice3 LLM weights는 BFloat16이지만 fp16=False
-        # 모드라 autocast 없음 → dtype mismatch 방지를 위해 fp32 강제.
+        # transformers/Qwen2 호환성: LLM weights 는 BFloat16 인데 fp16=False 라
+        # autocast 없음 → dtype mismatch 방지를 위해 fp32 강제.
         if hasattr(self._model, "model") and hasattr(self._model.model, "llm"):
             self._model.model.llm = self._model.model.llm.float()
-            logger.info("CosyVoice3 LLM를 float32로 변환 (BF16 weights 호환성).")
+            logger.info("%s LLM를 float32로 변환 (BF16 weights 호환성).", version)
 
         self._sample_rate = self._model.sample_rate
-        logger.info("CosyVoiceAdapter ready (sample_rate=%d).", self._sample_rate)
+        logger.info(
+            "CosyVoiceAdapter ready (version=%s, sample_rate=%d).", version, self._sample_rate
+        )
 
     def clone(self, reference_audio: AudioArray, text: str = _DEFAULT_TEXT) -> AudioArray:
         """reference_audio 화자 목소리로 text를 합성한다.
@@ -110,10 +121,13 @@ class CosyVoiceAdapter:
             ref_path = tmp.name
 
         try:
-            # CosyVoice3는 prompt_text 끝에 <|endofprompt|> (token 151646) 요구.
-            # 없으면 inference 내부 assertion 실패. CosyVoice2와 다른 API 사양.
-            end_of_prompt = "<|endofprompt|>"
-            prompt_text = text if text.endswith(end_of_prompt) else text + end_of_prompt
+            # CosyVoice3 는 prompt_text 끝에 <|endofprompt|> (token 151646) 요구.
+            # CosyVoice2 는 endofprompt 불필요 — assertion 안 함.
+            if self._is_v2:
+                prompt_text = text
+            else:
+                end_of_prompt = "<|endofprompt|>"
+                prompt_text = text if text.endswith(end_of_prompt) else text + end_of_prompt
             chunks = []
             for result in self._model.inference_zero_shot(
                 text,
