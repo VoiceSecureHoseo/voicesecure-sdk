@@ -46,6 +46,7 @@ from voicesecure.evaluators import ASREvaluator, SpeakerEvaluator, TTSEvaluator
 from voicesecure.evaluators.adapters.campplus import CAMPlusAdapter
 from voicesecure.evaluators.adapters.wav2vec2_asr import Wav2Vec2KoreanAdapter
 from voicesecure.evaluators.adapters.wavlm_sv import WavLMSVAdapter
+from voicesecure.evaluators.adapters.cosyvoice import CosyVoiceAdapter
 from voicesecure.evaluators.adapters.xtts import XTTSAdapter
 from voicesecure.modulation.masker import PsychoacousticMasker
 from voicesecure.modulation.mixer import Mixer
@@ -316,6 +317,7 @@ def train(args: argparse.Namespace) -> None:
     wavlm = WavLMSVAdapter(device=str(device))
     cam = CAMPlusAdapter(device=str(device))
     xtts = XTTSAdapter(model_dir=args.xtts_model_dir) if args.use_tts else None
+    cosy = CosyVoiceAdapter(cosyvoice_root=args.cosyvoice_root) if args.use_tts else None
     asr_adapter = Wav2Vec2KoreanAdapter(device=str(device)) if args.use_asr else None
 
     # ── SDK Evaluator 조합 ──────────────────────────────────────────
@@ -325,6 +327,7 @@ def train(args: argparse.Namespace) -> None:
         normalizer=emb_dist_normalizer,
     )
     tts_eval: TTSEvaluator | None = None
+    cosy_tts_eval: TTSEvaluator | None = None
     if xtts is not None:
         tts_eval = TTSEvaluator(
             xtts_model=xtts,
@@ -334,6 +337,13 @@ def train(args: argparse.Namespace) -> None:
             # XTTSAdapter.extract_embedding 이 get_conditioning_latents 의
             # speaker_embedding 을 노출한다.
             speaker_model=xtts,
+            normalizer=emb_dist_normalizer,
+            sampling_interval=args.tts_eval_interval,
+        )
+    if cosy is not None:
+        cosy_tts_eval = TTSEvaluator(
+            xtts_model=cosy,
+            speaker_model=cosy,
             normalizer=emb_dist_normalizer,
             sampling_interval=args.tts_eval_interval,
         )
@@ -426,17 +436,37 @@ def train(args: argparse.Namespace) -> None:
             # ── TTSEvaluator (sampling_interval 마다만) ────────────────
             if tts_eval is not None and tts_eval.should_evaluate(global_episode):
                 logger.info("[TTS 평가] episode=%d, file=%s", global_episode, file_id)
+                xtts_score: float | None = None
+                cosy_score: float | None = None
                 try:
                     tts_out = tts_eval.evaluate(
                         original,
                         modified,
                         precomputed_original_features=tts_cached,
                     )
-                    last_tts_score = tts_out.score
-                    writer.add_scalar("eval/tts_score", last_tts_score, global_episode)
-                    writer.add_scalar("eval/tts_raw", tts_out.raw_metric, global_episode)
+                    xtts_score = tts_out.score
+                    writer.add_scalar("eval/xtts_score", xtts_score, global_episode)
+                    writer.add_scalar("eval/xtts_raw", tts_out.raw_metric, global_episode)
                 except Exception as e:
-                    logger.warning("TTS 평가 실패: %s", e)
+                    logger.warning("XTTS 평가 실패: %s", e)
+
+                if cosy_tts_eval is not None:
+                    try:
+                        cosy_out = cosy_tts_eval.evaluate(
+                            original,
+                            modified,
+                            precomputed_original_features=None,
+                        )
+                        cosy_score = cosy_out.score
+                        writer.add_scalar("eval/cosy_score", cosy_score, global_episode)
+                        writer.add_scalar("eval/cosy_raw", cosy_out.raw_metric, global_episode)
+                    except Exception as e:
+                        logger.warning("CosyVoice 평가 실패: %s", e)
+
+                scores = [s for s in [xtts_score, cosy_score] if s is not None]
+                if scores:
+                    last_tts_score = sum(scores) / len(scores)
+                    writer.add_scalar("eval/tts_score", last_tts_score, global_episode)
 
             # ── RewardFunction ────────────────────────────────────────
             components = {
@@ -543,6 +573,14 @@ def parse_args() -> argparse.Namespace:
         type=str,
         default=None,
         help="XTTS v2 모델 폴더. None이면 coqui-tts 캐시 자동 탐색 → HuggingFace 자동 다운로드.",
+    )
+
+    # CosyVoice 모델
+    parser.add_argument(
+        "--cosyvoice_root",
+        type=str,
+        default="CosyVoice",
+        help="CosyVoice 레포 루트 경로 (sys.path에 추가). 기본값 'CosyVoice'.",
     )
 
     # Evaluator on/off

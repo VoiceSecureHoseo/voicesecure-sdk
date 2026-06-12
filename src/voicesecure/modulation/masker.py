@@ -388,7 +388,7 @@ class PsychoacousticMasker:
         _SPL_TO_DBFS_OFFSET = 96.0
         threshold_linear = torch.from_numpy(
             (10.0 ** ((threshold_db - _SPL_TO_DBFS_OFFSET) / 20.0)).astype(np.float32)
-        )  # (n_freq, n_time_audio)
+        ).to(raw_noise.device)  # (n_freq, n_time_audio)
 
         # raw_noise는 tanh squash된 값 [-1, 1]
         # 비율로 threshold 적용: noise = ratio * threshold
