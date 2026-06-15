@@ -422,7 +422,8 @@ def train(args: argparse.Namespace) -> None:
             state, action, log_prob, value, freq_pattern, time_gate = agent.act(original)
 
             # ── 심리음향 마스킹 → 변조 음성 ──────────────────────────────
-            safe_noise = masker.clamp(original, action)
+            # 심리음향 마스킹 적용 여부 — --no-use_masker 면 raw action 그대로 (강한 변조)
+            safe_noise = masker.clamp(original, action) if args.use_masker else action
             modified = mixer.mix(original, safe_noise)
 
             # ── SpeakerEvaluator (매 에피소드) ─────────────────────────
@@ -593,6 +594,13 @@ def parse_args() -> argparse.Namespace:
         action=argparse.BooleanOptionalAction,
         default=True,
         help="wav2vec2 ASR 평가 사용 여부 (default True). 끄면 asr_cer=0으로 고정.",
+    )
+    parser.add_argument(
+        "--use_masker",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="심리음향 마스킹 적용 여부 (default True). "
+        "False면 raw action 그대로 사용 — 귀에 들릴 정도로 강한 변조.",
     )
     parser.add_argument("--tts_eval_interval", type=int, default=TTS_EVAL_INTERVAL)
 
