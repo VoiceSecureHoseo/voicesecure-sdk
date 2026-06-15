@@ -85,7 +85,11 @@ class CosyVoiceAdapter:
                 device = "cpu"
 
         logger.info("Loading %s from %s (auto device: %s)...", version, model_dir, device)
-        self._model = CosyVoiceClass(model_dir, load_jit=False, load_trt=False, fp16=False)
+        # CosyVoice2 는 load_jit/load_trt/fp16 kwargs 받지만, CosyVoice3 는 model_dir 만.
+        if self._is_v2:
+            self._model = CosyVoiceClass(model_dir, load_jit=False, load_trt=False, fp16=False)
+        else:
+            self._model = CosyVoiceClass(model_dir)
 
         # transformers/Qwen2 호환성: LLM weights 는 BFloat16 인데 fp16=False 라
         # autocast 없음 → dtype mismatch 방지를 위해 fp32 강제.
