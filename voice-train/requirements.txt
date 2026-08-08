@@ -1,0 +1,9 @@
+torch
+torchaudio
+numpy
+scipy
+soundfile
+onnx
+onnx2torch
+matplotlib
+kaggle

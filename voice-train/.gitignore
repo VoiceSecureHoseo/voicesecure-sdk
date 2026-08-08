@@ -1,0 +1,21 @@
+# Secrets
+.env
+
+# Large model / checkpoint files (see README for download links)
+*.pt
+*.onnx
+
+# Sample audio outputs
+1_0001_*.wav
+
+# Training data / test datasets (see README for source)
+/kss/
+/kss_mini/
+/checkpoints/
+
+# Python
+__pycache__/
+*.pyc
+
+# OS / editor
+.claude/
