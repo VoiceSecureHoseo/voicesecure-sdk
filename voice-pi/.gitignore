@@ -1,0 +1,48 @@
+# ==========================================
+# VoiceSecure Raspberry Pi Deployment
+# Git Ignore
+# ==========================================
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Generated / test audio
+input/*.wav
+output/*.wav
+
+# Keep input/output directories
+!input/.gitkeep
+!output/.gitkeep
+
+# PyTorch training checkpoints
+checkpoints/*.pt
+
+# Test / coverage cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ONNX temporary files
+*.onnx.tmp

@@ -1,0 +1,2034 @@
+
+pytorch
+2.12.0+cpu:‚ã
+ç
+melval_0node_Shape_0"Shape*
+start†*
+
+end†JÑ
+	namespacew_empty_nn_module_stack_from_metadata_hook: _empty_nn_module_stack_from_metadata_hook/sym_size_int_25: aten.sym_size.intJd
+pkg.torch.onnx.class_hierarchyB['_empty_nn_module_stack_from_metadata_hook', 'aten.sym_size.int']Jç
+pkg.torch.onnx.fx_nodes%sym_size_int_25 : [num_users=6] = call_function[target=torch.ops.aten.sym_size.int](args = (%mel, 3), kwargs = {})J^
+pkg.torch.onnx.name_scopes@['_empty_nn_module_stack_from_metadata_hook', 'sym_size_int_25']Js
+pkg.torch.onnx.stack_traceUFile "torch/fx/passes/runtime_assert.py", line 24, in insert_deferred_runtime_asserts
+â
+val_0sym_size_int_25node_sym_size_int_25"SqueezeJÑ
+	namespacew_empty_nn_module_stack_from_metadata_hook: _empty_nn_module_stack_from_metadata_hook/sym_size_int_25: aten.sym_size.intJd
+pkg.torch.onnx.class_hierarchyB['_empty_nn_module_stack_from_metadata_hook', 'aten.sym_size.int']Jç
+pkg.torch.onnx.fx_nodes%sym_size_int_25 : [num_users=6] = call_function[target=torch.ops.aten.sym_size.int](args = (%mel, 3), kwargs = {})J^
+pkg.torch.onnx.name_scopes@['_empty_nn_module_stack_from_metadata_hook', 'sym_size_int_25']Js
+pkg.torch.onnx.stack_traceUFile "torch/fx/passes/runtime_assert.py", line 24, in insert_deferred_runtime_asserts
+€
+sym_size_int_25
+val_10
+floordiv_6node_floordiv_6"DivJÛ
+	namespaceÂ: model.PerturbationGenerator/enc1: model.EncoderBlock/enc1.conv1: model.ConvBnRelu/enc1.conv1.block: torch.nn.modules.container.Sequential/enc1.conv1.block.0: torch.nn.modules.conv.Conv2d/floordiv_6: <built-in function floordiv>J’
+pkg.torch.onnx.class_hierarchy≤['model.PerturbationGenerator', 'model.EncoderBlock', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.conv.Conv2d', '<built-in function floordiv>']Jä
+pkg.torch.onnx.fx_nodep%floordiv_6 : [num_users=5] = call_function[target=operator.floordiv](args = (%sym_size_int_25, 8), kwargs = {})Jp
+pkg.torch.onnx.name_scopesR['', 'enc1', 'enc1.conv1', 'enc1.conv1.block', 'enc1.conv1.block.0', 'floordiv_6']J–
+pkg.torch.onnx.stack_trace±File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 272, in forward
+    x, skip1 = self.enc1(mel)    # x:(B,32,40,200)  skip1:(B,32,80,401)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 76, in forward
+    x = self.conv1(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\conv.py", line 565, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+≤
+val_10
+
+floordiv_6mul_387node_mul_387"MulJÎ
+	namespace›: model.PerturbationGenerator/enc1: model.EncoderBlock/enc1.conv1: model.ConvBnRelu/enc1.conv1.block: torch.nn.modules.container.Sequential/enc1.conv1.block.0: torch.nn.modules.conv.Conv2d/mul_387: <built-in function mul>J–
+pkg.torch.onnx.class_hierarchy≠['model.PerturbationGenerator', 'model.EncoderBlock', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.conv.Conv2d', '<built-in function mul>']J}
+pkg.torch.onnx.fx_nodec%mul_387 : [num_users=2] = call_function[target=operator.mul](args = (8, %floordiv_6), kwargs = {})Jm
+pkg.torch.onnx.name_scopesO['', 'enc1', 'enc1.conv1', 'enc1.conv1.block', 'enc1.conv1.block.0', 'mul_387']J–
+pkg.torch.onnx.stack_trace±File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 272, in forward
+    x, skip1 = self.enc1(mel)    # x:(B,32,40,200)  skip1:(B,32,80,401)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 76, in forward
+    x = self.conv1(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\conv.py", line 565, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+Œ
+mel
+enc1.conv1.block.0.weight
+enc1.conv1.block.0.weight_biasgetitemnode_Conv_291"Conv*
+group†*
+auto_pad"NOTSET†*
+	dilations@@†*
+strides@@†*
+pads@@@@†J¨
+	namespaceû: model.PerturbationGenerator/enc1: model.EncoderBlock/enc1.conv1: model.ConvBnRelu/enc1.conv1.block: torch.nn.modules.container.Sequential/enc1.conv1.block.1: torch.nn.modules.batchnorm.BatchNorm2d/_native_batch_norm_legit_no_training: aten._native_batch_norm_legit_no_training.defaultJV
+!pkg.onnxscript.rewriter.rule_name1FuseBatchNormIntoConv, RemoveOptionalBiasFromConvJÙ
+pkg.torch.onnx.class_hierarchy—['model.PerturbationGenerator', 'model.EncoderBlock', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.batchnorm.BatchNorm2d', 'aten._native_batch_norm_legit_no_training.default']J–
+pkg.torch.onnx.fx_nodeµ%_native_batch_norm_legit_no_training : [num_users=1] = call_function[target=torch.ops.aten._native_batch_norm_legit_no_training.default](args = (%conv2d, %p_enc1_conv1_block_1_weight, %p_enc1_conv1_block_1_bias, %b_enc1_conv1_block_1_running_mean, %b_enc1_conv1_block_1_running_var, 0.1, 1e-05), kwargs = {})Jä
+pkg.torch.onnx.name_scopesl['', 'enc1', 'enc1.conv1', 'enc1.conv1.block', 'enc1.conv1.block.1', '_native_batch_norm_legit_no_training']J±
+pkg.torch.onnx.stack_traceíFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 272, in forward
+    x, skip1 = self.enc1(mel)    # x:(B,32,40,200)  skip1:(B,32,80,401)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 76, in forward
+    x = self.conv1(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\batchnorm.py", line 210, in forward
+    return F.batch_norm(
+ò
+getitemrelu	node_relu"ReluJÊ
+	namespaceÿ: model.PerturbationGenerator/enc1: model.EncoderBlock/enc1.conv1: model.ConvBnRelu/enc1.conv1.block: torch.nn.modules.container.Sequential/enc1.conv1.block.2: torch.nn.modules.activation.ReLU/relu: aten.relu.defaultJŒ
+pkg.torch.onnx.class_hierarchy´['model.PerturbationGenerator', 'model.EncoderBlock', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.activation.ReLU', 'aten.relu.default']JÑ
+pkg.torch.onnx.fx_nodej%relu : [num_users=1] = call_function[target=torch.ops.aten.relu.default](args = (%getitem,), kwargs = {})Jj
+pkg.torch.onnx.name_scopesL['', 'enc1', 'enc1.conv1', 'enc1.conv1.block', 'enc1.conv1.block.2', 'relu']J»
+pkg.torch.onnx.stack_trace©File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 272, in forward
+    x, skip1 = self.enc1(mel)    # x:(B,32,40,200)  skip1:(B,32,80,401)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 76, in forward
+    x = self.conv1(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\activation.py", line 143, in forward
+    return F.relu(input, inplace=self.inplace)
+Ÿ
+relu
+enc1.conv2.block.0.weight
+enc1.conv2.block.0.weight_bias	getitem_3node_Conv_293"Conv*
+group†*
+auto_pad"NOTSET†*
+	dilations@@†*
+strides@@†*
+pads@@@@†JÆ
+	namespace†: model.PerturbationGenerator/enc1: model.EncoderBlock/enc1.conv2: model.ConvBnRelu/enc1.conv2.block: torch.nn.modules.container.Sequential/enc1.conv2.block.1: torch.nn.modules.batchnorm.BatchNorm2d/_native_batch_norm_legit_no_training_1: aten._native_batch_norm_legit_no_training.defaultJV
+!pkg.onnxscript.rewriter.rule_name1FuseBatchNormIntoConv, RemoveOptionalBiasFromConvJÙ
+pkg.torch.onnx.class_hierarchy—['model.PerturbationGenerator', 'model.EncoderBlock', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.batchnorm.BatchNorm2d', 'aten._native_batch_norm_legit_no_training.default']J‘
+pkg.torch.onnx.fx_nodeπ%_native_batch_norm_legit_no_training_1 : [num_users=1] = call_function[target=torch.ops.aten._native_batch_norm_legit_no_training.default](args = (%conv2d_1, %p_enc1_conv2_block_1_weight, %p_enc1_conv2_block_1_bias, %b_enc1_conv2_block_1_running_mean, %b_enc1_conv2_block_1_running_var, 0.1, 1e-05), kwargs = {})Jå
+pkg.torch.onnx.name_scopesn['', 'enc1', 'enc1.conv2', 'enc1.conv2.block', 'enc1.conv2.block.1', '_native_batch_norm_legit_no_training_1']J±
+pkg.torch.onnx.stack_traceíFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 272, in forward
+    x, skip1 = self.enc1(mel)    # x:(B,32,40,200)  skip1:(B,32,80,401)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 77, in forward
+    x = self.conv2(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\batchnorm.py", line 210, in forward
+    return F.batch_norm(
+¶
+	getitem_3relu_1node_relu_1"ReluJË
+	namespace⁄: model.PerturbationGenerator/enc1: model.EncoderBlock/enc1.conv2: model.ConvBnRelu/enc1.conv2.block: torch.nn.modules.container.Sequential/enc1.conv2.block.2: torch.nn.modules.activation.ReLU/relu_1: aten.relu.defaultJŒ
+pkg.torch.onnx.class_hierarchy´['model.PerturbationGenerator', 'model.EncoderBlock', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.activation.ReLU', 'aten.relu.default']Jà
+pkg.torch.onnx.fx_noden%relu_1 : [num_users=2] = call_function[target=torch.ops.aten.relu.default](args = (%getitem_3,), kwargs = {})Jl
+pkg.torch.onnx.name_scopesN['', 'enc1', 'enc1.conv2', 'enc1.conv2.block', 'enc1.conv2.block.2', 'relu_1']J»
+pkg.torch.onnx.stack_trace©File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 272, in forward
+    x, skip1 = self.enc1(mel)    # x:(B,32,40,200)  skip1:(B,32,80,401)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 77, in forward
+    x = self.conv2(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\activation.py", line 143, in forward
+    return F.relu(input, inplace=self.inplace)
+Ú
+relu_1
+enc1.down.weight
+enc1.down.weight_bias	getitem_6node_Conv_295"Conv*
+group†*
+auto_pad"NOTSET†*
+	dilations@@†*
+strides@@†*
+pads@ @ @ @ †JŒ
+	namespace¿: model.PerturbationGenerator/enc1: model.EncoderBlock/enc1.bn: torch.nn.modules.batchnorm.BatchNorm2d/_native_batch_norm_legit_no_training_2: aten._native_batch_norm_legit_no_training.defaultJV
+!pkg.onnxscript.rewriter.rule_name1FuseBatchNormIntoConv, RemoveOptionalBiasFromConvJ∑
+pkg.torch.onnx.class_hierarchyî['model.PerturbationGenerator', 'model.EncoderBlock', 'torch.nn.modules.batchnorm.BatchNorm2d', 'aten._native_batch_norm_legit_no_training.default']J®
+pkg.torch.onnx.fx_nodeç%_native_batch_norm_legit_no_training_2 : [num_users=1] = call_function[target=torch.ops.aten._native_batch_norm_legit_no_training.default](args = (%conv2d_2, %p_enc1_bn_weight, %p_enc1_bn_bias, %b_enc1_bn_running_mean, %b_enc1_bn_running_var, 0.1, 1e-05), kwargs = {})J_
+pkg.torch.onnx.name_scopesA['', 'enc1', 'enc1.bn', '_native_batch_norm_legit_no_training_2']J—
+pkg.torch.onnx.stack_trace≤File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 272, in forward
+    x, skip1 = self.enc1(mel)    # x:(B,32,40,200)  skip1:(B,32,80,401)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 79, in forward
+    x = F.relu(self.bn(self.down(x)))  # Îã§Ïö¥ÏÉòÌîå
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\batchnorm.py", line 210, in forward
+    return F.batch_norm(
+Ú
+	getitem_6relu_2node_relu_2"ReluJ]
+	namespaceP: model.PerturbationGenerator/enc1: model.EncoderBlock/relu_2: aten.relu.defaultJl
+pkg.torch.onnx.class_hierarchyJ['model.PerturbationGenerator', 'model.EncoderBlock', 'aten.relu.default']Jà
+pkg.torch.onnx.fx_noden%relu_2 : [num_users=1] = call_function[target=torch.ops.aten.relu.default](args = (%getitem_6,), kwargs = {})J4
+pkg.torch.onnx.name_scopes['', 'enc1', 'relu_2']Jª
+pkg.torch.onnx.stack_traceúFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 272, in forward
+    x, skip1 = self.enc1(mel)    # x:(B,32,40,200)  skip1:(B,32,80,401)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 79, in forward
+    x = F.relu(self.bn(self.down(x)))  # Îã§Ïö¥ÏÉòÌîå
+€
+relu_2
+enc2.conv1.block.0.weight
+enc2.conv1.block.0.weight_bias	getitem_9node_Conv_297"Conv*
+group†*
+auto_pad"NOTSET†*
+	dilations@@†*
+strides@@†*
+pads@@@@†JÆ
+	namespace†: model.PerturbationGenerator/enc2: model.EncoderBlock/enc2.conv1: model.ConvBnRelu/enc2.conv1.block: torch.nn.modules.container.Sequential/enc2.conv1.block.1: torch.nn.modules.batchnorm.BatchNorm2d/_native_batch_norm_legit_no_training_3: aten._native_batch_norm_legit_no_training.defaultJV
+!pkg.onnxscript.rewriter.rule_name1FuseBatchNormIntoConv, RemoveOptionalBiasFromConvJÙ
+pkg.torch.onnx.class_hierarchy—['model.PerturbationGenerator', 'model.EncoderBlock', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.batchnorm.BatchNorm2d', 'aten._native_batch_norm_legit_no_training.default']J‘
+pkg.torch.onnx.fx_nodeπ%_native_batch_norm_legit_no_training_3 : [num_users=1] = call_function[target=torch.ops.aten._native_batch_norm_legit_no_training.default](args = (%conv2d_3, %p_enc2_conv1_block_1_weight, %p_enc2_conv1_block_1_bias, %b_enc2_conv1_block_1_running_mean, %b_enc2_conv1_block_1_running_var, 0.1, 1e-05), kwargs = {})Jå
+pkg.torch.onnx.name_scopesn['', 'enc2', 'enc2.conv1', 'enc2.conv1.block', 'enc2.conv1.block.1', '_native_batch_norm_legit_no_training_3']J±
+pkg.torch.onnx.stack_traceíFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 273, in forward
+    x, skip2 = self.enc2(x)      # x:(B,64,20,100)  skip2:(B,64,40,200)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 76, in forward
+    x = self.conv1(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\batchnorm.py", line 210, in forward
+    return F.batch_norm(
+¶
+	getitem_9relu_3node_relu_3"ReluJË
+	namespace⁄: model.PerturbationGenerator/enc2: model.EncoderBlock/enc2.conv1: model.ConvBnRelu/enc2.conv1.block: torch.nn.modules.container.Sequential/enc2.conv1.block.2: torch.nn.modules.activation.ReLU/relu_3: aten.relu.defaultJŒ
+pkg.torch.onnx.class_hierarchy´['model.PerturbationGenerator', 'model.EncoderBlock', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.activation.ReLU', 'aten.relu.default']Jà
+pkg.torch.onnx.fx_noden%relu_3 : [num_users=1] = call_function[target=torch.ops.aten.relu.default](args = (%getitem_9,), kwargs = {})Jl
+pkg.torch.onnx.name_scopesN['', 'enc2', 'enc2.conv1', 'enc2.conv1.block', 'enc2.conv1.block.2', 'relu_3']J»
+pkg.torch.onnx.stack_trace©File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 273, in forward
+    x, skip2 = self.enc2(x)      # x:(B,64,20,100)  skip2:(B,64,40,200)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 76, in forward
+    x = self.conv1(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\activation.py", line 143, in forward
+    return F.relu(input, inplace=self.inplace)
+‹
+relu_3
+enc2.conv2.block.0.weight
+enc2.conv2.block.0.weight_bias
+getitem_12node_Conv_299"Conv*
+group†*
+auto_pad"NOTSET†*
+	dilations@@†*
+strides@@†*
+pads@@@@†JÆ
+	namespace†: model.PerturbationGenerator/enc2: model.EncoderBlock/enc2.conv2: model.ConvBnRelu/enc2.conv2.block: torch.nn.modules.container.Sequential/enc2.conv2.block.1: torch.nn.modules.batchnorm.BatchNorm2d/_native_batch_norm_legit_no_training_4: aten._native_batch_norm_legit_no_training.defaultJV
+!pkg.onnxscript.rewriter.rule_name1FuseBatchNormIntoConv, RemoveOptionalBiasFromConvJÙ
+pkg.torch.onnx.class_hierarchy—['model.PerturbationGenerator', 'model.EncoderBlock', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.batchnorm.BatchNorm2d', 'aten._native_batch_norm_legit_no_training.default']J‘
+pkg.torch.onnx.fx_nodeπ%_native_batch_norm_legit_no_training_4 : [num_users=1] = call_function[target=torch.ops.aten._native_batch_norm_legit_no_training.default](args = (%conv2d_4, %p_enc2_conv2_block_1_weight, %p_enc2_conv2_block_1_bias, %b_enc2_conv2_block_1_running_mean, %b_enc2_conv2_block_1_running_var, 0.1, 1e-05), kwargs = {})Jå
+pkg.torch.onnx.name_scopesn['', 'enc2', 'enc2.conv2', 'enc2.conv2.block', 'enc2.conv2.block.1', '_native_batch_norm_legit_no_training_4']J±
+pkg.torch.onnx.stack_traceíFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 273, in forward
+    x, skip2 = self.enc2(x)      # x:(B,64,20,100)  skip2:(B,64,40,200)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 77, in forward
+    x = self.conv2(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\batchnorm.py", line 210, in forward
+    return F.batch_norm(
+®
+
+getitem_12relu_4node_relu_4"ReluJË
+	namespace⁄: model.PerturbationGenerator/enc2: model.EncoderBlock/enc2.conv2: model.ConvBnRelu/enc2.conv2.block: torch.nn.modules.container.Sequential/enc2.conv2.block.2: torch.nn.modules.activation.ReLU/relu_4: aten.relu.defaultJŒ
+pkg.torch.onnx.class_hierarchy´['model.PerturbationGenerator', 'model.EncoderBlock', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.activation.ReLU', 'aten.relu.default']Jâ
+pkg.torch.onnx.fx_nodeo%relu_4 : [num_users=2] = call_function[target=torch.ops.aten.relu.default](args = (%getitem_12,), kwargs = {})Jl
+pkg.torch.onnx.name_scopesN['', 'enc2', 'enc2.conv2', 'enc2.conv2.block', 'enc2.conv2.block.2', 'relu_4']J»
+pkg.torch.onnx.stack_trace©File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 273, in forward
+    x, skip2 = self.enc2(x)      # x:(B,64,20,100)  skip2:(B,64,40,200)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 77, in forward
+    x = self.conv2(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\activation.py", line 143, in forward
+    return F.relu(input, inplace=self.inplace)
+Û
+relu_4
+enc2.down.weight
+enc2.down.weight_bias
+getitem_15node_Conv_301"Conv*
+group†*
+auto_pad"NOTSET†*
+	dilations@@†*
+strides@@†*
+pads@ @ @ @ †JŒ
+	namespace¿: model.PerturbationGenerator/enc2: model.EncoderBlock/enc2.bn: torch.nn.modules.batchnorm.BatchNorm2d/_native_batch_norm_legit_no_training_5: aten._native_batch_norm_legit_no_training.defaultJV
+!pkg.onnxscript.rewriter.rule_name1FuseBatchNormIntoConv, RemoveOptionalBiasFromConvJ∑
+pkg.torch.onnx.class_hierarchyî['model.PerturbationGenerator', 'model.EncoderBlock', 'torch.nn.modules.batchnorm.BatchNorm2d', 'aten._native_batch_norm_legit_no_training.default']J®
+pkg.torch.onnx.fx_nodeç%_native_batch_norm_legit_no_training_5 : [num_users=1] = call_function[target=torch.ops.aten._native_batch_norm_legit_no_training.default](args = (%conv2d_5, %p_enc2_bn_weight, %p_enc2_bn_bias, %b_enc2_bn_running_mean, %b_enc2_bn_running_var, 0.1, 1e-05), kwargs = {})J_
+pkg.torch.onnx.name_scopesA['', 'enc2', 'enc2.bn', '_native_batch_norm_legit_no_training_5']J—
+pkg.torch.onnx.stack_trace≤File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 273, in forward
+    x, skip2 = self.enc2(x)      # x:(B,64,20,100)  skip2:(B,64,40,200)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 79, in forward
+    x = F.relu(self.bn(self.down(x)))  # Îã§Ïö¥ÏÉòÌîå
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\batchnorm.py", line 210, in forward
+    return F.batch_norm(
+Ù
+
+getitem_15relu_5node_relu_5"ReluJ]
+	namespaceP: model.PerturbationGenerator/enc2: model.EncoderBlock/relu_5: aten.relu.defaultJl
+pkg.torch.onnx.class_hierarchyJ['model.PerturbationGenerator', 'model.EncoderBlock', 'aten.relu.default']Jâ
+pkg.torch.onnx.fx_nodeo%relu_5 : [num_users=1] = call_function[target=torch.ops.aten.relu.default](args = (%getitem_15,), kwargs = {})J4
+pkg.torch.onnx.name_scopes['', 'enc2', 'relu_5']Jª
+pkg.torch.onnx.stack_traceúFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 273, in forward
+    x, skip2 = self.enc2(x)      # x:(B,64,20,100)  skip2:(B,64,40,200)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 79, in forward
+    x = F.relu(self.bn(self.down(x)))  # Îã§Ïö¥ÏÉòÌîå
+›
+relu_5
+enc3.conv1.block.0.weight
+enc3.conv1.block.0.weight_bias
+getitem_18node_Conv_303"Conv*
+group†*
+auto_pad"NOTSET†*
+	dilations@@†*
+strides@@†*
+pads@@@@†JÆ
+	namespace†: model.PerturbationGenerator/enc3: model.EncoderBlock/enc3.conv1: model.ConvBnRelu/enc3.conv1.block: torch.nn.modules.container.Sequential/enc3.conv1.block.1: torch.nn.modules.batchnorm.BatchNorm2d/_native_batch_norm_legit_no_training_6: aten._native_batch_norm_legit_no_training.defaultJV
+!pkg.onnxscript.rewriter.rule_name1FuseBatchNormIntoConv, RemoveOptionalBiasFromConvJÙ
+pkg.torch.onnx.class_hierarchy—['model.PerturbationGenerator', 'model.EncoderBlock', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.batchnorm.BatchNorm2d', 'aten._native_batch_norm_legit_no_training.default']J‘
+pkg.torch.onnx.fx_nodeπ%_native_batch_norm_legit_no_training_6 : [num_users=1] = call_function[target=torch.ops.aten._native_batch_norm_legit_no_training.default](args = (%conv2d_6, %p_enc3_conv1_block_1_weight, %p_enc3_conv1_block_1_bias, %b_enc3_conv1_block_1_running_mean, %b_enc3_conv1_block_1_running_var, 0.1, 1e-05), kwargs = {})Jå
+pkg.torch.onnx.name_scopesn['', 'enc3', 'enc3.conv1', 'enc3.conv1.block', 'enc3.conv1.block.1', '_native_batch_norm_legit_no_training_6']J≤
+pkg.torch.onnx.stack_traceìFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 274, in forward
+    x, skip3 = self.enc3(x)      # x:(B,128,10,50)  skip3:(B,128,20,100)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 76, in forward
+    x = self.conv1(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\batchnorm.py", line 210, in forward
+    return F.batch_norm(
+©
+
+getitem_18relu_6node_relu_6"ReluJË
+	namespace⁄: model.PerturbationGenerator/enc3: model.EncoderBlock/enc3.conv1: model.ConvBnRelu/enc3.conv1.block: torch.nn.modules.container.Sequential/enc3.conv1.block.2: torch.nn.modules.activation.ReLU/relu_6: aten.relu.defaultJŒ
+pkg.torch.onnx.class_hierarchy´['model.PerturbationGenerator', 'model.EncoderBlock', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.activation.ReLU', 'aten.relu.default']Jâ
+pkg.torch.onnx.fx_nodeo%relu_6 : [num_users=1] = call_function[target=torch.ops.aten.relu.default](args = (%getitem_18,), kwargs = {})Jl
+pkg.torch.onnx.name_scopesN['', 'enc3', 'enc3.conv1', 'enc3.conv1.block', 'enc3.conv1.block.2', 'relu_6']J…
+pkg.torch.onnx.stack_trace™File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 274, in forward
+    x, skip3 = self.enc3(x)      # x:(B,128,10,50)  skip3:(B,128,20,100)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 76, in forward
+    x = self.conv1(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\activation.py", line 143, in forward
+    return F.relu(input, inplace=self.inplace)
+›
+relu_6
+enc3.conv2.block.0.weight
+enc3.conv2.block.0.weight_bias
+getitem_21node_Conv_305"Conv*
+group†*
+auto_pad"NOTSET†*
+	dilations@@†*
+strides@@†*
+pads@@@@†JÆ
+	namespace†: model.PerturbationGenerator/enc3: model.EncoderBlock/enc3.conv2: model.ConvBnRelu/enc3.conv2.block: torch.nn.modules.container.Sequential/enc3.conv2.block.1: torch.nn.modules.batchnorm.BatchNorm2d/_native_batch_norm_legit_no_training_7: aten._native_batch_norm_legit_no_training.defaultJV
+!pkg.onnxscript.rewriter.rule_name1FuseBatchNormIntoConv, RemoveOptionalBiasFromConvJÙ
+pkg.torch.onnx.class_hierarchy—['model.PerturbationGenerator', 'model.EncoderBlock', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.batchnorm.BatchNorm2d', 'aten._native_batch_norm_legit_no_training.default']J‘
+pkg.torch.onnx.fx_nodeπ%_native_batch_norm_legit_no_training_7 : [num_users=1] = call_function[target=torch.ops.aten._native_batch_norm_legit_no_training.default](args = (%conv2d_7, %p_enc3_conv2_block_1_weight, %p_enc3_conv2_block_1_bias, %b_enc3_conv2_block_1_running_mean, %b_enc3_conv2_block_1_running_var, 0.1, 1e-05), kwargs = {})Jå
+pkg.torch.onnx.name_scopesn['', 'enc3', 'enc3.conv2', 'enc3.conv2.block', 'enc3.conv2.block.1', '_native_batch_norm_legit_no_training_7']J≤
+pkg.torch.onnx.stack_traceìFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 274, in forward
+    x, skip3 = self.enc3(x)      # x:(B,128,10,50)  skip3:(B,128,20,100)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 77, in forward
+    x = self.conv2(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\batchnorm.py", line 210, in forward
+    return F.batch_norm(
+©
+
+getitem_21relu_7node_relu_7"ReluJË
+	namespace⁄: model.PerturbationGenerator/enc3: model.EncoderBlock/enc3.conv2: model.ConvBnRelu/enc3.conv2.block: torch.nn.modules.container.Sequential/enc3.conv2.block.2: torch.nn.modules.activation.ReLU/relu_7: aten.relu.defaultJŒ
+pkg.torch.onnx.class_hierarchy´['model.PerturbationGenerator', 'model.EncoderBlock', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.activation.ReLU', 'aten.relu.default']Jâ
+pkg.torch.onnx.fx_nodeo%relu_7 : [num_users=2] = call_function[target=torch.ops.aten.relu.default](args = (%getitem_21,), kwargs = {})Jl
+pkg.torch.onnx.name_scopesN['', 'enc3', 'enc3.conv2', 'enc3.conv2.block', 'enc3.conv2.block.2', 'relu_7']J…
+pkg.torch.onnx.stack_trace™File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 274, in forward
+    x, skip3 = self.enc3(x)      # x:(B,128,10,50)  skip3:(B,128,20,100)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 77, in forward
+    x = self.conv2(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\activation.py", line 143, in forward
+    return F.relu(input, inplace=self.inplace)
+Ù
+relu_7
+enc3.down.weight
+enc3.down.weight_bias
+getitem_24node_Conv_307"Conv*
+group†*
+auto_pad"NOTSET†*
+	dilations@@†*
+strides@@†*
+pads@ @ @ @ †JŒ
+	namespace¿: model.PerturbationGenerator/enc3: model.EncoderBlock/enc3.bn: torch.nn.modules.batchnorm.BatchNorm2d/_native_batch_norm_legit_no_training_8: aten._native_batch_norm_legit_no_training.defaultJV
+!pkg.onnxscript.rewriter.rule_name1FuseBatchNormIntoConv, RemoveOptionalBiasFromConvJ∑
+pkg.torch.onnx.class_hierarchyî['model.PerturbationGenerator', 'model.EncoderBlock', 'torch.nn.modules.batchnorm.BatchNorm2d', 'aten._native_batch_norm_legit_no_training.default']J®
+pkg.torch.onnx.fx_nodeç%_native_batch_norm_legit_no_training_8 : [num_users=1] = call_function[target=torch.ops.aten._native_batch_norm_legit_no_training.default](args = (%conv2d_8, %p_enc3_bn_weight, %p_enc3_bn_bias, %b_enc3_bn_running_mean, %b_enc3_bn_running_var, 0.1, 1e-05), kwargs = {})J_
+pkg.torch.onnx.name_scopesA['', 'enc3', 'enc3.bn', '_native_batch_norm_legit_no_training_8']J“
+pkg.torch.onnx.stack_trace≥File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 274, in forward
+    x, skip3 = self.enc3(x)      # x:(B,128,10,50)  skip3:(B,128,20,100)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 79, in forward
+    x = F.relu(self.bn(self.down(x)))  # Îã§Ïö¥ÏÉòÌîå
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\batchnorm.py", line 210, in forward
+    return F.batch_norm(
+ı
+
+getitem_24relu_8node_relu_8"ReluJ]
+	namespaceP: model.PerturbationGenerator/enc3: model.EncoderBlock/relu_8: aten.relu.defaultJl
+pkg.torch.onnx.class_hierarchyJ['model.PerturbationGenerator', 'model.EncoderBlock', 'aten.relu.default']Jâ
+pkg.torch.onnx.fx_nodeo%relu_8 : [num_users=1] = call_function[target=torch.ops.aten.relu.default](args = (%getitem_24,), kwargs = {})J4
+pkg.torch.onnx.name_scopes['', 'enc3', 'relu_8']Jº
+pkg.torch.onnx.stack_traceùFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 274, in forward
+    x, skip3 = self.enc3(x)      # x:(B,128,10,50)  skip3:(B,128,20,100)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 79, in forward
+    x = F.relu(self.bn(self.down(x)))  # Îã§Ïö¥ÏÉòÌîå
+æ
+relu_8
+!bottleneck.block.0.block.0.weight
+&bottleneck.block.0.block.0.weight_bias
+getitem_27node_Conv_309"Conv*
+group†*
+auto_pad"NOTSET†*
+	dilations@@†*
+strides@@†*
+pads@@@@†JÇ
+	namespaceÙ: model.PerturbationGenerator/bottleneck: model.Bottleneck/bottleneck.block: torch.nn.modules.container.Sequential/bottleneck.block.0: model.ConvBnRelu/bottleneck.block.0.block: torch.nn.modules.container.Sequential/bottleneck.block.0.block.1: torch.nn.modules.batchnorm.BatchNorm2d/_native_batch_norm_legit_no_training_9: aten._native_batch_norm_legit_no_training.defaultJV
+!pkg.onnxscript.rewriter.rule_name1FuseBatchNormIntoConv, RemoveOptionalBiasFromConvJõ
+pkg.torch.onnx.class_hierarchy¯['model.PerturbationGenerator', 'model.Bottleneck', 'torch.nn.modules.container.Sequential', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.batchnorm.BatchNorm2d', 'aten._native_batch_norm_legit_no_training.default']JÙ
+pkg.torch.onnx.fx_nodeŸ%_native_batch_norm_legit_no_training_9 : [num_users=1] = call_function[target=torch.ops.aten._native_batch_norm_legit_no_training.default](args = (%conv2d_9, %p_bottleneck_block_0_block_1_weight, %p_bottleneck_block_0_block_1_bias, %b_bottleneck_block_0_block_1_running_mean, %b_bottleneck_block_0_block_1_running_var, 0.1, 1e-05), kwargs = {})Jø
+pkg.torch.onnx.name_scopes†['', 'bottleneck', 'bottleneck.block', 'bottleneck.block.0', 'bottleneck.block.0.block', 'bottleneck.block.0.block.1', '_native_batch_norm_legit_no_training_9']Jµ
+pkg.torch.onnx.stack_traceñFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 277, in forward
+    x = self.bottleneck(x)       # (B,256,10,50)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 134, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\batchnorm.py", line 210, in forward
+    return F.batch_norm(
+€
+
+getitem_27relu_9node_relu_9"ReluJº
+	namespaceÆ: model.PerturbationGenerator/bottleneck: model.Bottleneck/bottleneck.block: torch.nn.modules.container.Sequential/bottleneck.block.0: model.ConvBnRelu/bottleneck.block.0.block: torch.nn.modules.container.Sequential/bottleneck.block.0.block.2: torch.nn.modules.activation.ReLU/relu_9: aten.relu.defaultJı
+pkg.torch.onnx.class_hierarchy“['model.PerturbationGenerator', 'model.Bottleneck', 'torch.nn.modules.container.Sequential', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.activation.ReLU', 'aten.relu.default']Jâ
+pkg.torch.onnx.fx_nodeo%relu_9 : [num_users=1] = call_function[target=torch.ops.aten.relu.default](args = (%getitem_27,), kwargs = {})Jü
+pkg.torch.onnx.name_scopesÄ['', 'bottleneck', 'bottleneck.block', 'bottleneck.block.0', 'bottleneck.block.0.block', 'bottleneck.block.0.block.2', 'relu_9']JÃ
+pkg.torch.onnx.stack_trace≠File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 277, in forward
+    x = self.bottleneck(x)       # (B,256,10,50)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 134, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\activation.py", line 143, in forward
+    return F.relu(input, inplace=self.inplace)
+¬
+relu_9
+!bottleneck.block.1.block.0.weight
+&bottleneck.block.1.block.0.weight_bias
+getitem_30node_Conv_311"Conv*
+group†*
+auto_pad"NOTSET†*
+	dilations@@†*
+strides@@†*
+pads@@@@†JÉ
+	namespaceı: model.PerturbationGenerator/bottleneck: model.Bottleneck/bottleneck.block: torch.nn.modules.container.Sequential/bottleneck.block.1: model.ConvBnRelu/bottleneck.block.1.block: torch.nn.modules.container.Sequential/bottleneck.block.1.block.1: torch.nn.modules.batchnorm.BatchNorm2d/_native_batch_norm_legit_no_training_10: aten._native_batch_norm_legit_no_training.defaultJV
+!pkg.onnxscript.rewriter.rule_name1FuseBatchNormIntoConv, RemoveOptionalBiasFromConvJõ
+pkg.torch.onnx.class_hierarchy¯['model.PerturbationGenerator', 'model.Bottleneck', 'torch.nn.modules.container.Sequential', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.batchnorm.BatchNorm2d', 'aten._native_batch_norm_legit_no_training.default']Jˆ
+pkg.torch.onnx.fx_node€%_native_batch_norm_legit_no_training_10 : [num_users=1] = call_function[target=torch.ops.aten._native_batch_norm_legit_no_training.default](args = (%conv2d_10, %p_bottleneck_block_1_block_1_weight, %p_bottleneck_block_1_block_1_bias, %b_bottleneck_block_1_block_1_running_mean, %b_bottleneck_block_1_block_1_running_var, 0.1, 1e-05), kwargs = {})J¿
+pkg.torch.onnx.name_scopes°['', 'bottleneck', 'bottleneck.block', 'bottleneck.block.1', 'bottleneck.block.1.block', 'bottleneck.block.1.block.1', '_native_batch_norm_legit_no_training_10']Jµ
+pkg.torch.onnx.stack_traceñFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 277, in forward
+    x = self.bottleneck(x)       # (B,256,10,50)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 134, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\batchnorm.py", line 210, in forward
+    return F.batch_norm(
+‡
+
+getitem_30relu_10node_relu_10"ReluJΩ
+	namespaceØ: model.PerturbationGenerator/bottleneck: model.Bottleneck/bottleneck.block: torch.nn.modules.container.Sequential/bottleneck.block.1: model.ConvBnRelu/bottleneck.block.1.block: torch.nn.modules.container.Sequential/bottleneck.block.1.block.2: torch.nn.modules.activation.ReLU/relu_10: aten.relu.defaultJı
+pkg.torch.onnx.class_hierarchy“['model.PerturbationGenerator', 'model.Bottleneck', 'torch.nn.modules.container.Sequential', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.activation.ReLU', 'aten.relu.default']Jä
+pkg.torch.onnx.fx_nodep%relu_10 : [num_users=1] = call_function[target=torch.ops.aten.relu.default](args = (%getitem_30,), kwargs = {})J†
+pkg.torch.onnx.name_scopesÅ['', 'bottleneck', 'bottleneck.block', 'bottleneck.block.1', 'bottleneck.block.1.block', 'bottleneck.block.1.block.2', 'relu_10']JÃ
+pkg.torch.onnx.stack_trace≠File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 277, in forward
+    x = self.bottleneck(x)       # (B,256,10,50)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 134, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\activation.py", line 143, in forward
+    return F.relu(input, inplace=self.inplace)
+¬
+relu_10
+dec1.up.block.0.weight
+dec1.up.block.0.weight_bias
+getitem_33node_ConvTranspose_312"ConvTranspose*
+output_padding@ @ †*
+group†*
+auto_pad"NOTSET†*
+	dilations@@†*
+strides@@†*
+pads@@@@†J®
+	namespaceö: model.PerturbationGenerator/dec1: model.DecoderBlock/dec1.up: model.UpConvBnRelu/dec1.up.block: torch.nn.modules.container.Sequential/dec1.up.block.1: torch.nn.modules.batchnorm.BatchNorm2d/_native_batch_norm_legit_no_training_11: aten._native_batch_norm_legit_no_training.defaultJC
+!pkg.onnxscript.rewriter.rule_nameFuseBatchNormIntoConvTransposeJˆ
+pkg.torch.onnx.class_hierarchy”['model.PerturbationGenerator', 'model.DecoderBlock', 'model.UpConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.batchnorm.BatchNorm2d', 'aten._native_batch_norm_legit_no_training.default']JÃ
+pkg.torch.onnx.fx_node±%_native_batch_norm_legit_no_training_11 : [num_users=1] = call_function[target=torch.ops.aten._native_batch_norm_legit_no_training.default](args = (%convolution, %p_dec1_up_block_1_weight, %p_dec1_up_block_1_bias, %b_dec1_up_block_1_running_mean, %b_dec1_up_block_1_running_var, 0.1, 1e-05), kwargs = {})JÑ
+pkg.torch.onnx.name_scopesf['', 'dec1', 'dec1.up', 'dec1.up.block', 'dec1.up.block.1', '_native_batch_norm_legit_no_training_11']Jò
+pkg.torch.onnx.stack_trace˘File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 280, in forward
+    x = self.dec1(x, skip3)      # (B,128,20,100)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 99, in forward
+    x = self.up(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 58, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\batchnorm.py", line 210, in forward
+    return F.batch_norm(
+Ü
+
+getitem_33relu_11node_relu_11"ReluJ‚
+	namespace‘: model.PerturbationGenerator/dec1: model.DecoderBlock/dec1.up: model.UpConvBnRelu/dec1.up.block: torch.nn.modules.container.Sequential/dec1.up.block.2: torch.nn.modules.activation.ReLU/relu_11: aten.relu.defaultJ–
+pkg.torch.onnx.class_hierarchy≠['model.PerturbationGenerator', 'model.DecoderBlock', 'model.UpConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.activation.ReLU', 'aten.relu.default']Jä
+pkg.torch.onnx.fx_nodep%relu_11 : [num_users=1] = call_function[target=torch.ops.aten.relu.default](args = (%getitem_33,), kwargs = {})Jd
+pkg.torch.onnx.name_scopesF['', 'dec1', 'dec1.up', 'dec1.up.block', 'dec1.up.block.2', 'relu_11']JØ
+pkg.torch.onnx.stack_traceêFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 280, in forward
+    x = self.dec1(x, skip3)      # (B,128,20,100)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 99, in forward
+    x = self.up(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 58, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\activation.py", line 143, in forward
+    return F.relu(input, inplace=self.inplace)
+˘
+relu_11
+relu_7catnode_cat"Concat*
+axis†JY
+	namespaceL: model.PerturbationGenerator/dec1: model.DecoderBlock/cat: aten.cat.defaultJk
+pkg.torch.onnx.class_hierarchyI['model.PerturbationGenerator', 'model.DecoderBlock', 'aten.cat.default']Jè
+pkg.torch.onnx.fx_nodeu%cat : [num_users=1] = call_function[target=torch.ops.aten.cat.default](args = ([%relu_11, %relu_7], 1), kwargs = {})J1
+pkg.torch.onnx.name_scopes['', 'dec1', 'cat']J¥
+pkg.torch.onnx.stack_traceïFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 280, in forward
+    x = self.dec1(x, skip3)      # (B,128,20,100)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 118, in forward
+    x = torch.cat([x, skip], dim=1)   # (B, out_ch + skip_ch, H, W)
+‘
+cat
+dec1.conv.0.block.0.weight
+dec1.conv.0.block.0.weight_bias
+getitem_36node_Conv_314"Conv*
+group†*
+auto_pad"NOTSET†*
+	dilations@@†*
+strides@@†*
+pads@@@@†J„
+	namespace’: model.PerturbationGenerator/dec1: model.DecoderBlock/dec1.conv: torch.nn.modules.container.Sequential/dec1.conv.0: model.ConvBnRelu/dec1.conv.0.block: torch.nn.modules.container.Sequential/dec1.conv.0.block.1: torch.nn.modules.batchnorm.BatchNorm2d/_native_batch_norm_legit_no_training_12: aten._native_batch_norm_legit_no_training.defaultJV
+!pkg.onnxscript.rewriter.rule_name1FuseBatchNormIntoConv, RemoveOptionalBiasFromConvJù
+pkg.torch.onnx.class_hierarchy˙['model.PerturbationGenerator', 'model.DecoderBlock', 'torch.nn.modules.container.Sequential', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.batchnorm.BatchNorm2d', 'aten._native_batch_norm_legit_no_training.default']J⁄
+pkg.torch.onnx.fx_nodeø%_native_batch_norm_legit_no_training_12 : [num_users=1] = call_function[target=torch.ops.aten._native_batch_norm_legit_no_training.default](args = (%conv2d_11, %p_dec1_conv_0_block_1_weight, %p_dec1_conv_0_block_1_bias, %b_dec1_conv_0_block_1_running_mean, %b_dec1_conv_0_block_1_running_var, 0.1, 1e-05), kwargs = {})Jù
+pkg.torch.onnx.name_scopes['', 'dec1', 'dec1.conv', 'dec1.conv.0', 'dec1.conv.0.block', 'dec1.conv.0.block.1', '_native_batch_norm_legit_no_training_12']Jµ
+pkg.torch.onnx.stack_traceñFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 280, in forward
+    x = self.dec1(x, skip3)      # (B,128,20,100)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 119, in forward
+    return self.conv(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\batchnorm.py", line 210, in forward
+    return F.batch_norm(
+û
+
+getitem_36relu_12node_relu_12"ReluJù
+	namespaceè: model.PerturbationGenerator/dec1: model.DecoderBlock/dec1.conv: torch.nn.modules.container.Sequential/dec1.conv.0: model.ConvBnRelu/dec1.conv.0.block: torch.nn.modules.container.Sequential/dec1.conv.0.block.2: torch.nn.modules.activation.ReLU/relu_12: aten.relu.defaultJ˜
+pkg.torch.onnx.class_hierarchy‘['model.PerturbationGenerator', 'model.DecoderBlock', 'torch.nn.modules.container.Sequential', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.activation.ReLU', 'aten.relu.default']Jä
+pkg.torch.onnx.fx_nodep%relu_12 : [num_users=1] = call_function[target=torch.ops.aten.relu.default](args = (%getitem_36,), kwargs = {})J}
+pkg.torch.onnx.name_scopes_['', 'dec1', 'dec1.conv', 'dec1.conv.0', 'dec1.conv.0.block', 'dec1.conv.0.block.2', 'relu_12']JÃ
+pkg.torch.onnx.stack_trace≠File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 280, in forward
+    x = self.dec1(x, skip3)      # (B,128,20,100)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 119, in forward
+    return self.conv(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\activation.py", line 143, in forward
+    return F.relu(input, inplace=self.inplace)
+ÿ
+relu_12
+dec1.conv.1.block.0.weight
+dec1.conv.1.block.0.weight_bias
+getitem_39node_Conv_316"Conv*
+group†*
+auto_pad"NOTSET†*
+	dilations@@†*
+strides@@†*
+pads@@@@†J„
+	namespace’: model.PerturbationGenerator/dec1: model.DecoderBlock/dec1.conv: torch.nn.modules.container.Sequential/dec1.conv.1: model.ConvBnRelu/dec1.conv.1.block: torch.nn.modules.container.Sequential/dec1.conv.1.block.1: torch.nn.modules.batchnorm.BatchNorm2d/_native_batch_norm_legit_no_training_13: aten._native_batch_norm_legit_no_training.defaultJV
+!pkg.onnxscript.rewriter.rule_name1FuseBatchNormIntoConv, RemoveOptionalBiasFromConvJù
+pkg.torch.onnx.class_hierarchy˙['model.PerturbationGenerator', 'model.DecoderBlock', 'torch.nn.modules.container.Sequential', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.batchnorm.BatchNorm2d', 'aten._native_batch_norm_legit_no_training.default']J⁄
+pkg.torch.onnx.fx_nodeø%_native_batch_norm_legit_no_training_13 : [num_users=1] = call_function[target=torch.ops.aten._native_batch_norm_legit_no_training.default](args = (%conv2d_12, %p_dec1_conv_1_block_1_weight, %p_dec1_conv_1_block_1_bias, %b_dec1_conv_1_block_1_running_mean, %b_dec1_conv_1_block_1_running_var, 0.1, 1e-05), kwargs = {})Jù
+pkg.torch.onnx.name_scopes['', 'dec1', 'dec1.conv', 'dec1.conv.1', 'dec1.conv.1.block', 'dec1.conv.1.block.1', '_native_batch_norm_legit_no_training_13']Jµ
+pkg.torch.onnx.stack_traceñFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 280, in forward
+    x = self.dec1(x, skip3)      # (B,128,20,100)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 119, in forward
+    return self.conv(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\batchnorm.py", line 210, in forward
+    return F.batch_norm(
+û
+
+getitem_39relu_13node_relu_13"ReluJù
+	namespaceè: model.PerturbationGenerator/dec1: model.DecoderBlock/dec1.conv: torch.nn.modules.container.Sequential/dec1.conv.1: model.ConvBnRelu/dec1.conv.1.block: torch.nn.modules.container.Sequential/dec1.conv.1.block.2: torch.nn.modules.activation.ReLU/relu_13: aten.relu.defaultJ˜
+pkg.torch.onnx.class_hierarchy‘['model.PerturbationGenerator', 'model.DecoderBlock', 'torch.nn.modules.container.Sequential', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.activation.ReLU', 'aten.relu.default']Jä
+pkg.torch.onnx.fx_nodep%relu_13 : [num_users=1] = call_function[target=torch.ops.aten.relu.default](args = (%getitem_39,), kwargs = {})J}
+pkg.torch.onnx.name_scopes_['', 'dec1', 'dec1.conv', 'dec1.conv.1', 'dec1.conv.1.block', 'dec1.conv.1.block.2', 'relu_13']JÃ
+pkg.torch.onnx.stack_trace≠File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 280, in forward
+    x = self.dec1(x, skip3)      # (B,128,20,100)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 119, in forward
+    return self.conv(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\activation.py", line 143, in forward
+    return F.relu(input, inplace=self.inplace)
+√
+relu_13
+dec2.up.block.0.weight
+dec2.up.block.0.weight_bias
+getitem_42node_ConvTranspose_317"ConvTranspose*
+output_padding@ @ †*
+group†*
+auto_pad"NOTSET†*
+	dilations@@†*
+strides@@†*
+pads@@@@†J®
+	namespaceö: model.PerturbationGenerator/dec2: model.DecoderBlock/dec2.up: model.UpConvBnRelu/dec2.up.block: torch.nn.modules.container.Sequential/dec2.up.block.1: torch.nn.modules.batchnorm.BatchNorm2d/_native_batch_norm_legit_no_training_14: aten._native_batch_norm_legit_no_training.defaultJC
+!pkg.onnxscript.rewriter.rule_nameFuseBatchNormIntoConvTransposeJˆ
+pkg.torch.onnx.class_hierarchy”['model.PerturbationGenerator', 'model.DecoderBlock', 'model.UpConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.batchnorm.BatchNorm2d', 'aten._native_batch_norm_legit_no_training.default']JŒ
+pkg.torch.onnx.fx_node≥%_native_batch_norm_legit_no_training_14 : [num_users=1] = call_function[target=torch.ops.aten._native_batch_norm_legit_no_training.default](args = (%convolution_1, %p_dec2_up_block_1_weight, %p_dec2_up_block_1_bias, %b_dec2_up_block_1_running_mean, %b_dec2_up_block_1_running_var, 0.1, 1e-05), kwargs = {})JÑ
+pkg.torch.onnx.name_scopesf['', 'dec2', 'dec2.up', 'dec2.up.block', 'dec2.up.block.1', '_native_batch_norm_legit_no_training_14']Jó
+pkg.torch.onnx.stack_trace¯File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 281, in forward
+    x = self.dec2(x, skip2)      # (B,64,40,200)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 99, in forward
+    x = self.up(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 58, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\batchnorm.py", line 210, in forward
+    return F.batch_norm(
+Ö
+
+getitem_42relu_14node_relu_14"ReluJ‚
+	namespace‘: model.PerturbationGenerator/dec2: model.DecoderBlock/dec2.up: model.UpConvBnRelu/dec2.up.block: torch.nn.modules.container.Sequential/dec2.up.block.2: torch.nn.modules.activation.ReLU/relu_14: aten.relu.defaultJ–
+pkg.torch.onnx.class_hierarchy≠['model.PerturbationGenerator', 'model.DecoderBlock', 'model.UpConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.activation.ReLU', 'aten.relu.default']Jä
+pkg.torch.onnx.fx_nodep%relu_14 : [num_users=1] = call_function[target=torch.ops.aten.relu.default](args = (%getitem_42,), kwargs = {})Jd
+pkg.torch.onnx.name_scopesF['', 'dec2', 'dec2.up', 'dec2.up.block', 'dec2.up.block.2', 'relu_14']JÆ
+pkg.torch.onnx.stack_traceèFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 281, in forward
+    x = self.dec2(x, skip2)      # (B,64,40,200)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 99, in forward
+    x = self.up(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 58, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\activation.py", line 143, in forward
+    return F.relu(input, inplace=self.inplace)
+Ç
+relu_14
+relu_4cat_1
+node_cat_1"Concat*
+axis†J[
+	namespaceN: model.PerturbationGenerator/dec2: model.DecoderBlock/cat_1: aten.cat.defaultJk
+pkg.torch.onnx.class_hierarchyI['model.PerturbationGenerator', 'model.DecoderBlock', 'aten.cat.default']Jë
+pkg.torch.onnx.fx_nodew%cat_1 : [num_users=1] = call_function[target=torch.ops.aten.cat.default](args = ([%relu_14, %relu_4], 1), kwargs = {})J3
+pkg.torch.onnx.name_scopes['', 'dec2', 'cat_1']J≥
+pkg.torch.onnx.stack_traceîFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 281, in forward
+    x = self.dec2(x, skip2)      # (B,64,40,200)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 118, in forward
+    x = torch.cat([x, skip], dim=1)   # (B, out_ch + skip_ch, H, W)
+’
+cat_1
+dec2.conv.0.block.0.weight
+dec2.conv.0.block.0.weight_bias
+getitem_45node_Conv_319"Conv*
+group†*
+auto_pad"NOTSET†*
+	dilations@@†*
+strides@@†*
+pads@@@@†J„
+	namespace’: model.PerturbationGenerator/dec2: model.DecoderBlock/dec2.conv: torch.nn.modules.container.Sequential/dec2.conv.0: model.ConvBnRelu/dec2.conv.0.block: torch.nn.modules.container.Sequential/dec2.conv.0.block.1: torch.nn.modules.batchnorm.BatchNorm2d/_native_batch_norm_legit_no_training_15: aten._native_batch_norm_legit_no_training.defaultJV
+!pkg.onnxscript.rewriter.rule_name1FuseBatchNormIntoConv, RemoveOptionalBiasFromConvJù
+pkg.torch.onnx.class_hierarchy˙['model.PerturbationGenerator', 'model.DecoderBlock', 'torch.nn.modules.container.Sequential', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.batchnorm.BatchNorm2d', 'aten._native_batch_norm_legit_no_training.default']J⁄
+pkg.torch.onnx.fx_nodeø%_native_batch_norm_legit_no_training_15 : [num_users=1] = call_function[target=torch.ops.aten._native_batch_norm_legit_no_training.default](args = (%conv2d_13, %p_dec2_conv_0_block_1_weight, %p_dec2_conv_0_block_1_bias, %b_dec2_conv_0_block_1_running_mean, %b_dec2_conv_0_block_1_running_var, 0.1, 1e-05), kwargs = {})Jù
+pkg.torch.onnx.name_scopes['', 'dec2', 'dec2.conv', 'dec2.conv.0', 'dec2.conv.0.block', 'dec2.conv.0.block.1', '_native_batch_norm_legit_no_training_15']J¥
+pkg.torch.onnx.stack_traceïFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 281, in forward
+    x = self.dec2(x, skip2)      # (B,64,40,200)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 119, in forward
+    return self.conv(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\batchnorm.py", line 210, in forward
+    return F.batch_norm(
+ù
+
+getitem_45relu_15node_relu_15"ReluJù
+	namespaceè: model.PerturbationGenerator/dec2: model.DecoderBlock/dec2.conv: torch.nn.modules.container.Sequential/dec2.conv.0: model.ConvBnRelu/dec2.conv.0.block: torch.nn.modules.container.Sequential/dec2.conv.0.block.2: torch.nn.modules.activation.ReLU/relu_15: aten.relu.defaultJ˜
+pkg.torch.onnx.class_hierarchy‘['model.PerturbationGenerator', 'model.DecoderBlock', 'torch.nn.modules.container.Sequential', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.activation.ReLU', 'aten.relu.default']Jä
+pkg.torch.onnx.fx_nodep%relu_15 : [num_users=1] = call_function[target=torch.ops.aten.relu.default](args = (%getitem_45,), kwargs = {})J}
+pkg.torch.onnx.name_scopes_['', 'dec2', 'dec2.conv', 'dec2.conv.0', 'dec2.conv.0.block', 'dec2.conv.0.block.2', 'relu_15']JÀ
+pkg.torch.onnx.stack_trace¨File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 281, in forward
+    x = self.dec2(x, skip2)      # (B,64,40,200)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 119, in forward
+    return self.conv(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\activation.py", line 143, in forward
+    return F.relu(input, inplace=self.inplace)
+◊
+relu_15
+dec2.conv.1.block.0.weight
+dec2.conv.1.block.0.weight_bias
+getitem_48node_Conv_321"Conv*
+group†*
+auto_pad"NOTSET†*
+	dilations@@†*
+strides@@†*
+pads@@@@†J„
+	namespace’: model.PerturbationGenerator/dec2: model.DecoderBlock/dec2.conv: torch.nn.modules.container.Sequential/dec2.conv.1: model.ConvBnRelu/dec2.conv.1.block: torch.nn.modules.container.Sequential/dec2.conv.1.block.1: torch.nn.modules.batchnorm.BatchNorm2d/_native_batch_norm_legit_no_training_16: aten._native_batch_norm_legit_no_training.defaultJV
+!pkg.onnxscript.rewriter.rule_name1FuseBatchNormIntoConv, RemoveOptionalBiasFromConvJù
+pkg.torch.onnx.class_hierarchy˙['model.PerturbationGenerator', 'model.DecoderBlock', 'torch.nn.modules.container.Sequential', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.batchnorm.BatchNorm2d', 'aten._native_batch_norm_legit_no_training.default']J⁄
+pkg.torch.onnx.fx_nodeø%_native_batch_norm_legit_no_training_16 : [num_users=1] = call_function[target=torch.ops.aten._native_batch_norm_legit_no_training.default](args = (%conv2d_14, %p_dec2_conv_1_block_1_weight, %p_dec2_conv_1_block_1_bias, %b_dec2_conv_1_block_1_running_mean, %b_dec2_conv_1_block_1_running_var, 0.1, 1e-05), kwargs = {})Jù
+pkg.torch.onnx.name_scopes['', 'dec2', 'dec2.conv', 'dec2.conv.1', 'dec2.conv.1.block', 'dec2.conv.1.block.1', '_native_batch_norm_legit_no_training_16']J¥
+pkg.torch.onnx.stack_traceïFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 281, in forward
+    x = self.dec2(x, skip2)      # (B,64,40,200)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 119, in forward
+    return self.conv(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\batchnorm.py", line 210, in forward
+    return F.batch_norm(
+ù
+
+getitem_48relu_16node_relu_16"ReluJù
+	namespaceè: model.PerturbationGenerator/dec2: model.DecoderBlock/dec2.conv: torch.nn.modules.container.Sequential/dec2.conv.1: model.ConvBnRelu/dec2.conv.1.block: torch.nn.modules.container.Sequential/dec2.conv.1.block.2: torch.nn.modules.activation.ReLU/relu_16: aten.relu.defaultJ˜
+pkg.torch.onnx.class_hierarchy‘['model.PerturbationGenerator', 'model.DecoderBlock', 'torch.nn.modules.container.Sequential', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.activation.ReLU', 'aten.relu.default']Jä
+pkg.torch.onnx.fx_nodep%relu_16 : [num_users=1] = call_function[target=torch.ops.aten.relu.default](args = (%getitem_48,), kwargs = {})J}
+pkg.torch.onnx.name_scopes_['', 'dec2', 'dec2.conv', 'dec2.conv.1', 'dec2.conv.1.block', 'dec2.conv.1.block.2', 'relu_16']JÀ
+pkg.torch.onnx.stack_trace¨File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 281, in forward
+    x = self.dec2(x, skip2)      # (B,64,40,200)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 119, in forward
+    return self.conv(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\activation.py", line 143, in forward
+    return F.relu(input, inplace=self.inplace)
+√
+relu_16
+dec3.up.block.0.weight
+dec3.up.block.0.weight_bias
+getitem_51node_ConvTranspose_322"ConvTranspose*
+output_padding@ @ †*
+group†*
+auto_pad"NOTSET†*
+	dilations@@†*
+strides@@†*
+pads@@@@†J®
+	namespaceö: model.PerturbationGenerator/dec3: model.DecoderBlock/dec3.up: model.UpConvBnRelu/dec3.up.block: torch.nn.modules.container.Sequential/dec3.up.block.1: torch.nn.modules.batchnorm.BatchNorm2d/_native_batch_norm_legit_no_training_17: aten._native_batch_norm_legit_no_training.defaultJC
+!pkg.onnxscript.rewriter.rule_nameFuseBatchNormIntoConvTransposeJˆ
+pkg.torch.onnx.class_hierarchy”['model.PerturbationGenerator', 'model.DecoderBlock', 'model.UpConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.batchnorm.BatchNorm2d', 'aten._native_batch_norm_legit_no_training.default']JŒ
+pkg.torch.onnx.fx_node≥%_native_batch_norm_legit_no_training_17 : [num_users=1] = call_function[target=torch.ops.aten._native_batch_norm_legit_no_training.default](args = (%convolution_2, %p_dec3_up_block_1_weight, %p_dec3_up_block_1_bias, %b_dec3_up_block_1_running_mean, %b_dec3_up_block_1_running_var, 0.1, 1e-05), kwargs = {})JÑ
+pkg.torch.onnx.name_scopesf['', 'dec3', 'dec3.up', 'dec3.up.block', 'dec3.up.block.1', '_native_batch_norm_legit_no_training_17']Jó
+pkg.torch.onnx.stack_trace¯File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 282, in forward
+    x = self.dec3(x, skip1)      # (B,32,80,401)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 99, in forward
+    x = self.up(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 58, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\batchnorm.py", line 210, in forward
+    return F.batch_norm(
+Ö
+
+getitem_51relu_17node_relu_17"ReluJ‚
+	namespace‘: model.PerturbationGenerator/dec3: model.DecoderBlock/dec3.up: model.UpConvBnRelu/dec3.up.block: torch.nn.modules.container.Sequential/dec3.up.block.2: torch.nn.modules.activation.ReLU/relu_17: aten.relu.defaultJ–
+pkg.torch.onnx.class_hierarchy≠['model.PerturbationGenerator', 'model.DecoderBlock', 'model.UpConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.activation.ReLU', 'aten.relu.default']Jä
+pkg.torch.onnx.fx_nodep%relu_17 : [num_users=1] = call_function[target=torch.ops.aten.relu.default](args = (%getitem_51,), kwargs = {})Jd
+pkg.torch.onnx.name_scopesF['', 'dec3', 'dec3.up', 'dec3.up.block', 'dec3.up.block.2', 'relu_17']JÆ
+pkg.torch.onnx.stack_traceèFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 282, in forward
+    x = self.dec3(x, skip1)      # (B,32,80,401)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 99, in forward
+    x = self.up(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 58, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\activation.py", line 143, in forward
+    return F.relu(input, inplace=self.inplace)
+‰
+sym_size_int_25
+mul_387sub_71node_sub_71"SubJc
+	namespaceV: model.PerturbationGenerator/dec3: model.DecoderBlock/sub_71: <built-in function sub>Jr
+pkg.torch.onnx.class_hierarchyP['model.PerturbationGenerator', 'model.DecoderBlock', '<built-in function sub>']Jà
+pkg.torch.onnx.fx_noden%sub_71 : [num_users=2] = call_function[target=operator.sub](args = (%sym_size_int_25, %mul_387), kwargs = {})J4
+pkg.torch.onnx.name_scopes['', 'dec3', 'sub_71']Jì
+pkg.torch.onnx.stack_traceÙFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 282, in forward
+    x = self.dec3(x, skip1)      # (B,32,80,401)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 104, in forward
+    dw = skip.shape[3] - x.shape[3]
+¯
+sub_71
+val_7
+floordiv_3node_floordiv_3"DivJl
+	namespace_: model.PerturbationGenerator/dec3: model.DecoderBlock/floordiv_3: <built-in function floordiv>Jw
+pkg.torch.onnx.class_hierarchyU['model.PerturbationGenerator', 'model.DecoderBlock', '<built-in function floordiv>']JÅ
+pkg.torch.onnx.fx_nodeg%floordiv_3 : [num_users=2] = call_function[target=operator.floordiv](args = (%sub_71, 2), kwargs = {})J8
+pkg.torch.onnx.name_scopes['', 'dec3', 'floordiv_3']Jü
+pkg.torch.onnx.stack_traceÄFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 282, in forward
+    x = self.dec3(x, skip1)      # (B,32,80,401)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 114, in forward
+    x = F.pad(x, [dw // 2, dw - dw // 2, 0, 0])
+‰
+sub_71
+
+floordiv_3sub_72node_sub_72"SubJc
+	namespaceV: model.PerturbationGenerator/dec3: model.DecoderBlock/sub_72: <built-in function sub>Jr
+pkg.torch.onnx.class_hierarchyP['model.PerturbationGenerator', 'model.DecoderBlock', '<built-in function sub>']JÇ
+pkg.torch.onnx.fx_nodeh%sub_72 : [num_users=1] = call_function[target=operator.sub](args = (%sub_71, %floordiv_3), kwargs = {})J4
+pkg.torch.onnx.name_scopes['', 'dec3', 'sub_72']Jü
+pkg.torch.onnx.stack_traceÄFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 282, in forward
+    x = self.dec3(x, skip1)      # (B,32,80,401)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 114, in forward
+    x = F.pad(x, [dw // 2, dw - dw // 2, 0, 0])
+ã
+
+floordiv_3
+val_191val_192node_Reshape_192"Reshape*
+	allowzero †JY
+	namespaceL: model.PerturbationGenerator/dec3: model.DecoderBlock/pad: aten.pad.defaultJk
+pkg.torch.onnx.class_hierarchyI['model.PerturbationGenerator', 'model.DecoderBlock', 'aten.pad.default']J†
+pkg.torch.onnx.fx_nodeÖ%pad : [num_users=1] = call_function[target=torch.ops.aten.pad.default](args = (%relu_17, [%floordiv_3, %sub_72, 0, 0]), kwargs = {})J1
+pkg.torch.onnx.name_scopes['', 'dec3', 'pad']Jü
+pkg.torch.onnx.stack_traceÄFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 282, in forward
+    x = self.dec3(x, skip1)      # (B,32,80,401)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 114, in forward
+    x = F.pad(x, [dw // 2, dw - dw // 2, 0, 0])
+á
+sub_72
+val_191val_193node_Reshape_193"Reshape*
+	allowzero †JY
+	namespaceL: model.PerturbationGenerator/dec3: model.DecoderBlock/pad: aten.pad.defaultJk
+pkg.torch.onnx.class_hierarchyI['model.PerturbationGenerator', 'model.DecoderBlock', 'aten.pad.default']J†
+pkg.torch.onnx.fx_nodeÖ%pad : [num_users=1] = call_function[target=torch.ops.aten.pad.default](args = (%relu_17, [%floordiv_3, %sub_72, 0, 0]), kwargs = {})J1
+pkg.torch.onnx.name_scopes['', 'dec3', 'pad']Jü
+pkg.torch.onnx.stack_traceÄFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 282, in forward
+    x = self.dec3(x, skip1)      # (B,32,80,401)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 114, in forward
+    x = F.pad(x, [dw // 2, dw - dw // 2, 0, 0])
+∑
+val_194
+val_194
+val_194
+val_192
+val_194
+val_194
+val_194
+val_193val_197node_Concat_197"Concat*
+axis †JY
+	namespaceL: model.PerturbationGenerator/dec3: model.DecoderBlock/pad: aten.pad.defaultJk
+pkg.torch.onnx.class_hierarchyI['model.PerturbationGenerator', 'model.DecoderBlock', 'aten.pad.default']J†
+pkg.torch.onnx.fx_nodeÖ%pad : [num_users=1] = call_function[target=torch.ops.aten.pad.default](args = (%relu_17, [%floordiv_3, %sub_72, 0, 0]), kwargs = {})J1
+pkg.torch.onnx.name_scopes['', 'dec3', 'pad']Jü
+pkg.torch.onnx.stack_traceÄFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 282, in forward
+    x = self.dec3(x, skip1)      # (B,32,80,401)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 114, in forward
+    x = F.pad(x, [dw // 2, dw - dw // 2, 0, 0])
+˚
+relu_17
+val_197padnode_pad"Pad*
+mode"constant†JY
+	namespaceL: model.PerturbationGenerator/dec3: model.DecoderBlock/pad: aten.pad.defaultJk
+pkg.torch.onnx.class_hierarchyI['model.PerturbationGenerator', 'model.DecoderBlock', 'aten.pad.default']J†
+pkg.torch.onnx.fx_nodeÖ%pad : [num_users=1] = call_function[target=torch.ops.aten.pad.default](args = (%relu_17, [%floordiv_3, %sub_72, 0, 0]), kwargs = {})J1
+pkg.torch.onnx.name_scopes['', 'dec3', 'pad']Jü
+pkg.torch.onnx.stack_traceÄFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 282, in forward
+    x = self.dec3(x, skip1)      # (B,32,80,401)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 114, in forward
+    x = F.pad(x, [dw // 2, dw - dw // 2, 0, 0])
+˙
+pad
+relu_1cat_2
+node_cat_2"Concat*
+axis†J[
+	namespaceN: model.PerturbationGenerator/dec3: model.DecoderBlock/cat_2: aten.cat.defaultJk
+pkg.torch.onnx.class_hierarchyI['model.PerturbationGenerator', 'model.DecoderBlock', 'aten.cat.default']Jç
+pkg.torch.onnx.fx_nodes%cat_2 : [num_users=1] = call_function[target=torch.ops.aten.cat.default](args = ([%pad, %relu_1], 1), kwargs = {})J3
+pkg.torch.onnx.name_scopes['', 'dec3', 'cat_2']J≥
+pkg.torch.onnx.stack_traceîFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 282, in forward
+    x = self.dec3(x, skip1)      # (B,32,80,401)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 118, in forward
+    x = torch.cat([x, skip], dim=1)   # (B, out_ch + skip_ch, H, W)
+’
+cat_2
+dec3.conv.0.block.0.weight
+dec3.conv.0.block.0.weight_bias
+getitem_54node_Conv_324"Conv*
+group†*
+auto_pad"NOTSET†*
+	dilations@@†*
+strides@@†*
+pads@@@@†J„
+	namespace’: model.PerturbationGenerator/dec3: model.DecoderBlock/dec3.conv: torch.nn.modules.container.Sequential/dec3.conv.0: model.ConvBnRelu/dec3.conv.0.block: torch.nn.modules.container.Sequential/dec3.conv.0.block.1: torch.nn.modules.batchnorm.BatchNorm2d/_native_batch_norm_legit_no_training_18: aten._native_batch_norm_legit_no_training.defaultJV
+!pkg.onnxscript.rewriter.rule_name1FuseBatchNormIntoConv, RemoveOptionalBiasFromConvJù
+pkg.torch.onnx.class_hierarchy˙['model.PerturbationGenerator', 'model.DecoderBlock', 'torch.nn.modules.container.Sequential', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.batchnorm.BatchNorm2d', 'aten._native_batch_norm_legit_no_training.default']J⁄
+pkg.torch.onnx.fx_nodeø%_native_batch_norm_legit_no_training_18 : [num_users=1] = call_function[target=torch.ops.aten._native_batch_norm_legit_no_training.default](args = (%conv2d_15, %p_dec3_conv_0_block_1_weight, %p_dec3_conv_0_block_1_bias, %b_dec3_conv_0_block_1_running_mean, %b_dec3_conv_0_block_1_running_var, 0.1, 1e-05), kwargs = {})Jù
+pkg.torch.onnx.name_scopes['', 'dec3', 'dec3.conv', 'dec3.conv.0', 'dec3.conv.0.block', 'dec3.conv.0.block.1', '_native_batch_norm_legit_no_training_18']J¥
+pkg.torch.onnx.stack_traceïFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 282, in forward
+    x = self.dec3(x, skip1)      # (B,32,80,401)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 119, in forward
+    return self.conv(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\batchnorm.py", line 210, in forward
+    return F.batch_norm(
+ù
+
+getitem_54relu_18node_relu_18"ReluJù
+	namespaceè: model.PerturbationGenerator/dec3: model.DecoderBlock/dec3.conv: torch.nn.modules.container.Sequential/dec3.conv.0: model.ConvBnRelu/dec3.conv.0.block: torch.nn.modules.container.Sequential/dec3.conv.0.block.2: torch.nn.modules.activation.ReLU/relu_18: aten.relu.defaultJ˜
+pkg.torch.onnx.class_hierarchy‘['model.PerturbationGenerator', 'model.DecoderBlock', 'torch.nn.modules.container.Sequential', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.activation.ReLU', 'aten.relu.default']Jä
+pkg.torch.onnx.fx_nodep%relu_18 : [num_users=1] = call_function[target=torch.ops.aten.relu.default](args = (%getitem_54,), kwargs = {})J}
+pkg.torch.onnx.name_scopes_['', 'dec3', 'dec3.conv', 'dec3.conv.0', 'dec3.conv.0.block', 'dec3.conv.0.block.2', 'relu_18']JÀ
+pkg.torch.onnx.stack_trace¨File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 282, in forward
+    x = self.dec3(x, skip1)      # (B,32,80,401)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 119, in forward
+    return self.conv(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\activation.py", line 143, in forward
+    return F.relu(input, inplace=self.inplace)
+◊
+relu_18
+dec3.conv.1.block.0.weight
+dec3.conv.1.block.0.weight_bias
+getitem_57node_Conv_326"Conv*
+group†*
+auto_pad"NOTSET†*
+	dilations@@†*
+strides@@†*
+pads@@@@†J„
+	namespace’: model.PerturbationGenerator/dec3: model.DecoderBlock/dec3.conv: torch.nn.modules.container.Sequential/dec3.conv.1: model.ConvBnRelu/dec3.conv.1.block: torch.nn.modules.container.Sequential/dec3.conv.1.block.1: torch.nn.modules.batchnorm.BatchNorm2d/_native_batch_norm_legit_no_training_19: aten._native_batch_norm_legit_no_training.defaultJV
+!pkg.onnxscript.rewriter.rule_name1FuseBatchNormIntoConv, RemoveOptionalBiasFromConvJù
+pkg.torch.onnx.class_hierarchy˙['model.PerturbationGenerator', 'model.DecoderBlock', 'torch.nn.modules.container.Sequential', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.batchnorm.BatchNorm2d', 'aten._native_batch_norm_legit_no_training.default']J⁄
+pkg.torch.onnx.fx_nodeø%_native_batch_norm_legit_no_training_19 : [num_users=1] = call_function[target=torch.ops.aten._native_batch_norm_legit_no_training.default](args = (%conv2d_16, %p_dec3_conv_1_block_1_weight, %p_dec3_conv_1_block_1_bias, %b_dec3_conv_1_block_1_running_mean, %b_dec3_conv_1_block_1_running_var, 0.1, 1e-05), kwargs = {})Jù
+pkg.torch.onnx.name_scopes['', 'dec3', 'dec3.conv', 'dec3.conv.1', 'dec3.conv.1.block', 'dec3.conv.1.block.1', '_native_batch_norm_legit_no_training_19']J¥
+pkg.torch.onnx.stack_traceïFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 282, in forward
+    x = self.dec3(x, skip1)      # (B,32,80,401)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 119, in forward
+    return self.conv(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\batchnorm.py", line 210, in forward
+    return F.batch_norm(
+ù
+
+getitem_57relu_19node_relu_19"ReluJù
+	namespaceè: model.PerturbationGenerator/dec3: model.DecoderBlock/dec3.conv: torch.nn.modules.container.Sequential/dec3.conv.1: model.ConvBnRelu/dec3.conv.1.block: torch.nn.modules.container.Sequential/dec3.conv.1.block.2: torch.nn.modules.activation.ReLU/relu_19: aten.relu.defaultJ˜
+pkg.torch.onnx.class_hierarchy‘['model.PerturbationGenerator', 'model.DecoderBlock', 'torch.nn.modules.container.Sequential', 'model.ConvBnRelu', 'torch.nn.modules.container.Sequential', 'torch.nn.modules.activation.ReLU', 'aten.relu.default']Jä
+pkg.torch.onnx.fx_nodep%relu_19 : [num_users=1] = call_function[target=torch.ops.aten.relu.default](args = (%getitem_57,), kwargs = {})J}
+pkg.torch.onnx.name_scopes_['', 'dec3', 'dec3.conv', 'dec3.conv.1', 'dec3.conv.1.block', 'dec3.conv.1.block.2', 'relu_19']JÀ
+pkg.torch.onnx.stack_trace¨File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 282, in forward
+    x = self.dec3(x, skip1)      # (B,32,80,401)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 119, in forward
+    return self.conv(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 39, in forward
+    return self.block(x)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\container.py", line 253, in forward
+    input = module(input)
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\activation.py", line 143, in forward
+    return F.relu(input, inplace=self.inplace)
+´
+val_221
+val_222
+val_0val_224node_Concat_224"Concat*
+axis †Jü
+	namespaceë: model.PerturbationGenerator/projector: model.TimeDomainProjector/projector.up1: torch.nn.modules.conv.ConvTranspose1d/view_1: aten.view.defaultJú
+pkg.torch.onnx.class_hierarchyz['model.PerturbationGenerator', 'model.TimeDomainProjector', 'torch.nn.modules.conv.ConvTranspose1d', 'aten.view.default']J£
+pkg.torch.onnx.fx_nodeà%view_1 : [num_users=1] = call_function[target=torch.ops.aten.view.default](args = (%relu_19, [1, 2560, %sym_size_int_25]), kwargs = {})JJ
+pkg.torch.onnx.name_scopes,['', 'projector', 'projector.up1', 'view_1']J≠
+pkg.torch.onnx.stack_traceéFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 285, in forward
+    delta = self.projector(x)    # (B,64000)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 185, in forward
+    x = x.reshape(B, C * n_freq, T)           # (B, C*n_freq, T')
+•
+relu_19
+val_224view_1node_view_1"Reshape*
+	allowzero†Jü
+	namespaceë: model.PerturbationGenerator/projector: model.TimeDomainProjector/projector.up1: torch.nn.modules.conv.ConvTranspose1d/view_1: aten.view.defaultJú
+pkg.torch.onnx.class_hierarchyz['model.PerturbationGenerator', 'model.TimeDomainProjector', 'torch.nn.modules.conv.ConvTranspose1d', 'aten.view.default']J£
+pkg.torch.onnx.fx_nodeà%view_1 : [num_users=1] = call_function[target=torch.ops.aten.view.default](args = (%relu_19, [1, 2560, %sym_size_int_25]), kwargs = {})JJ
+pkg.torch.onnx.name_scopes,['', 'projector', 'projector.up1', 'view_1']J≠
+pkg.torch.onnx.stack_traceéFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 285, in forward
+    delta = self.projector(x)    # (B,64000)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 185, in forward
+    x = x.reshape(B, C * n_freq, T)           # (B, C*n_freq, T')
+∏
+view_1
+projector.up1.weight
+projector.up1.weight_bias
+getitem_60node_ConvTranspose_328"ConvTranspose*
+output_padding@ †*
+group†*
+auto_pad"NOTSET†*
+	dilations@†*
+strides@††*
+pads@P@P†J·
+	namespace”: model.PerturbationGenerator/projector: model.TimeDomainProjector/projector.bn1: torch.nn.modules.batchnorm.BatchNorm1d/_native_batch_norm_legit_no_training_20: aten._native_batch_norm_legit_no_training.defaultJC
+!pkg.onnxscript.rewriter.rule_nameFuseBatchNormIntoConvTransposeJæ
+pkg.torch.onnx.class_hierarchyõ['model.PerturbationGenerator', 'model.TimeDomainProjector', 'torch.nn.modules.batchnorm.BatchNorm1d', 'aten._native_batch_norm_legit_no_training.default']J∆
+pkg.torch.onnx.fx_node´%_native_batch_norm_legit_no_training_20 : [num_users=1] = call_function[target=torch.ops.aten._native_batch_norm_legit_no_training.default](args = (%convolution_3, %p_projector_bn1_weight, %p_projector_bn1_bias, %b_projector_bn1_running_mean, %b_projector_bn1_running_var, 0.1, 1e-05), kwargs = {})Jk
+pkg.torch.onnx.name_scopesM['', 'projector', 'projector.bn1', '_native_batch_norm_legit_no_training_20']Jª
+pkg.torch.onnx.stack_traceúFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 285, in forward
+    delta = self.projector(x)    # (B,64000)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 187, in forward
+    x = torch.relu(self.bn1(self.up1(x)))  # (B, 64, ~T')
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\batchnorm.py", line 210, in forward
+    return F.batch_norm(
+˚
+
+getitem_60relu_20node_relu_20"ReluJj
+	namespace]: model.PerturbationGenerator/projector: model.TimeDomainProjector/relu_20: aten.relu.defaultJs
+pkg.torch.onnx.class_hierarchyQ['model.PerturbationGenerator', 'model.TimeDomainProjector', 'aten.relu.default']Jä
+pkg.torch.onnx.fx_nodep%relu_20 : [num_users=1] = call_function[target=torch.ops.aten.relu.default](args = (%getitem_60,), kwargs = {})J:
+pkg.torch.onnx.name_scopes['', 'projector', 'relu_20']J•
+pkg.torch.onnx.stack_traceÜFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 285, in forward
+    delta = self.projector(x)    # (B,64000)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 187, in forward
+    x = torch.relu(self.bn1(self.up1(x)))  # (B, 64, ~T')
+∏
+relu_20
+projector.up2.weight
+projector.up2.weight_bias
+getitem_63node_ConvTranspose_329"ConvTranspose*
+output_padding@ †*
+group†*
+auto_pad"NOTSET†*
+	dilations@†*
+strides@†*
+pads@@†J·
+	namespace”: model.PerturbationGenerator/projector: model.TimeDomainProjector/projector.bn2: torch.nn.modules.batchnorm.BatchNorm1d/_native_batch_norm_legit_no_training_21: aten._native_batch_norm_legit_no_training.defaultJC
+!pkg.onnxscript.rewriter.rule_nameFuseBatchNormIntoConvTransposeJæ
+pkg.torch.onnx.class_hierarchyõ['model.PerturbationGenerator', 'model.TimeDomainProjector', 'torch.nn.modules.batchnorm.BatchNorm1d', 'aten._native_batch_norm_legit_no_training.default']J∆
+pkg.torch.onnx.fx_node´%_native_batch_norm_legit_no_training_21 : [num_users=1] = call_function[target=torch.ops.aten._native_batch_norm_legit_no_training.default](args = (%convolution_4, %p_projector_bn2_weight, %p_projector_bn2_bias, %b_projector_bn2_running_mean, %b_projector_bn2_running_var, 0.1, 1e-05), kwargs = {})Jk
+pkg.torch.onnx.name_scopesM['', 'projector', 'projector.bn2', '_native_batch_norm_legit_no_training_21']Jª
+pkg.torch.onnx.stack_traceúFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 285, in forward
+    delta = self.projector(x)    # (B,64000)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 188, in forward
+    x = torch.relu(self.bn2(self.up2(x)))  # (B, 16, ~T')
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\batchnorm.py", line 210, in forward
+    return F.batch_norm(
+˚
+
+getitem_63relu_21node_relu_21"ReluJj
+	namespace]: model.PerturbationGenerator/projector: model.TimeDomainProjector/relu_21: aten.relu.defaultJs
+pkg.torch.onnx.class_hierarchyQ['model.PerturbationGenerator', 'model.TimeDomainProjector', 'aten.relu.default']Jä
+pkg.torch.onnx.fx_nodep%relu_21 : [num_users=1] = call_function[target=torch.ops.aten.relu.default](args = (%getitem_63,), kwargs = {})J:
+pkg.torch.onnx.name_scopes['', 'projector', 'relu_21']J•
+pkg.torch.onnx.stack_traceÜFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 285, in forward
+    delta = self.projector(x)    # (B,64000)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 188, in forward
+    x = torch.relu(self.bn2(self.up2(x)))  # (B, 16, ~T')
+ƒ	
+relu_21
+projector.out.weight
+projector.out.biasconv1dnode_conv1d"Conv*
+group†*
+auto_pad"NOTSET†*
+	dilations@†*
+strides@†*
+pads@@†Jò
+	namespaceä: model.PerturbationGenerator/projector: model.TimeDomainProjector/projector.out: torch.nn.modules.conv.Conv1d/conv1d: aten.conv1d.defaultJï
+pkg.torch.onnx.class_hierarchys['model.PerturbationGenerator', 'model.TimeDomainProjector', 'torch.nn.modules.conv.Conv1d', 'aten.conv1d.default']J¬
+pkg.torch.onnx.fx_nodeß%conv1d : [num_users=1] = call_function[target=torch.ops.aten.conv1d.default](args = (%relu_21, %p_projector_out_weight, %p_projector_out_bias, [1], [3]), kwargs = {})JJ
+pkg.torch.onnx.name_scopes,['', 'projector', 'projector.out', 'conv1d']JŸ
+pkg.torch.onnx.stack_trace∫File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 285, in forward
+    delta = self.projector(x)    # (B,64000)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 189, in forward
+    x = self.out(x)                        # (B, 1, ~T')
+  File "C:\Users\songj\Desktop\voicesecure-local\venv\Lib\site-packages\torch\nn\modules\conv.py", line 385, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+˙
+conv1d
+val_221squeezenode_squeeze"SqueezeJi
+	namespace\: model.PerturbationGenerator/projector: model.TimeDomainProjector/squeeze: aten.squeeze.dimJr
+pkg.torch.onnx.class_hierarchyP['model.PerturbationGenerator', 'model.TimeDomainProjector', 'aten.squeeze.dim']Já
+pkg.torch.onnx.fx_nodem%squeeze : [num_users=1] = call_function[target=torch.ops.aten.squeeze.dim](args = (%conv1d, 1), kwargs = {})J:
+pkg.torch.onnx.name_scopes['', 'projector', 'squeeze']J°
+pkg.torch.onnx.stack_traceÇFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 285, in forward
+    delta = self.projector(x)    # (B,64000)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 190, in forward
+    x = x.squeeze(1)                       # (B, ~T')
+Õ
+squeezetanh	node_tanh"TanhJg
+	namespaceZ: model.PerturbationGenerator/projector: model.TimeDomainProjector/tanh: aten.tanh.defaultJs
+pkg.torch.onnx.class_hierarchyQ['model.PerturbationGenerator', 'model.TimeDomainProjector', 'aten.tanh.default']JÑ
+pkg.torch.onnx.fx_nodej%tanh : [num_users=1] = call_function[target=torch.ops.aten.tanh.default](args = (%squeeze,), kwargs = {})J7
+pkg.torch.onnx.name_scopes['', 'projector', 'tanh']Jå
+pkg.torch.onnx.stack_traceÌFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 285, in forward
+    delta = self.projector(x)    # (B,64000)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 200, in forward
+    x = torch.tanh(x) * self.eps
+€
+tanh
+val_238deltanode_mul_382"MulJh
+	namespace[: model.PerturbationGenerator/projector: model.TimeDomainProjector/mul_382: aten.mul.TensorJq
+pkg.torch.onnx.class_hierarchyO['model.PerturbationGenerator', 'model.TimeDomainProjector', 'aten.mul.Tensor']Já
+pkg.torch.onnx.fx_nodem%mul_382 : [num_users=1] = call_function[target=torch.ops.aten.mul.Tensor](args = (%tanh, 0.01), kwargs = {})J:
+pkg.torch.onnx.name_scopes['', 'projector', 'mul_382']Jå
+pkg.torch.onnx.stack_traceÌFile "C:\Users\songj\Desktop\voicesecure-local\model.py", line 285, in forward
+    delta = self.projector(x)    # (B,64000)
+  File "C:\Users\songj\Desktop\voicesecure-local\model.py", line 200, in forward
+    x = torch.tanh(x) * self.eps
+main_graph*h Benc1.conv1.block.0.weightj
+locationgenerator.onnx.dataj
+offset5568j
+length1152p*j  Benc1.conv2.block.0.weightj
+locationgenerator.onnx.dataj
+offset23104j
+length36864p*`  Benc1.down.weightj
+locationgenerator.onnx.dataj
+offset6720j
+length16384p*k@ Benc2.conv1.block.0.weightj
+locationgenerator.onnx.dataj
+offset199232j
+length73728p*l@@Benc2.conv2.block.0.weightj
+locationgenerator.onnx.dataj
+offset477760j
+length147456p*b@@Benc2.down.weightj
+locationgenerator.onnx.dataj
+offset133696j
+length65536p*nÄ@Benc3.conv1.block.0.weightj
+locationgenerator.onnx.dataj
+offset1034816j
+length294912p*oÄÄBenc3.conv2.block.0.weightj
+locationgenerator.onnx.dataj
+offset2148928j
+length589824p*eÄÄBenc3.down.weightj
+locationgenerator.onnx.dataj
+offset772672j
+length262144p*xÄÄB!bottleneck.block.0.block.0.weightj
+locationgenerator.onnx.dataj
+offset3342336j
+length1179648p*xÄÄB!bottleneck.block.1.block.0.weightj
+locationgenerator.onnx.dataj
+offset7798784j
+length2359296p*mÄÄBdec1.up.block.0.weightj
+locationgenerator.onnx.dataj
+offset5701632j
+length2097152p*qÄÄBdec1.conv.0.block.0.weightj
+locationgenerator.onnx.dataj
+offset4521984j
+length1179648p*pÄÄBdec1.conv.1.block.0.weightj
+locationgenerator.onnx.dataj
+offset2738752j
+length589824p*kÄ@Bdec2.up.block.0.weightj
+locationgenerator.onnx.dataj
+offset1624640j
+length524288p*o@ÄBdec2.conv.0.block.0.weightj
+locationgenerator.onnx.dataj
+offset1329728j
+length294912p*m@@Bdec2.conv.1.block.0.weightj
+locationgenerator.onnx.dataj
+offset625216j
+length147456p*i@ Bdec3.up.block.0.weightj
+locationgenerator.onnx.dataj
+offset346688j
+length131072p*l @Bdec3.conv.0.block.0.weightj
+locationgenerator.onnx.dataj
+offset272960j
+length73728p*k  Bdec3.conv.1.block.0.weightj
+locationgenerator.onnx.dataj
+offset59968j
+length36864p*lÄ@¿Bprojector.up1.weightj
+locationgenerator.onnx.dataj
+offset10158080j
+length	209715200p*c@	Bprojector.up2.weightj
+locationgenerator.onnx.dataj
+offset96832j
+length36864p*]Bprojector.out.weightj
+locationgenerator.onnx.dataj
+offset0j
+length448p*Bprojector.out.biasJ»6ò<*ß Benc1.conv1.block.0.weight_biasJÄôﬂûæËMá>dû¬æΩÉî>W√f>∑Å>«·Ræ˛Ææûpæ⁄BÉ<[&ë>“/ä>–[R>Ívˇ<<<∆;kÔ´>–%`æ!ô<“zô>‘ƒQ>XÁ;áô>J∫=öìæS≈ûæˆ>>yz>6ÉåæÕˇï>XZë>∂#>cMñ>*ß Benc1.conv2.block.0.weight_biasJÄw∑‚øk¨ï>jÚæÓ&Ìæìá-¿M ¿–%â>B›]?˛pB?ßªö?⁄1?1LΩ	#?óuÄΩ2W?Éo=!°=X¡Zæ>'G¿i–ú>¥?óQ>˛ ?8ñï?ñ.hæ∫.]?)pp?+Äá=£cI¿±¨3?BƒÓ>uçF>*û Benc1.down.weight_biasJÄéÔQ?3æ@b≤≠<ªZä?f5?õà>˜'†=ŒŒÊ=OB7øwcFø|˝K>ìD >÷ø,È‘>Õú	?jÑ†æö%úø‹<óæË‘≠øˆX?“ Y?°'høﬂVø>ΩÀ>≥ø™æ”5«?XÀõæclwøé?J}	æ8<¬>o™£æ*ß@Benc2.conv1.block.0.weight_biasJÄHÌu=∫·øíã>°{˝>Çæ™`røö?í`>_â?¯MYønëÖ?¶rÉæO◊Y?Êà>y?v>E?Œ]%øû&Dø⁄àë?tñ@ø L-øj˜ã?g:ÄøM% æ…eÅ>8AQ>~M?*û?X/?tTÉ?PÚºÛıP>˜
+ø>Í==ƒ™>†Õæì>ê‘o?I™çøk2>\±~øóF_?ßöæˇ 4?^è~=¡ﬂ øns-?t√¨<îßÏ>X€?ÿ§)?J¬ΩÊ9£?)≈Ç?J›v?nX2æÕ?W??™
+úæ¿”«>«ı?ä¶< |Ç?ƒs?*ß@Benc2.conv2.block.0.weight_biasJÄ‹õ?™3øÒ√Ω?å]ãæ€Éá?’Mú>Øt6?’Z"?ÈN>z\4?Ï«i<–@¢æ¿ï`>Dπ3?ÿ>ÏT∫?Ï>nCŸ>Ñòæoõ?Á”>wåÄ;êêq;◊Bzø=;£æÆ-?ªí6?{ˇ,?Bÿì>Ñœ¢æ)s#?û`¶<©∫≠Ωï]íΩDÊMøáäø£ãæôn?„û¸>l˚‘æéﬁó>¬ß?_˛'?áp7>d=ÈΩ”<?»%Ç=æ`æU®øex?EØç?”hr?;ÃÓ?t≠Ã>n¿∏>ÑöÔºN O?…¯éæÙyK>…πó>vB˙>,á;øízΩ*û@Benc2.down.weight_biasJÄÅ∆?øreà>	l}>[◊ræÆYYøûWUøMõ°ø{ÁÖ>‹”>§õ'>bΩüæäŒ*>îY«Ω!ß/øOXgæ›væmóx?üûO?8Æ√æxT øÄ5?0π±>«=?5?¬ã¯>ŸÊπΩ(sÌ>Œ©˚>–;^£ıΩ∏πJøÉ∆«?îwõæmﬁDø¯6?◊°æ∆Ÿ?w[Bø-„6?…?_∆ˇø;AΩÖìºGæo?Ö“–?)µ=ã
+âΩ†Ú`=ƒmcæh›_æ3¨¿=_{æÓ8øSîD?EvÅ>Œ˚úøMõ>œH?™ı0ø|AŒæÅò?≥€€æÂPR> Iã?*fÄBenc3.conv1.block.0.weight_biasj
+locationgenerator.onnx.dataj
+offset448j
+length512p*fÄBenc3.conv2.block.0.weight_biasj
+locationgenerator.onnx.dataj
+offset960j
+length512p*^ÄBenc3.down.weight_biasj
+locationgenerator.onnx.dataj
+offset1472j
+length512p*pÄB&bottleneck.block.0.block.0.weight_biasj
+locationgenerator.onnx.dataj
+offset3520j
+length1024p*pÄB&bottleneck.block.1.block.0.weight_biasj
+locationgenerator.onnx.dataj
+offset4544j
+length1024p*dÄBdec1.up.block.0.weight_biasj
+locationgenerator.onnx.dataj
+offset1984j
+length512p*hÄBdec1.conv.0.block.0.weight_biasj
+locationgenerator.onnx.dataj
+offset2496j
+length512p*hÄBdec1.conv.1.block.0.weight_biasj
+locationgenerator.onnx.dataj
+offset3008j
+length512p*§@Bdec2.up.block.0.weight_biasJÄE/›æ~(#>ã`>Lí'æzÜ>	™¯Ω&=æÑùÅ>,ó<ær/R>2“Ì=≈løå:ÃæıT>3 >€æ¢ åΩ—-b>4%*æ”«‡æfêh?\f;=ˇü"?ñfù>:˙˜Ω,é±ΩXóøì8µæÀ_æAÖe>ìå>Ï8>Ì|©>$Ñ÷Ω˛Ï;æPsæÒ¨Ω©ø>™“>~ª>´∫>º >p˛•=$>>‰Oæz} Ωﬁ´˝="{¥Ω7é?x%º*ø|â˚Ω÷A¥æ˚7æE!!æ˙ÁÀ>-d>B®πæ?˘"?Äç◊æà"êæ^sÙ=UõÔæ®?*®@Bdec2.conv.0.block.0.weight_biasJÄŒÀ>VÓ¥>BJX?(_«º™5>e*+?»≠?>¿Ä>òæ	Ω´+>{Éæ Km>	?⁄–pø2+?˛
+?&™ø=∂$>Hæ~ÁÓ>gfææ«4D?G˙?Q
+?§µsærÌ«Ω¶0„=/Hø_≤†>ËH!?ÚmÄ>Ä->§˝OæŒ˚£>´?#{æ[p?Tp?cJò=Ë ?!Çø•?Ó‹>Ì_¬=€í>x^=?œî
+?‡?aøMÕeæÅ®fΩB◊ë>»yWæÀ¬ø’=πéˆæÙÕµ>ÌÆÉø<TG>J>¬>ˆ%:æû(Z>S<…æf1#ø’o√>*®@Bdec2.conv.1.block.0.weight_biasJÄÏ’æºÁΩá€=®QØ>ü“>–~?º˚Z˝æ*+ﬁΩœVb?%¸è>ı†D>–∂Q>´7&?‰¡êæÎS?®H?7›q?ΩNæ∆+?Œèøœä,æ··2?e/.æﬂ#ø*qæﬂÂ‚>∫Î∂>2]O=u∑>Tˆ–>˝æYΩ˚ÍÁ>˙≤ó>¸S´=vﬂ>‰¶’>xÑWæà3°>∏ıÓæc3?ÒS–æ¿´Ä>}í6>Íi◊ªrEùæÌÛ◊>óvæå8Ωl≠ø™—6?6àæ
+Ùˆ>ÿ§>®*Øæ %=S¯ü>CçΩÿ)\>≠îÊ>∆“3<mç>‚X>†ê ?Æﬁ’>*§ Bdec3.up.block.0.weight_biasJÄêæ{–˘æ][fæøÜëæ˜øë@|ºaÕêæÒú >t∑æÓ3æKT:æZGﬁæπ|¬=ÔY]ΩjùøÄ≥cæ_∫æ=7≈>±"¡æË™æ§[æÓw[æ⁄Ô§æ„ËDæ—#ÕæßˆdæÉ—Y=(°æ¢%8æH;JæÙR£æ=Q€æ*® Bdec3.conv.0.block.0.weight_biasJÄîL˚ΩWÔP?ªıCøØ‰æÉ9>±¬
+øˆõΩ·úI>Rø3$?Ê‹æÁ¥$?4äMªcù+?#5?Ï√?d7ÿΩ˙†O>®‚¬>ÌÁó=‰5u=JÆ∞<É}·ºç®=>±#	?>&>vE>`¿ö;Ø8Ç>–& ΩA??Íπ=*® Bdec3.conv.1.block.0.weight_biasJÄ§ß>ÃéMæ(‹—æxO>™)πæ±˜æ\ R=ñΩ£æ§ ü=˜Å9æl$\=@=Mæc¥>Äç©;–Á‚æ*≈%ø<ÆÚ>û≈æ*h°=v¨≠>Vâ£æô6.>°=÷6±=∑˙`>'¿>¯Y=›˚?>PÓ2øì&>Q∑æƒÓ±æ*¢@Bprojector.up1.weight_biasJÄ4ÔJ=fÔò<Püº÷æ\Ω†<í|æ0è€ºÑwEΩ*R.æÇ7;=wCæÓÁ%æ∞Iªl3ªÙ¬©Ω(Æ‰ª¿ﬁz;!$æ¡Kæ¬æÇÁYæ≈ø[Ωûï∏Ω˚f=SÜÍΩ2I]æ$∞®æ¢Õdæ4àæãâàΩ».˝<GâºŸïªS‚Ω-+æl.<§Læ8)Ω`$Õ∫¥ÁöΩ0]æ¡¯d=·≈ÓΩPPnΩ§wTæáÿºı =7‰º.û=æ8†<|Qæ FªΩô2=nQlæ]äΩÕQH=¸Â&æΩÚ<	(=H…ƒΩ‘+¿Ω¿PæÍΩün =*aBprojector.up2.weight_biasJ@Ï&>¯
+>ÚºPΩ0â˙;PÛùª‹ÁzΩ Uº≠R>ÈSΩÅô=Ñ –=g;Ω5Óº9∆æ=“ö]=‡Ω*Bval_7J       *Bval_10J       *Bval_191Jˇˇˇˇˇˇˇˇ*Bval_194J        *Bval_221J       *Bval_222J 
+      *Bval_238J
+◊#<Z–
+mel!
+
+
+
+P
+time_frames"=
+/pkg.torch.export.graph_signature.InputSpec.kind
+USER_INPUT"=
+5pkg.torch.export.graph_signature.InputSpec.persistentNone"(
+!pkg.torch.onnx.original_node_namemelbï
+delta
+
+
+160*time_frames"?
+0pkg.torch.export.graph_signature.OutputSpec.kindUSER_OUTPUT",
+!pkg.torch.onnx.original_node_namemul_382j3
+enc1.conv1.block.0.weight
+
+ 
+
+
+j3
+enc1.conv2.block.0.weight
+
+ 
+ 
+
+j*
+enc1.down.weight
+
+ 
+ 
+
+j3
+enc2.conv1.block.0.weight
+
+@
+ 
+
+j3
+enc2.conv2.block.0.weight
+
+@
+@
+
+j*
+enc2.down.weight
+
+@
+@
+
+j4
+enc3.conv1.block.0.weight
+
+Ä
+@
+
+j5
+enc3.conv2.block.0.weight
+
+Ä
+Ä
+
+j,
+enc3.down.weight
+
+Ä
+Ä
+
+j=
+!bottleneck.block.0.block.0.weight
+
+Ä
+Ä
+
+j=
+!bottleneck.block.1.block.0.weight
+
+Ä
+Ä
+
+j2
+dec1.up.block.0.weight
+
+Ä
+Ä
+
+j6
+dec1.conv.0.block.0.weight
+
+Ä
+Ä
+
+j6
+dec1.conv.1.block.0.weight
+
+Ä
+Ä
+
+j1
+dec2.up.block.0.weight
+
+Ä
+@
+
+j5
+dec2.conv.0.block.0.weight
+
+@
+Ä
+
+j4
+dec2.conv.1.block.0.weight
+
+@
+@
+
+j0
+dec3.up.block.0.weight
+
+@
+ 
+
+j4
+dec3.conv.0.block.0.weight
+
+ 
+@
+
+j4
+dec3.conv.1.block.0.weight
+
+ 
+ 
+
+j,
+projector.up1.weight
+
+Ä
+@
+¿j*
+projector.up2.weight
+
+@
+
+	j‰
+projector.out.weight
+
+
+
+"<
+/pkg.torch.export.graph_signature.InputSpec.kind	PARAMETER"=
+5pkg.torch.export.graph_signature.InputSpec.persistentNone";
+!pkg.torch.onnx.original_node_namep_projector_out_weightjÿ
+projector.out.bias
+
+
+"<
+/pkg.torch.export.graph_signature.InputSpec.kind	PARAMETER"=
+5pkg.torch.export.graph_signature.InputSpec.persistentNone"9
+!pkg.torch.onnx.original_node_namep_projector_out_biasj,
+enc1.conv1.block.0.weight_bias
+
+
+ j,
+enc1.conv2.block.0.weight_bias
+
+
+ j#
+enc1.down.weight_bias
+
+
+ j,
+enc2.conv1.block.0.weight_bias
+
+
+@j,
+enc2.conv2.block.0.weight_bias
+
+
+@j#
+enc2.down.weight_bias
+
+
+@j-
+enc3.conv1.block.0.weight_bias
+	
+Äj-
+enc3.conv2.block.0.weight_bias
+	
+Äj$
+enc3.down.weight_bias
+	
+Äj5
+&bottleneck.block.0.block.0.weight_bias
+	
+Äj5
+&bottleneck.block.1.block.0.weight_bias
+	
+Äj*
+dec1.up.block.0.weight_bias
+	
+Äj.
+dec1.conv.0.block.0.weight_bias
+	
+Äj.
+dec1.conv.1.block.0.weight_bias
+	
+Äj)
+dec2.up.block.0.weight_bias
+
+
+@j-
+dec2.conv.0.block.0.weight_bias
+
+
+@j-
+dec2.conv.1.block.0.weight_bias
+
+
+@j)
+dec3.up.block.0.weight_bias
+
+
+ j-
+dec3.conv.0.block.0.weight_bias
+
+
+ j-
+dec3.conv.1.block.0.weight_bias
+
+
+ j'
+projector.up1.weight_bias
+
+
+@j'
+projector.up2.weight_bias
+
+
+j
+val_7
+ j
+val_10
+ j
+val_191
+
+
+j
+val_194
+
+
+j
+val_221
+
+
+j
+val_222
+
+
+j
+val_238
+ j
+val_0
+
+
+j
+sym_size_int_25
+ j
+
+floordiv_6
+ j
+mul_387
+ j,
+getitem!
+
+
+ 
+P
+time_framesj)
+relu!
+
+
+ 
+P
+time_framesj.
+	getitem_3!
+
+
+ 
+P
+time_framesj+
+relu_1!
+
+
+ 
+P
+time_framesj3
+	getitem_6&
+$ 
+
+ 
+(
+(time_frames//2)j0
+relu_2&
+$ 
+
+ 
+(
+(time_frames//2)j3
+	getitem_9&
+$ 
+
+@
+(
+(time_frames//2)j0
+relu_3&
+$ 
+
+@
+(
+(time_frames//2)j4
+
+getitem_12&
+$ 
+
+@
+(
+(time_frames//2)j0
+relu_4&
+$ 
+
+@
+(
+(time_frames//2)j4
+
+getitem_15&
+$ 
+
+@
+
+(time_frames//4)j0
+relu_5&
+$ 
+
+@
+
+(time_frames//4)j5
+
+getitem_18'
+%!
+
+Ä
+
+(time_frames//4)j1
+relu_6'
+%!
+
+Ä
+
+(time_frames//4)j5
+
+getitem_21'
+%!
+
+Ä
+
+(time_frames//4)j1
+relu_7'
+%!
+
+Ä
+
+(time_frames//4)j5
+
+getitem_24'
+%!
+
+Ä
+
+
+(time_frames//8)j1
+relu_8'
+%!
+
+Ä
+
+
+(time_frames//8)j5
+
+getitem_27'
+%!
+
+Ä
+
+
+(time_frames//8)j1
+relu_9'
+%!
+
+Ä
+
+
+(time_frames//8)j5
+
+getitem_30'
+%!
+
+Ä
+
+
+(time_frames//8)j2
+relu_10'
+%!
+
+Ä
+
+
+(time_frames//8)j9
+
+getitem_33+
+)%
+
+Ä
+
+2*((time_frames//8))j6
+relu_11+
+)%
+
+Ä
+
+2*((time_frames//8))j2
+cat+
+)%
+
+Ä
+
+2*((time_frames//8))j9
+
+getitem_36+
+)%
+
+Ä
+
+2*((time_frames//8))j6
+relu_12+
+)%
+
+Ä
+
+2*((time_frames//8))j9
+
+getitem_39+
+)%
+
+Ä
+
+2*((time_frames//8))j6
+relu_13+
+)%
+
+Ä
+
+2*((time_frames//8))j8
+
+getitem_42*
+($
+
+@
+(
+4*((time_frames//8))j5
+relu_14*
+($
+
+@
+(
+4*((time_frames//8))j4
+cat_1+
+)%
+
+Ä
+(
+4*((time_frames//8))j8
+
+getitem_45*
+($
+
+@
+(
+4*((time_frames//8))j5
+relu_15*
+($
+
+@
+(
+4*((time_frames//8))j8
+
+getitem_48*
+($
+
+@
+(
+4*((time_frames//8))j5
+relu_16*
+($
+
+@
+(
+4*((time_frames//8))j8
+
+getitem_51*
+($
+
+ 
+P
+8*((time_frames//8))j5
+relu_17*
+($
+
+ 
+P
+8*((time_frames//8))j
+sub_71
+ j
+
+floordiv_3
+ j
+sub_72
+ j
+val_192
+
+
+j
+val_193
+
+
+j
+val_197
+
+
+j(
+pad!
+
+
+ 
+P
+time_framesj*
+cat_2!
+
+
+@
+P
+time_framesj/
+
+getitem_54!
+
+
+ 
+P
+time_framesj,
+relu_18!
+
+
+ 
+P
+time_framesj/
+
+getitem_57!
+
+
+ 
+P
+time_framesj,
+relu_19!
+
+
+ 
+P
+time_framesj
+val_224
+
+
+j(
+view_1
+
+
+Ä
+time_framesj/
+
+getitem_60!
+
+
+@
+160*time_framesj,
+relu_20!
+
+
+@
+160*time_framesj/
+
+getitem_63!
+
+
+
+160*time_framesj,
+relu_21!
+
+
+
+160*time_framesj+
+conv1d!
+
+
+
+160*time_framesj(
+squeeze
+
+
+160*time_framesj%
+tanh
+
+
+160*time_framesÇŸY
+0pkg.torch.export.ExportedProgram.graph_signature§Y
+# inputs
+p_enc1_conv1_block_0_weight: PARAMETER target='enc1.conv1.block.0.weight'
+p_enc1_conv1_block_1_weight: PARAMETER target='enc1.conv1.block.1.weight'
+p_enc1_conv1_block_1_bias: PARAMETER target='enc1.conv1.block.1.bias'
+p_enc1_conv2_block_0_weight: PARAMETER target='enc1.conv2.block.0.weight'
+p_enc1_conv2_block_1_weight: PARAMETER target='enc1.conv2.block.1.weight'
+p_enc1_conv2_block_1_bias: PARAMETER target='enc1.conv2.block.1.bias'
+p_enc1_down_weight: PARAMETER target='enc1.down.weight'
+p_enc1_bn_weight: PARAMETER target='enc1.bn.weight'
+p_enc1_bn_bias: PARAMETER target='enc1.bn.bias'
+p_enc2_conv1_block_0_weight: PARAMETER target='enc2.conv1.block.0.weight'
+p_enc2_conv1_block_1_weight: PARAMETER target='enc2.conv1.block.1.weight'
+p_enc2_conv1_block_1_bias: PARAMETER target='enc2.conv1.block.1.bias'
+p_enc2_conv2_block_0_weight: PARAMETER target='enc2.conv2.block.0.weight'
+p_enc2_conv2_block_1_weight: PARAMETER target='enc2.conv2.block.1.weight'
+p_enc2_conv2_block_1_bias: PARAMETER target='enc2.conv2.block.1.bias'
+p_enc2_down_weight: PARAMETER target='enc2.down.weight'
+p_enc2_bn_weight: PARAMETER target='enc2.bn.weight'
+p_enc2_bn_bias: PARAMETER target='enc2.bn.bias'
+p_enc3_conv1_block_0_weight: PARAMETER target='enc3.conv1.block.0.weight'
+p_enc3_conv1_block_1_weight: PARAMETER target='enc3.conv1.block.1.weight'
+p_enc3_conv1_block_1_bias: PARAMETER target='enc3.conv1.block.1.bias'
+p_enc3_conv2_block_0_weight: PARAMETER target='enc3.conv2.block.0.weight'
+p_enc3_conv2_block_1_weight: PARAMETER target='enc3.conv2.block.1.weight'
+p_enc3_conv2_block_1_bias: PARAMETER target='enc3.conv2.block.1.bias'
+p_enc3_down_weight: PARAMETER target='enc3.down.weight'
+p_enc3_bn_weight: PARAMETER target='enc3.bn.weight'
+p_enc3_bn_bias: PARAMETER target='enc3.bn.bias'
+p_bottleneck_block_0_block_0_weight: PARAMETER target='bottleneck.block.0.block.0.weight'
+p_bottleneck_block_0_block_1_weight: PARAMETER target='bottleneck.block.0.block.1.weight'
+p_bottleneck_block_0_block_1_bias: PARAMETER target='bottleneck.block.0.block.1.bias'
+p_bottleneck_block_1_block_0_weight: PARAMETER target='bottleneck.block.1.block.0.weight'
+p_bottleneck_block_1_block_1_weight: PARAMETER target='bottleneck.block.1.block.1.weight'
+p_bottleneck_block_1_block_1_bias: PARAMETER target='bottleneck.block.1.block.1.bias'
+p_dec1_up_block_0_weight: PARAMETER target='dec1.up.block.0.weight'
+p_dec1_up_block_1_weight: PARAMETER target='dec1.up.block.1.weight'
+p_dec1_up_block_1_bias: PARAMETER target='dec1.up.block.1.bias'
+p_dec1_conv_0_block_0_weight: PARAMETER target='dec1.conv.0.block.0.weight'
+p_dec1_conv_0_block_1_weight: PARAMETER target='dec1.conv.0.block.1.weight'
+p_dec1_conv_0_block_1_bias: PARAMETER target='dec1.conv.0.block.1.bias'
+p_dec1_conv_1_block_0_weight: PARAMETER target='dec1.conv.1.block.0.weight'
+p_dec1_conv_1_block_1_weight: PARAMETER target='dec1.conv.1.block.1.weight'
+p_dec1_conv_1_block_1_bias: PARAMETER target='dec1.conv.1.block.1.bias'
+p_dec2_up_block_0_weight: PARAMETER target='dec2.up.block.0.weight'
+p_dec2_up_block_1_weight: PARAMETER target='dec2.up.block.1.weight'
+p_dec2_up_block_1_bias: PARAMETER target='dec2.up.block.1.bias'
+p_dec2_conv_0_block_0_weight: PARAMETER target='dec2.conv.0.block.0.weight'
+p_dec2_conv_0_block_1_weight: PARAMETER target='dec2.conv.0.block.1.weight'
+p_dec2_conv_0_block_1_bias: PARAMETER target='dec2.conv.0.block.1.bias'
+p_dec2_conv_1_block_0_weight: PARAMETER target='dec2.conv.1.block.0.weight'
+p_dec2_conv_1_block_1_weight: PARAMETER target='dec2.conv.1.block.1.weight'
+p_dec2_conv_1_block_1_bias: PARAMETER target='dec2.conv.1.block.1.bias'
+p_dec3_up_block_0_weight: PARAMETER target='dec3.up.block.0.weight'
+p_dec3_up_block_1_weight: PARAMETER target='dec3.up.block.1.weight'
+p_dec3_up_block_1_bias: PARAMETER target='dec3.up.block.1.bias'
+p_dec3_conv_0_block_0_weight: PARAMETER target='dec3.conv.0.block.0.weight'
+p_dec3_conv_0_block_1_weight: PARAMETER target='dec3.conv.0.block.1.weight'
+p_dec3_conv_0_block_1_bias: PARAMETER target='dec3.conv.0.block.1.bias'
+p_dec3_conv_1_block_0_weight: PARAMETER target='dec3.conv.1.block.0.weight'
+p_dec3_conv_1_block_1_weight: PARAMETER target='dec3.conv.1.block.1.weight'
+p_dec3_conv_1_block_1_bias: PARAMETER target='dec3.conv.1.block.1.bias'
+p_projector_up1_weight: PARAMETER target='projector.up1.weight'
+p_projector_bn1_weight: PARAMETER target='projector.bn1.weight'
+p_projector_bn1_bias: PARAMETER target='projector.bn1.bias'
+p_projector_up2_weight: PARAMETER target='projector.up2.weight'
+p_projector_bn2_weight: PARAMETER target='projector.bn2.weight'
+p_projector_bn2_bias: PARAMETER target='projector.bn2.bias'
+p_projector_out_weight: PARAMETER target='projector.out.weight'
+p_projector_out_bias: PARAMETER target='projector.out.bias'
+b_enc1_conv1_block_1_running_mean: BUFFER target='enc1.conv1.block.1.running_mean' persistent=True
+b_enc1_conv1_block_1_running_var: BUFFER target='enc1.conv1.block.1.running_var' persistent=True
+b_enc1_conv1_block_1_num_batches_tracked: BUFFER target='enc1.conv1.block.1.num_batches_tracked' persistent=True
+b_enc1_conv2_block_1_running_mean: BUFFER target='enc1.conv2.block.1.running_mean' persistent=True
+b_enc1_conv2_block_1_running_var: BUFFER target='enc1.conv2.block.1.running_var' persistent=True
+b_enc1_conv2_block_1_num_batches_tracked: BUFFER target='enc1.conv2.block.1.num_batches_tracked' persistent=True
+b_enc1_bn_running_mean: BUFFER target='enc1.bn.running_mean' persistent=True
+b_enc1_bn_running_var: BUFFER target='enc1.bn.running_var' persistent=True
+b_enc1_bn_num_batches_tracked: BUFFER target='enc1.bn.num_batches_tracked' persistent=True
+b_enc2_conv1_block_1_running_mean: BUFFER target='enc2.conv1.block.1.running_mean' persistent=True
+b_enc2_conv1_block_1_running_var: BUFFER target='enc2.conv1.block.1.running_var' persistent=True
+b_enc2_conv1_block_1_num_batches_tracked: BUFFER target='enc2.conv1.block.1.num_batches_tracked' persistent=True
+b_enc2_conv2_block_1_running_mean: BUFFER target='enc2.conv2.block.1.running_mean' persistent=True
+b_enc2_conv2_block_1_running_var: BUFFER target='enc2.conv2.block.1.running_var' persistent=True
+b_enc2_conv2_block_1_num_batches_tracked: BUFFER target='enc2.conv2.block.1.num_batches_tracked' persistent=True
+b_enc2_bn_running_mean: BUFFER target='enc2.bn.running_mean' persistent=True
+b_enc2_bn_running_var: BUFFER target='enc2.bn.running_var' persistent=True
+b_enc2_bn_num_batches_tracked: BUFFER target='enc2.bn.num_batches_tracked' persistent=True
+b_enc3_conv1_block_1_running_mean: BUFFER target='enc3.conv1.block.1.running_mean' persistent=True
+b_enc3_conv1_block_1_running_var: BUFFER target='enc3.conv1.block.1.running_var' persistent=True
+b_enc3_conv1_block_1_num_batches_tracked: BUFFER target='enc3.conv1.block.1.num_batches_tracked' persistent=True
+b_enc3_conv2_block_1_running_mean: BUFFER target='enc3.conv2.block.1.running_mean' persistent=True
+b_enc3_conv2_block_1_running_var: BUFFER target='enc3.conv2.block.1.running_var' persistent=True
+b_enc3_conv2_block_1_num_batches_tracked: BUFFER target='enc3.conv2.block.1.num_batches_tracked' persistent=True
+b_enc3_bn_running_mean: BUFFER target='enc3.bn.running_mean' persistent=True
+b_enc3_bn_running_var: BUFFER target='enc3.bn.running_var' persistent=True
+b_enc3_bn_num_batches_tracked: BUFFER target='enc3.bn.num_batches_tracked' persistent=True
+b_bottleneck_block_0_block_1_running_mean: BUFFER target='bottleneck.block.0.block.1.running_mean' persistent=True
+b_bottleneck_block_0_block_1_running_var: BUFFER target='bottleneck.block.0.block.1.running_var' persistent=True
+b_bottleneck_block_0_block_1_num_batches_tracked: BUFFER target='bottleneck.block.0.block.1.num_batches_tracked' persistent=True
+b_bottleneck_block_1_block_1_running_mean: BUFFER target='bottleneck.block.1.block.1.running_mean' persistent=True
+b_bottleneck_block_1_block_1_running_var: BUFFER target='bottleneck.block.1.block.1.running_var' persistent=True
+b_bottleneck_block_1_block_1_num_batches_tracked: BUFFER target='bottleneck.block.1.block.1.num_batches_tracked' persistent=True
+b_dec1_up_block_1_running_mean: BUFFER target='dec1.up.block.1.running_mean' persistent=True
+b_dec1_up_block_1_running_var: BUFFER target='dec1.up.block.1.running_var' persistent=True
+b_dec1_up_block_1_num_batches_tracked: BUFFER target='dec1.up.block.1.num_batches_tracked' persistent=True
+b_dec1_conv_0_block_1_running_mean: BUFFER target='dec1.conv.0.block.1.running_mean' persistent=True
+b_dec1_conv_0_block_1_running_var: BUFFER target='dec1.conv.0.block.1.running_var' persistent=True
+b_dec1_conv_0_block_1_num_batches_tracked: BUFFER target='dec1.conv.0.block.1.num_batches_tracked' persistent=True
+b_dec1_conv_1_block_1_running_mean: BUFFER target='dec1.conv.1.block.1.running_mean' persistent=True
+b_dec1_conv_1_block_1_running_var: BUFFER target='dec1.conv.1.block.1.running_var' persistent=True
+b_dec1_conv_1_block_1_num_batches_tracked: BUFFER target='dec1.conv.1.block.1.num_batches_tracked' persistent=True
+b_dec2_up_block_1_running_mean: BUFFER target='dec2.up.block.1.running_mean' persistent=True
+b_dec2_up_block_1_running_var: BUFFER target='dec2.up.block.1.running_var' persistent=True
+b_dec2_up_block_1_num_batches_tracked: BUFFER target='dec2.up.block.1.num_batches_tracked' persistent=True
+b_dec2_conv_0_block_1_running_mean: BUFFER target='dec2.conv.0.block.1.running_mean' persistent=True
+b_dec2_conv_0_block_1_running_var: BUFFER target='dec2.conv.0.block.1.running_var' persistent=True
+b_dec2_conv_0_block_1_num_batches_tracked: BUFFER target='dec2.conv.0.block.1.num_batches_tracked' persistent=True
+b_dec2_conv_1_block_1_running_mean: BUFFER target='dec2.conv.1.block.1.running_mean' persistent=True
+b_dec2_conv_1_block_1_running_var: BUFFER target='dec2.conv.1.block.1.running_var' persistent=True
+b_dec2_conv_1_block_1_num_batches_tracked: BUFFER target='dec2.conv.1.block.1.num_batches_tracked' persistent=True
+b_dec3_up_block_1_running_mean: BUFFER target='dec3.up.block.1.running_mean' persistent=True
+b_dec3_up_block_1_running_var: BUFFER target='dec3.up.block.1.running_var' persistent=True
+b_dec3_up_block_1_num_batches_tracked: BUFFER target='dec3.up.block.1.num_batches_tracked' persistent=True
+b_dec3_conv_0_block_1_running_mean: BUFFER target='dec3.conv.0.block.1.running_mean' persistent=True
+b_dec3_conv_0_block_1_running_var: BUFFER target='dec3.conv.0.block.1.running_var' persistent=True
+b_dec3_conv_0_block_1_num_batches_tracked: BUFFER target='dec3.conv.0.block.1.num_batches_tracked' persistent=True
+b_dec3_conv_1_block_1_running_mean: BUFFER target='dec3.conv.1.block.1.running_mean' persistent=True
+b_dec3_conv_1_block_1_running_var: BUFFER target='dec3.conv.1.block.1.running_var' persistent=True
+b_dec3_conv_1_block_1_num_batches_tracked: BUFFER target='dec3.conv.1.block.1.num_batches_tracked' persistent=True
+b_projector_bn1_running_mean: BUFFER target='projector.bn1.running_mean' persistent=True
+b_projector_bn1_running_var: BUFFER target='projector.bn1.running_var' persistent=True
+b_projector_bn1_num_batches_tracked: BUFFER target='projector.bn1.num_batches_tracked' persistent=True
+b_projector_bn2_running_mean: BUFFER target='projector.bn2.running_mean' persistent=True
+b_projector_bn2_running_var: BUFFER target='projector.bn2.running_var' persistent=True
+b_projector_bn2_num_batches_tracked: BUFFER target='projector.bn2.num_batches_tracked' persistent=True
+mel: USER_INPUT
+
+# outputs
+mul_382: USER_OUTPUT
+ÇJ
+2pkg.torch.export.ExportedProgram.range_constraints{s40: VR[0, int_oo]}B
+ 

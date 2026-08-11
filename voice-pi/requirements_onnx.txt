@@ -1,0 +1,20 @@
+# ==========================================
+# VoiceSecure Raspberry Pi Deployment
+# Runtime Requirements
+# ==========================================
+
+# Numerical / signal processing
+numpy>=1.24
+scipy>=1.11
+
+# Audio
+soundfile>=0.12
+sounddevice>=0.4
+librosa>=0.10
+
+# Mel Spectrogram / feature extraction
+torch
+torchaudio
+
+# ONNX inference
+onnxruntime>=1.18
