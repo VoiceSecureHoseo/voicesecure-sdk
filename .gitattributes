@@ -1,1 +1,0 @@
-voice-pi/checkpoints/*.onnx.data filter=lfs diff=lfs merge=lfs -text
